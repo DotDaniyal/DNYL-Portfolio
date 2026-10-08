@@ -290,7 +290,7 @@
 
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
-      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .journey-currently-card, .currently-action-btn, .service-card, .srv-stage-tab, .service-action-link"
+      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .journey-currently-card, .currently-action-btn, .service-card, .srv-stage-tab, .service-action-link, .contact-orb-card, .contact-channel-item, .contact-social-btn, .contact-input, .channel-copy-btn"
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
@@ -2152,6 +2152,525 @@
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // 13. 07 — CONTACT / LOCALSTORAGE FORM, VALIDATION & INTERACTIVE ORB ENGINE
+  // ---------------------------------------------------------------------------
+  const CONTACT_STORAGE_KEY = "daniyal_portfolio_contact_messages";
+
+  function initContactSection() {
+    const contactSection = document.getElementById("contact");
+    if (!contactSection) return;
+
+    const headerRevealNodes = Array.from(
+      contactSection.querySelectorAll('[data-contact-reveal="header"]')
+    );
+    const orbCard = document.getElementById("contact-orb-card");
+    const orbRig = document.getElementById("contact-orb-rig");
+    const infoNodes = Array.from(
+      contactSection.querySelectorAll('[data-contact-reveal="info"]')
+    );
+    const formCol = contactSection.querySelector(
+      '[data-contact-reveal="form"]'
+    );
+    const climaxCta = contactSection.querySelector(
+      '[data-contact-reveal="cta"]'
+    );
+    const formShell = document.getElementById("contact-form-shell");
+    const contactForm = document.getElementById("contact-form");
+    const successState = document.getElementById("contact-success-state");
+    const storageBadge = document.getElementById("form-storage-badge");
+
+    const nameInput = document.getElementById("contact-name");
+    const emailInput = document.getElementById("contact-email");
+    const subjectInput = document.getElementById("contact-subject");
+    const messageInput = document.getElementById("contact-message");
+    const charCount = document.getElementById("contact-char-count");
+
+    const copyEmailBtn = document.getElementById("contact-copy-email-btn");
+    const copyEmailText = document.getElementById("contact-copy-email-text");
+    const copyPhoneBtn = document.getElementById("contact-copy-phone-btn");
+    const copyPhoneText = document.getElementById("contact-copy-phone-text");
+
+    const savedSenderEl = document.getElementById("saved-msg-sender");
+    const savedTimeEl = document.getElementById("saved-msg-time");
+    const savedSubjectEl = document.getElementById("saved-msg-subject");
+    const savedBodyEl = document.getElementById("saved-msg-body");
+    const copySavedBtn = document.getElementById("btn-copy-saved-msg");
+    const copySavedLabel = document.getElementById("copy-saved-msg-label");
+    const openEmailAppBtn = document.getElementById("btn-open-email-app");
+    const sendAnotherBtn = document.getElementById("btn-send-another");
+    const startConversationBtn = document.getElementById(
+      "btn-start-conversation"
+    );
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+
+    // 1. Scroll Reveal Choreography
+    if (prefersReducedMotion) {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      if (orbCard) orbCard.classList.add("is-inview");
+      infoNodes.forEach((el) => el.classList.add("is-inview"));
+      if (formCol) formCol.classList.add("is-inview");
+      if (climaxCta) climaxCta.classList.add("is-inview");
+    } else if ("IntersectionObserver" in window) {
+      const headerObs = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-inview");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16, rootMargin: "0px 0px -5% 0px" }
+      );
+      headerRevealNodes.forEach((el) => headerObs.observe(el));
+
+      if (orbCard) {
+        headerObs.observe(orbCard);
+      }
+      if (formCol) {
+        headerObs.observe(formCol);
+      }
+      if (climaxCta) {
+        headerObs.observe(climaxCta);
+      }
+
+      const infoObs = new IntersectionObserver(
+        (entries, obs) => {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .map((e) => e.target);
+          visible.forEach((item, idx) => {
+            item.style.transitionDelay = `${Math.min(idx * 75, 250)}ms`;
+            item.classList.add("is-inview");
+            window.setTimeout(() => {
+              item.style.transitionDelay = "0ms";
+            }, 800 + idx * 75);
+            obs.unobserve(item);
+          });
+        },
+        { threshold: 0.14, rootMargin: "0px 0px -4% 0px" }
+      );
+      infoNodes.forEach((el) => infoObs.observe(el));
+
+      // Active navigation highlight for #contact
+      const contactNavObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.classList.toggle(
+                  "is-active",
+                  link.getAttribute("href") === "#contact"
+                );
+              });
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+      contactNavObs.observe(contactSection);
+    } else {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      if (orbCard) orbCard.classList.add("is-inview");
+      infoNodes.forEach((el) => el.classList.add("is-inview"));
+      if (formCol) formCol.classList.add("is-inview");
+      if (climaxCta) climaxCta.classList.add("is-inview");
+    }
+
+    // 2. Interactive Orb & Form Mouse Spotlight
+    if (isFinePointer && !prefersReducedMotion) {
+      if (orbCard && orbRig) {
+        let orbRaf = null;
+        let targetOrbX = 0;
+        let targetOrbY = 0;
+        let currOrbX = 0;
+        let currOrbY = 0;
+        let orbHovered = false;
+
+        function animateOrb() {
+          currOrbX += (targetOrbX - currOrbX) * 0.14;
+          currOrbY += (targetOrbY - currOrbY) * 0.14;
+          orbRig.style.setProperty("--orb-x", `${currOrbX.toFixed(1)}px`);
+          orbRig.style.setProperty("--orb-y", `${currOrbY.toFixed(1)}px`);
+
+          if (
+            orbHovered ||
+            Math.abs(targetOrbX - currOrbX) > 0.1 ||
+            Math.abs(targetOrbY - currOrbY) > 0.1
+          ) {
+            orbRaf = requestAnimationFrame(animateOrb);
+          } else {
+            orbRaf = null;
+          }
+        }
+
+        orbCard.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = orbCard.getBoundingClientRect();
+            const relX =
+              (event.clientX - (rect.left + rect.width / 2)) /
+              (rect.width / 2);
+            const relY =
+              (event.clientY - (rect.top + rect.height / 2)) /
+              (rect.height / 2);
+            targetOrbX = Math.max(-14, Math.min(14, relX * 14));
+            targetOrbY = Math.max(-14, Math.min(14, relY * 14));
+            if (!orbHovered) {
+              orbHovered = true;
+              if (!orbRaf) orbRaf = requestAnimationFrame(animateOrb);
+            }
+          },
+          { passive: true }
+        );
+
+        orbCard.addEventListener("mouseleave", () => {
+          orbHovered = false;
+          targetOrbX = 0;
+          targetOrbY = 0;
+          if (!orbRaf) orbRaf = requestAnimationFrame(animateOrb);
+        });
+      }
+
+      if (formShell) {
+        formShell.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = formShell.getBoundingClientRect();
+            formShell.style.setProperty(
+              "--form-mouse-x",
+              `${(event.clientX - rect.left).toFixed(1)}px`
+            );
+            formShell.style.setProperty(
+              "--form-mouse-y",
+              `${(event.clientY - rect.top).toFixed(1)}px`
+            );
+          },
+          { passive: true }
+        );
+      }
+    }
+
+    // 3. Direct Copy Buttons for Email & Phone (+92 333 1001904)
+    async function copyTextWithFeedback(text, btnEl, labelEl, toastNotice) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        }
+        if (btnEl) btnEl.classList.add("is-copied");
+        if (labelEl) labelEl.textContent = "COPIED ✓";
+        showToast(toastNotice);
+        window.setTimeout(() => {
+          if (btnEl) btnEl.classList.remove("is-copied");
+          if (labelEl) labelEl.textContent = "COPY";
+        }, 2800);
+      } catch {
+        showToast(toastNotice);
+      }
+    }
+
+    if (copyEmailBtn) {
+      copyEmailBtn.addEventListener("click", () => {
+        copyTextWithFeedback(
+          "mdaniyalhayyat@gmail.com",
+          copyEmailBtn,
+          copyEmailText,
+          "Copied mdaniyalhayyat@gmail.com to your clipboard."
+        );
+      });
+    }
+
+    if (copyPhoneBtn) {
+      copyPhoneBtn.addEventListener("click", () => {
+        copyTextWithFeedback(
+          "+92 333 1001904",
+          copyPhoneBtn,
+          copyPhoneText,
+          "Copied +92 333 1001904 to your clipboard."
+        );
+      });
+    }
+
+    // 4. LocalStorage Helper & Badge Counter
+    function getSavedMessages() {
+      try {
+        const raw = localStorage.getItem(CONTACT_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function updateStorageBadge() {
+      if (!storageBadge) return;
+      const saved = getSavedMessages();
+      if (saved.length > 0) {
+        storageBadge.textContent = `LOCALSTORAGE · ${saved.length} SAVED`;
+      } else {
+        storageBadge.textContent = "LOCALSTORAGE READY";
+      }
+    }
+    updateStorageBadge();
+
+    // 5. Floating Labels & Inline Form Validation
+    const fieldsConfig = [
+      {
+        key: "name",
+        input: nameInput,
+        wrap: contactSection.querySelector('[data-field-wrap="name"]'),
+        errorEl: document.getElementById("contact-name-error"),
+        validate: (val) => {
+          if (!val.trim()) return "Please enter your name.";
+          return "";
+        }
+      },
+      {
+        key: "email",
+        input: emailInput,
+        wrap: contactSection.querySelector('[data-field-wrap="email"]'),
+        errorEl: document.getElementById("contact-email-error"),
+        validate: (val) => {
+          const clean = val.trim();
+          if (!clean) return "Please enter your email address.";
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(clean)) {
+            return "Please enter a valid email format (e.g., name@domain.com).";
+          }
+          return "";
+        }
+      },
+      {
+        key: "subject",
+        input: subjectInput,
+        wrap: contactSection.querySelector('[data-field-wrap="subject"]'),
+        errorEl: document.getElementById("contact-subject-error"),
+        validate: (val) => {
+          if (!val.trim()) return "Please enter a subject for your message.";
+          return "";
+        }
+      },
+      {
+        key: "message",
+        input: messageInput,
+        wrap: contactSection.querySelector('[data-field-wrap="message"]'),
+        errorEl: document.getElementById("contact-message-error"),
+        validate: (val) => {
+          if (!val.trim()) return "Please enter your project details or message.";
+          return "";
+        }
+      }
+    ];
+
+    function syncFloatingState(cfg) {
+      if (!cfg.input || !cfg.wrap) return;
+      const hasVal = cfg.input.value.trim().length > 0;
+      cfg.wrap.classList.toggle("has-value", hasVal);
+    }
+
+    function validateSingleField(cfg) {
+      if (!cfg.input || !cfg.wrap || !cfg.errorEl) return true;
+      const errMsg = cfg.validate(cfg.input.value);
+      const hasErr = Boolean(errMsg);
+      cfg.wrap.classList.toggle("has-error", hasErr);
+      cfg.input.setAttribute("aria-invalid", String(hasErr));
+      cfg.errorEl.textContent = errMsg;
+      return !hasErr;
+    }
+
+    fieldsConfig.forEach((cfg) => {
+      if (!cfg.input || !cfg.wrap) return;
+      syncFloatingState(cfg);
+
+      cfg.input.addEventListener("focus", () => {
+        cfg.wrap.classList.add("is-focused");
+      });
+
+      cfg.input.addEventListener("blur", () => {
+        cfg.wrap.classList.remove("is-focused");
+        syncFloatingState(cfg);
+        if (cfg.wrap.dataset.touched === "true") {
+          validateSingleField(cfg);
+        }
+      });
+
+      cfg.input.addEventListener("input", () => {
+        syncFloatingState(cfg);
+        if (cfg.key === "message" && charCount) {
+          charCount.textContent = `${cfg.input.value.length} / 5000`;
+        }
+        if (cfg.wrap.classList.contains("has-error")) {
+          validateSingleField(cfg);
+        }
+      });
+    });
+
+    // 6. Form Submission -> Save to LocalStorage & Transition to Success State
+    let lastFormattedMessage = "";
+
+    if (contactForm) {
+      contactForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        let firstInvalidInput = null;
+        let allValid = true;
+
+        fieldsConfig.forEach((cfg) => {
+          if (cfg.wrap) cfg.wrap.dataset.touched = "true";
+          const isValid = validateSingleField(cfg);
+          if (!isValid && allValid) {
+            allValid = false;
+            firstInvalidInput = cfg.input;
+          }
+        });
+
+        if (!allValid) {
+          if (firstInvalidInput) firstInvalidInput.focus();
+          return;
+        }
+
+        const nameVal = nameInput ? nameInput.value.trim() : "";
+        const emailVal = emailInput ? emailInput.value.trim() : "";
+        const subjectVal = subjectInput ? subjectInput.value.trim() : "";
+        const messageVal = messageInput ? messageInput.value.trim() : "";
+        const timestamp = new Date().toLocaleString([], {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+
+        const submissionRecord = {
+          id: `msg_${Date.now()}`,
+          name: nameVal,
+          email: emailVal,
+          subject: subjectVal,
+          message: messageVal,
+          savedAt: timestamp
+        };
+
+        try {
+          const existing = getSavedMessages();
+          existing.unshift(submissionRecord);
+          localStorage.setItem(
+            CONTACT_STORAGE_KEY,
+            JSON.stringify(existing.slice(0, 25))
+          );
+        } catch {
+          // Fallback if storage quota is restricted
+        }
+
+        updateStorageBadge();
+
+        lastFormattedMessage = [
+          `To: Daniyal Hayat (mdaniyalhayyat@gmail.com)`,
+          `From: ${nameVal} <${emailVal}>`,
+          `Subject: ${subjectVal}`,
+          `Saved Locally: ${timestamp}`,
+          `---`,
+          messageVal
+        ].join("\n");
+
+        if (savedSenderEl) {
+          savedSenderEl.textContent = `From: ${nameVal} (${emailVal})`;
+        }
+        if (savedTimeEl) {
+          savedTimeEl.textContent = `Saved locally · ${timestamp}`;
+        }
+        if (savedSubjectEl) {
+          savedSubjectEl.textContent = `Subject: ${subjectVal}`;
+        }
+        if (savedBodyEl) {
+          savedBodyEl.textContent = messageVal;
+        }
+
+        if (openEmailAppBtn) {
+          const mailSubject = encodeURIComponent(subjectVal);
+          const mailBody = encodeURIComponent(
+            `Hi Daniyal,\n\n${messageVal}\n\n—\n${nameVal}\n${emailVal}`
+          );
+          openEmailAppBtn.setAttribute(
+            "href",
+            `mailto:mdaniyalhayyat@gmail.com?subject=${mailSubject}&body=${mailBody}`
+          );
+        }
+
+        contactForm.classList.add("is-hidden");
+        if (successState) {
+          successState.classList.add("is-visible");
+          successState.setAttribute("aria-hidden", "false");
+        }
+        if (copySavedBtn) copySavedBtn.focus();
+      });
+    }
+
+    // Copy Formatted Saved Message
+    if (copySavedBtn) {
+      copySavedBtn.addEventListener("click", async () => {
+        if (!lastFormattedMessage) return;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(lastFormattedMessage);
+          }
+          if (copySavedLabel) copySavedLabel.textContent = "MESSAGE COPIED ✓";
+          showToast("Copied your saved message to the clipboard.");
+          window.setTimeout(() => {
+            if (copySavedLabel) copySavedLabel.textContent = "COPY MESSAGE";
+          }, 2800);
+        } catch {
+          showToast("Copied your saved message to the clipboard.");
+        }
+      });
+    }
+
+    // Send Another Message (Reset Form)
+    function resetToContactForm(focusFirstField) {
+      if (contactForm) {
+        contactForm.reset();
+        contactForm.classList.remove("is-hidden");
+      }
+      if (charCount) {
+        charCount.textContent = "0 / 5000";
+      }
+      fieldsConfig.forEach((cfg) => {
+        if (cfg.wrap) {
+          cfg.wrap.classList.remove("has-value", "has-error", "is-focused");
+          delete cfg.wrap.dataset.touched;
+        }
+        if (cfg.input) cfg.input.setAttribute("aria-invalid", "false");
+        if (cfg.errorEl) cfg.errorEl.textContent = "";
+      });
+      if (successState) {
+        successState.classList.remove("is-visible");
+        successState.setAttribute("aria-hidden", "true");
+      }
+      if (focusFirstField && nameInput) {
+        nameInput.focus();
+      }
+    }
+
+    if (sendAnotherBtn) {
+      sendAnotherBtn.addEventListener("click", () => {
+        resetToContactForm(true);
+      });
+    }
+
+    if (startConversationBtn) {
+      startConversationBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        resetToContactForm(false);
+        if (formShell) {
+          formShell.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        window.setTimeout(() => {
+          if (nameInput) nameInput.focus();
+        }, 420);
+      });
+    }
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
@@ -2162,6 +2681,7 @@
       initProjectsSection();
       initJourneySection();
       initServicesSection();
+      initContactSection();
     });
   } else {
     initPageLoadSequence();
@@ -2171,5 +2691,6 @@
     initProjectsSection();
     initJourneySection();
     initServicesSection();
+    initContactSection();
   }
 })();
