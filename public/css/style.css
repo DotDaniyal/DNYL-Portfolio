@@ -2256,7 +2256,387 @@ body.is-loaded .scroll-indicator {
 }
 
 /* ==========================================================================
-   13. RESPONSIVE BREAKPOINTS (DESKTOP -> TABLET -> MOBILE)
+   13. 03 — SKILLS & EXPERTISE SECTION (INTERACTIVE ECOSYSTEM MATRIX)
+   ========================================================================== */
+
+.skills-section {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  padding: clamp(5rem, 9vw, 8.5rem) 0 clamp(6rem, 10vw, 9.5rem);
+}
+
+.skills-ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.skills-ambient-glow--left {
+  top: 22%;
+  left: -10%;
+  width: min(48vw, 600px);
+  height: min(48vw, 600px);
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.085) 0%,
+    rgba(129, 140, 248, 0.045) 48%,
+    transparent 74%
+  );
+  animation: ambientDriftPrimary 20s ease-in-out infinite alternate;
+}
+
+.skills-ambient-glow--right {
+  bottom: 12%;
+  right: -8%;
+  width: min(46vw, 560px);
+  height: min(46vw, 560px);
+  background: radial-gradient(
+    circle,
+    rgba(226, 194, 144, 0.075) 0%,
+    rgba(56, 189, 248, 0.04) 48%,
+    transparent 74%
+  );
+  animation: ambientDriftSecondary 24s ease-in-out infinite alternate;
+}
+
+.skills-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+}
+
+.skills-top-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  margin-bottom: clamp(2.75rem, 4.5vw, 4rem);
+}
+
+.skills-header {
+  max-width: 760px;
+}
+
+.skills-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition: opacity 0.8s var(--ease-cinematic),
+    transform 0.8s var(--ease-cinematic);
+}
+
+.skills-eyebrow.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.skills-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 4.4vw, 3.85rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  text-wrap: balance;
+}
+
+.skills-intro {
+  font-size: clamp(0.96rem, 1.08vw, 1.08rem);
+  line-height: 1.68;
+  color: var(--text-secondary);
+  max-width: 64ch;
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity 0.85s var(--ease-cinematic) 0.15s,
+    transform 0.85s var(--ease-cinematic) 0.15s;
+}
+
+.skills-intro.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Interactive Segmented Filter Bar */
+.skills-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  border-radius: 14px;
+  background: rgba(245, 245, 240, 0.025);
+  border: 1px solid var(--border-subtle);
+  width: fit-content;
+  max-width: 100%;
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity 0.85s var(--ease-cinematic) 0.22s,
+    transform 0.85s var(--ease-cinematic) 0.22s;
+}
+
+.skills-filter-bar.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.skill-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: color 0.18s var(--ease-cinematic),
+    background-color 0.18s var(--ease-cinematic),
+    border-color 0.18s var(--ease-cinematic),
+    box-shadow 0.18s var(--ease-cinematic);
+}
+
+.skill-filter-btn:hover {
+  color: var(--text-primary);
+  background: rgba(245, 245, 240, 0.04);
+}
+
+.skill-filter-btn.is-active {
+  color: var(--bg-canvas);
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  box-shadow: 0 6px 20px -6px rgba(56, 189, 248, 0.35);
+}
+
+.filter-btn-count {
+  font-size: 0.66rem;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+.skill-filter-btn.is-active .filter-btn-count {
+  opacity: 0.85;
+}
+
+/* 4-Column Desktop Skill Grid */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
+  perspective: 1200px;
+}
+
+/* Premium Interactive Skill Card */
+.skill-card {
+  position: relative;
+  border-radius: 18px;
+  background: linear-gradient(
+    155deg,
+    rgba(245, 245, 240, 0.038) 0%,
+    rgba(245, 245, 240, 0.012) 100%
+  );
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translate3d(0, 24px, 0) scale(0.97);
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition: opacity 0.65s var(--ease-cinematic),
+    transform 0.22s var(--ease-cinematic),
+    border-color 0.22s var(--ease-cinematic),
+    box-shadow 0.22s var(--ease-cinematic),
+    background 0.25s var(--ease-cinematic);
+}
+
+.skill-card.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.skill-card.is-filtering-out {
+  opacity: 0 !important;
+  transform: translate3d(0, 14px, 0) scale(0.95) !important;
+  pointer-events: none;
+}
+
+.skill-card.is-hidden-card {
+  display: none !important;
+}
+
+.skill-card:hover {
+  border-color: rgba(56, 189, 248, 0.38);
+  box-shadow: 0 24px 48px -16px rgba(56, 189, 248, 0.18),
+    0 14px 32px -12px rgba(0, 0, 0, 0.75);
+}
+
+/* Mouse-Following Internal Spotlight Glow */
+.skill-card-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+    280px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, 20%),
+    rgba(56, 189, 248, 0.13),
+    rgba(226, 194, 144, 0.05) 45%,
+    transparent 75%
+  );
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-cinematic);
+  pointer-events: none;
+}
+
+.skill-card:hover .skill-card-glow {
+  opacity: 1;
+}
+
+.skill-card-inner {
+  position: relative;
+  z-index: 1;
+  padding: 1.4rem 1.35rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: 1.15rem;
+}
+
+.skill-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.skill-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: rgba(245, 245, 240, 0.035);
+  border: 1px solid rgba(245, 245, 240, 0.09);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-ice);
+  flex-shrink: 0;
+  transition: transform 0.22s var(--ease-cinematic),
+    color 0.22s var(--ease-cinematic),
+    border-color 0.22s var(--ease-cinematic),
+    background-color 0.22s var(--ease-cinematic);
+}
+
+.skill-card:hover .skill-icon-box {
+  transform: translate3d(0, -2px, 0) scale(1.06);
+  color: var(--text-primary);
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.12);
+}
+
+/* Clean Unboxed Metadata Line (Zero-Pill Discipline) */
+.skill-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.skill-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.skill-name {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  transition: color 0.2s var(--ease-cinematic);
+}
+
+.skill-card:hover .skill-name {
+  color: var(--accent-ice);
+}
+
+.skill-desc {
+  font-size: 0.84rem;
+  line-height: 1.56;
+  color: var(--text-secondary);
+}
+
+/* Qualitative Proficiency Footer + Signal Indicator */
+.skill-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(245, 245, 240, 0.06);
+}
+
+.skill-level-text {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+}
+
+.skill-card:hover .skill-level-text {
+  color: var(--text-primary);
+}
+
+.skill-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.signal-bar {
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(245, 245, 240, 0.12);
+  transform: scaleX(0.4);
+  transform-origin: left center;
+  transition: transform 0.6s var(--ease-cinematic),
+    background-color 0.35s var(--ease-cinematic);
+}
+
+.skill-card.is-inview .signal-bar {
+  transform: scaleX(1);
+}
+
+.signal-bar.is-filled {
+  background: linear-gradient(90deg, var(--accent-ice), var(--accent-gold));
+}
+
+/* ==========================================================================
+   14. RESPONSIVE BREAKPOINTS (DESKTOP -> TABLET -> MOBILE)
    ========================================================================== */
 
 /* Tablet Breakpoint */
@@ -2304,6 +2684,10 @@ body.is-loaded .scroll-indicator {
   }
 
   .about-stats-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .skills-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -2392,8 +2776,15 @@ body.is-loaded .scroll-indicator {
 }
 
 @media (max-width: 560px) {
-  .about-info-grid {
+  .about-info-grid,
+  .skills-grid {
     grid-template-columns: 1fr;
+  }
+
+  .skills-filter-bar {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
 }
 
@@ -2459,10 +2850,18 @@ body.is-loaded .scroll-indicator {
   .about-philosophy,
   .about-paragraph,
   .about-info-card,
-  .about-stats-bar {
+  .about-stats-bar,
+  .skills-eyebrow,
+  .skills-intro,
+  .skills-filter-bar,
+  .skill-card {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;
+  }
+
+  .signal-bar {
+    transform: scaleX(1) !important;
   }
 
   .about-word-highlight {

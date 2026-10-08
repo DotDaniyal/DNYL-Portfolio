@@ -290,7 +290,7 @@
 
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
-      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame"
+      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn"
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
@@ -652,16 +652,252 @@
     requestAnimationFrame(updateScrollParallaxLoop);
   }
 
+  // ---------------------------------------------------------------------------
+  // 9. SKILLS SECTION: STAGGERED REVEAL, FILTER SYSTEM & 3D CARD MOUSE ENGINE
+  // ---------------------------------------------------------------------------
+  function initSkillsSection() {
+    const skillsSection = document.getElementById("skills");
+    if (!skillsSection) return;
+
+    const headerRevealNodes = Array.from(
+      skillsSection.querySelectorAll(
+        '[data-skills-reveal]:not([data-skills-reveal="card"])'
+      )
+    );
+    const skillCards = Array.from(
+      skillsSection.querySelectorAll('.skill-card[data-skills-reveal="card"]')
+    );
+    const filterBtns = Array.from(
+      skillsSection.querySelectorAll(".skill-filter-btn[data-filter]")
+    );
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+
+    if (prefersReducedMotion) {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      skillCards.forEach((card) => card.classList.add("is-inview"));
+    } else if ("IntersectionObserver" in window) {
+      // 1. Header & Filter Bar Reveal
+      const headerObserver = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-inview");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.18, rootMargin: "0px 0px -5% 0px" }
+      );
+
+      headerRevealNodes.forEach((el) => headerObserver.observe(el));
+
+      // 2. Sequential Staggered Card Reveal
+      const cardObserver = new IntersectionObserver(
+        (entries, obs) => {
+          const intersectingCards = entries
+            .filter((e) => e.isIntersecting)
+            .map((e) => e.target);
+
+          intersectingCards.forEach((card, batchIdx) => {
+            card.style.transitionDelay = `${Math.min(batchIdx * 55, 380)}ms`;
+            card.classList.add("is-inview");
+            window.setTimeout(() => {
+              card.style.transitionDelay = "0ms";
+            }, 700 + batchIdx * 55);
+            obs.unobserve(card);
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -4% 0px" }
+      );
+
+      skillCards.forEach((card) => cardObserver.observe(card));
+
+      // 3. Active Navigation Highlight for #skills
+      const skillsNavObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.classList.toggle(
+                  "is-active",
+                  link.getAttribute("href") === "#skills"
+                );
+              });
+            }
+          });
+        },
+        { threshold: 0.22 }
+      );
+      skillsNavObserver.observe(skillsSection);
+    } else {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      skillCards.forEach((card) => card.classList.add("is-inview"));
+    }
+
+    // 4. Category Filter System (Smooth Opacity + Transform Transitions)
+    let filterTimeout = null;
+    let activeCategory = "all";
+
+    function applySkillFilter(category) {
+      if (category === activeCategory) return;
+      activeCategory = category;
+
+      filterBtns.forEach((btn) => {
+        const isMatch = btn.getAttribute("data-filter") === category;
+        btn.classList.toggle("is-active", isMatch);
+        btn.setAttribute("aria-pressed", String(isMatch));
+      });
+
+      if (prefersReducedMotion) {
+        skillCards.forEach((card) => {
+          const cardCat = card.getAttribute("data-category");
+          const shouldShow = category === "all" || cardCat === category;
+          card.classList.toggle("is-hidden-card", !shouldShow);
+          card.classList.remove("is-filtering-out");
+          if (shouldShow) card.classList.add("is-inview");
+        });
+        return;
+      }
+
+      if (filterTimeout) window.clearTimeout(filterTimeout);
+
+      // Step A: Animate out visible cards
+      skillCards.forEach((card) => {
+        card.style.transitionDelay = "0ms";
+        card.classList.add("is-filtering-out");
+      });
+
+      // Step B: Swap visibility & stagger in matching cards
+      filterTimeout = window.setTimeout(() => {
+        let visibleIndex = 0;
+
+        skillCards.forEach((card) => {
+          const cardCat = card.getAttribute("data-category");
+          const shouldShow = category === "all" || cardCat === category;
+
+          if (shouldShow) {
+            card.classList.remove("is-hidden-card");
+            const delayMs = Math.min(visibleIndex * 45, 320);
+            card.style.transitionDelay = `${delayMs}ms`;
+            visibleIndex++;
+
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                card.classList.remove("is-filtering-out");
+                card.classList.add("is-inview");
+              });
+            });
+          } else {
+            card.classList.add("is-hidden-card");
+          }
+        });
+      }, 210);
+    }
+
+    filterBtns.forEach((btn, idx) => {
+      btn.addEventListener("click", () => {
+        const cat = btn.getAttribute("data-filter") || "all";
+        applySkillFilter(cat);
+      });
+
+      // Keyboard arrow support across filter toolbar
+      btn.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          const dir = event.key === "ArrowRight" ? 1 : -1;
+          const nextIdx = (idx + dir + filterBtns.length) % filterBtns.length;
+          filterBtns[nextIdx].focus();
+          filterBtns[nextIdx].click();
+        }
+      });
+    });
+
+    // 5. Mouse-Responsive 3D Skill Card System (Max 5 deg tilt + Cursor Glow)
+    if (isFinePointer && !prefersReducedMotion) {
+      const MAX_CARD_TILT = 5;
+      let hoveredCard = null;
+      let targetRotX = 0;
+      let targetRotY = 0;
+      let currRotX = 0;
+      let currRotY = 0;
+      let cardRafId = null;
+
+      function updateHoveredCardTransform() {
+        if (!hoveredCard) {
+          cardRafId = null;
+          return;
+        }
+
+        currRotX += (targetRotX - currRotX) * 0.16;
+        currRotY += (targetRotY - currRotY) * 0.16;
+
+        hoveredCard.style.transform = `translate3d(0, -4px, 0) rotateX(${currRotX.toFixed(
+          2
+        )}deg) rotateY(${currRotY.toFixed(2)}deg)`;
+
+        cardRafId = requestAnimationFrame(updateHoveredCardTransform);
+      }
+
+      skillCards.forEach((card) => {
+        card.addEventListener("mouseenter", () => {
+          hoveredCard = card;
+          card.style.transitionDelay = "0ms";
+          if (!cardRafId) {
+            cardRafId = requestAnimationFrame(updateHoveredCardTransform);
+          }
+        });
+
+        card.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = card.getBoundingClientRect();
+            const localX = event.clientX - rect.left;
+            const localY = event.clientY - rect.top;
+
+            card.style.setProperty("--card-mouse-x", `${localX.toFixed(1)}px`);
+            card.style.setProperty("--card-mouse-y", `${localY.toFixed(1)}px`);
+
+            const relX = (localX - rect.width / 2) / (rect.width / 2);
+            const relY = (localY - rect.height / 2) / (rect.height / 2);
+
+            targetRotY = Math.max(
+              -MAX_CARD_TILT,
+              Math.min(MAX_CARD_TILT, relX * MAX_CARD_TILT)
+            );
+            targetRotX = Math.max(
+              -MAX_CARD_TILT,
+              Math.min(MAX_CARD_TILT, -relY * MAX_CARD_TILT)
+            );
+          },
+          { passive: true }
+        );
+
+        card.addEventListener("mouseleave", () => {
+          if (hoveredCard === card) {
+            hoveredCard = null;
+          }
+          targetRotX = 0;
+          targetRotY = 0;
+          currRotX = 0;
+          currRotY = 0;
+          card.style.transform = "";
+        });
+      });
+    }
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       initPageLoadSequence();
       initParticlesCanvas();
       initAboutScrollAnimations();
+      initSkillsSection();
     });
   } else {
     initPageLoadSequence();
     initParticlesCanvas();
     initAboutScrollAnimations();
+    initSkillsSection();
   }
 })();
