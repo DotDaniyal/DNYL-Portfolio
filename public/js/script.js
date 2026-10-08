@@ -290,7 +290,7 @@
 
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
-      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn"
+      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card"
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
@@ -886,6 +886,771 @@
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // 10. SELECTED WORK / PROJECTS SECTION: REVEAL, FILTER, 3D STAGE & CASE MODAL
+  // ---------------------------------------------------------------------------
+  const REAL_PROJECTS_DATA = {
+    "offical-darul-ifta-irshad-us-saileen": {
+      index: "01",
+      title: "Official Darul Ifta Irshad us Saileen",
+      category: "Web Platform",
+      language: "JavaScript",
+      liveUrl: "https://darulifta-bkfbzf6u.manus.space/",
+      githubUrl:
+        "https://github.com/DotDaniyal/Offical-Darul-ifta-Irshad-us-saileen-",
+      technologies: [
+        "JavaScript",
+        "Tailwind CSS",
+        "HTML5",
+        "Responsive Web",
+        "REST APIs"
+      ],
+      metrics: [
+        { label: "DEPLOYMENT", value: "Active Production" },
+        { label: "ACCESSIBILITY", value: "Mobile & Desktop" },
+        { label: "PERFORMANCE", value: "Optimized Load" }
+      ],
+      overview:
+        "Official Darul Ifta Irshad us Saileen is an online consultation platform engineered to provide accessible religious guidance and official fatwas to a broad community across desktop and mobile devices.",
+      problem:
+        "Traditional consultation workflows relied on physical visits or disjointed communication channels, making verified guidance difficult to archive, search, and access promptly.",
+      design:
+        "Designed a fast, lightweight, responsive web platform featuring structured inquiry categories, direct submission interfaces, clean editorial typography, and accessible contrast for users of all demographics.",
+      solution:
+        "Crafted using semantic HTML5, modern Tailwind CSS for modular utility styling, and vanilla JavaScript routines with efficient asset minification to ensure instant load times on variable-speed cellular connections.",
+      result:
+        "Successfully launched live in production, serving queries with zero layout shift and providing community members with an authoritative digital resource.",
+      features: [
+        "Intuitive religious consultation portal",
+        "Streamlined fatwa repository and searchable categories",
+        "High-contrast, distraction-free typographic hierarchy",
+        "Accessible design optimized for low-bandwidth mobile devices"
+      ]
+    },
+    "cortexiq-by-dnyl": {
+      index: "02",
+      title: "CortexIQ AI Suite",
+      category: "AI & Intelligence",
+      language: "TypeScript",
+      liveUrl: "https://daniyal-hayat-portfolio.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal/cortexiq-by-dnyl",
+      technologies: [
+        "TypeScript",
+        "React",
+        "Google Gemini AI",
+        "Tailwind CSS",
+        "Vite",
+        "Motion"
+      ],
+      metrics: [
+        { label: "DEPLOYMENT", value: "Live Production" },
+        { label: "TYPE SAFETY", value: "100% TypeScript" },
+        { label: "ENGINE", value: "Gemini AI" }
+      ],
+      overview:
+        "CortexIQ AI Suite is Daniyal Hayat's premier flagship intelligence platform, bridging natural language prompts with high-performance computational workflows.",
+      problem:
+        "Traditional developer tools lack unified interfaces for managing complex AI prompts, token budgets, and structured analytical feedback.",
+      design:
+        "Architected a lightning-fast reactive dashboard with a sleek obsidian-and-cyan theme, glassmorphism panels, and highly responsive data visualizations.",
+      solution:
+        "Built with React 19, TypeScript, Vite, and Tailwind CSS, implementing efficient client-state separation, memoized rendering components, and robust error boundary checks for sub-100ms UI responsiveness.",
+      result:
+        "Delivers an exceptional, production-deployed intelligence suite that highlights Daniyal's full-stack and AI engineering mastery.",
+      features: [
+        "Advanced AI computational intelligence pipeline with real-time prompt parsing",
+        "Futuristic dark-mode dashboard with interactive telemetry cards",
+        "Strict TypeScript typings and modular SDK integration",
+        "Optimized for high-performance reactive web experiences"
+      ]
+    },
+    "hamara-weather": {
+      index: "03",
+      title: "Hamara Weather",
+      category: "Utility App",
+      language: "JavaScript",
+      liveUrl: "https://hamara-weather.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal/Hamara-Weather",
+      technologies: [
+        "JavaScript",
+        "Meteorological API",
+        "DOM Manipulation",
+        "CSS3",
+        "Async Pipeline"
+      ],
+      metrics: [
+        { label: "STATUS", value: "Live on Vercel" },
+        { label: "DATA SOURCE", value: "Real-time API" },
+        { label: "UPDATE RATE", value: "On-demand Sync" }
+      ],
+      overview:
+        "Hamara Weather is a sleek, lightweight weather forecasting application created to provide quick, accurate weather reports with minimal bandwidth footprint.",
+      problem:
+        "Existing consumer weather services are frequently cluttered with intrusive advertisements, slow tracker scripts, and complex layouts that delay essential forecast info.",
+      design:
+        "Constructed with clean atmospheric gradients, modern iconography, and distinct typographic hierarchy distinguishing key metric numbers from secondary labels.",
+      solution:
+        "Developed using vanilla JavaScript utilizing asynchronous Fetch API calls, structured JSON parsing, and defensive error fallbacks for unavailable cities or weak network connections.",
+      result:
+        "Deployed live on Vercel with exceptional speed metrics and a clean, dependable everyday utility experience.",
+      features: [
+        "Real-time weather API integration for live temperature and wind speed",
+        "Atmospheric humidity, pressure, and visibility telemetry",
+        "Adaptive weather condition indicators with visual feedback",
+        "Zero-latency search with responsive layout across all viewports"
+      ]
+    },
+    "mystic-match-by-dnyl": {
+      index: "04",
+      title: "Mystic Match Puzzle Game",
+      category: "Mobile Game",
+      language: "Kotlin",
+      liveUrl: "https://mystic-match-rho.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal/mystic-match-by-dnyl",
+      technologies: [
+        "Kotlin",
+        "Android",
+        "Game Mechanics",
+        "Mobile UI",
+        "Algorithms"
+      ],
+      metrics: [
+        { label: "PLATFORM", value: "Live Web & Android" },
+        { label: "ENGINE", value: "Custom Algorithmic" },
+        { label: "DEPLOYMENT", value: "Vercel Live" }
+      ],
+      overview:
+        "Mystic Match is an interactive puzzle game demonstrating advanced state machines, algorithmic matrix manipulations, and fluid touch interactions.",
+      problem:
+        "Game loops on mobile and web can easily introduce memory leaks and performance stutters when tracking animated grid states.",
+      design:
+        "Created a fantasy neo-aesthetic with vibrant gem motifs, clean board borders, and immediate visual reactions upon valid combinations.",
+      solution:
+        "Implemented discrete state transitions (IDLE, SWAPPING, CHECKING, CLEARING, DROPPING) and 2D matrix traversal algorithms to prevent infinite cascade loops and ensure deterministic gameplay.",
+      result:
+        "A captivating, glitch-free puzzle experience showcasing deep algorithmic and design competence live on Vercel.",
+      features: [
+        "Algorithmic match-3 grid detection with cascading mechanics",
+        "Fantasy-themed visual styling with custom responsive tile states",
+        "Fluid touch-drag interaction and tactile feedback",
+        "High-performance frame rendering optimized for modern browsers and devices"
+      ]
+    },
+    "islamic-ai-mujeeb": {
+      index: "05",
+      title: "Islamic AI / Mujeeb us Saileen",
+      category: "AI & Intelligence",
+      language: "TypeScript",
+      liveUrl: "https://darulifta-bkfbzf6u.manus.space/",
+      githubUrl:
+        "https://github.com/DotDaniyal/Offical-Darul-ifta-Irshad-us-saileen-",
+      technologies: [
+        "TypeScript",
+        "React",
+        "Google Gemini AI",
+        "Tailwind CSS",
+        "REST APIs"
+      ],
+      metrics: [
+        { label: "AI ENGINE", value: "Gemini AI" },
+        { label: "VERIFICATION", value: "Authoritative Fatwas" },
+        { label: "LANGUAGES", value: "Arabic, Urdu, English" }
+      ],
+      overview:
+        "Mujeeb us Saileen is an advanced AI research platform designed to help community scholars and seekers locate verified rulings swiftly.",
+      problem:
+        "Traditional Islamic question archives span thousands of physical and digital texts, making prompt theological verification time-consuming.",
+      design:
+        "Dignified editorial design with soothing neutral tones, dark mode support, and crystal-clear Arabic and Nastaliq Urdu script legibility.",
+      solution:
+        "Built in TypeScript with strict API proxy boundaries, rigorous system instructions, few-shot theological examples, and multi-tier defensive prompt guards to ground responses exclusively in verified references.",
+      result:
+        "An authoritative AI consultation platform bridging tradition with cutting-edge language model technology.",
+      features: [
+        "Natural language consultation search backed by structured fatwa archives",
+        "Defensive prompt engineering preventing hallucinatory jurisprudence rulings",
+        "Bilingual typography optimized for complex Arabic and Nastaliq Urdu scripts",
+        "Instant query citation indexing with source reference links"
+      ]
+    },
+    "ai-prompt-studio-hub": {
+      index: "06",
+      title: "AI Prompt Studio & Workspace",
+      category: "AI & Fullstack",
+      language: "TypeScript",
+      liveUrl:
+        "https://ais-pre-c2gas5bmz4riptqglg7i75-935024525749.asia-east1.run.app",
+      githubUrl: "https://github.com/DotDaniyal/cortexiq-by-dnyl",
+      technologies: [
+        "React",
+        "Node.js",
+        "Express",
+        "Gemini AI API",
+        "Tailwind CSS"
+      ],
+      metrics: [
+        { label: "BACKEND", value: "Express API" },
+        { label: "AI INTEGRATION", value: "Google Gemini SDK" },
+        { label: "ARCHITECTURE", value: "Full-Stack" }
+      ],
+      overview:
+        "AI Prompt Studio is a robust full-stack developer workspace designed to streamline prompt iteration, testing, and generation workflows.",
+      problem:
+        "Prompt engineering often requires constant context switching between raw API clients, documentation, and notepad apps.",
+      design:
+        "High-contrast dark developer aesthetic with code syntax highlighting, clean sidebars, and instant visual feedback indicators.",
+      solution:
+        "Engineered in React and Express, leveraging server-side Google Gemini SDK proxy routes with streaming support to keep credentials secure.",
+      result:
+        "Provides an ultra-smooth playground for rapid prompt iteration and AI-driven development.",
+      features: [
+        "Secure server-side API proxy protecting sensitive AI keys",
+        "Interactive template variables with live token count estimation",
+        "One-click history export and preset management",
+        "Responsive split-screen layout for prompt engineering and output inspection"
+      ]
+    },
+    "faryal-fc": {
+      index: "07",
+      title: "Faryal FC Web Platform",
+      category: "Web Platform",
+      language: "JavaScript",
+      liveUrl: "https://daniyal-hayat-portfolio.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal",
+      technologies: [
+        "React",
+        "Tailwind CSS",
+        "JavaScript",
+        "Responsive UI",
+        "Vercel"
+      ],
+      metrics: [
+        { label: "DEPLOYMENT", value: "Vercel Live" },
+        { label: "ROSTER ENGINE", value: "Interactive Squad" },
+        { label: "VIEWPORT", value: "Mobile Optimized" }
+      ],
+      overview:
+        "Faryal FC is an official digital headquarters engineered to unite supporters, display real-time match fixtures, and showcase squad performance metrics.",
+      problem:
+        "Local sports teams often struggle with fragmented social media updates, leading to lost match announcements and low fan engagement.",
+      design:
+        "Athletic dark-mode aesthetic with emerald and cyan accents, bold jersey number typography, and tactile match scorecards.",
+      solution:
+        "Crafted using React, Tailwind CSS, optimized SVG silhouette placeholders, and CSS clamp() fluid typography for instantaneous page transitions.",
+      result:
+        "Delivered a high-energy, production-ready web platform that elevates the club's professional digital presence.",
+      features: [
+        "Dynamic match fixture schedule with countdowns and scoreboards",
+        "Interactive squad roster profiles with player statistics",
+        "Media gallery and match highlights reel",
+        "High-contrast club livery design system and responsive mobile drawer"
+      ]
+    },
+    "dnyl-eyewear": {
+      index: "08",
+      title: "DNYL Eyewear Boutique Experience",
+      category: "E-Commerce & Brand",
+      language: "TypeScript",
+      liveUrl: "https://daniyal-hayat-portfolio.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal",
+      technologies: [
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "Motion",
+        "E-Commerce"
+      ],
+      metrics: [
+        { label: "DESIGN", value: "Editorial Luxury" },
+        { label: "TYPE SAFETY", value: "100% TypeScript" },
+        { label: "UX FEEL", value: "60 FPS Motion" }
+      ],
+      overview:
+        "DNYL Eyewear is a bespoke digital showroom designed to deliver an in-person boutique feeling directly to browser viewports.",
+      problem:
+        "Typical online eyewear stores are cluttered with discount banners and generic grid layouts that detract from the craft of designer eyewear.",
+      design:
+        "Monochrome obsidian and alabaster palette with subtle gold/cyan highlights and expansive negative space.",
+      solution:
+        "Engineered in React 19 and TypeScript, utilizing Motion for smooth layout transitions and progressive lazy loading for sub-second rendering.",
+      result:
+        "A stunning digital brand experience demonstrating Daniyal's creative art direction and frontend engineering.",
+      features: [
+        "Curated frame lookbook with 360-degree aesthetic perspective cards",
+        "Interactive lens prescription and tint customizer",
+        "High-fashion monochrome typography and glassmorphism accents",
+        "Smooth cart simulation with local state persistence"
+      ]
+    },
+    "darul-ifta-irshad-us-saileen-app2": {
+      index: "09",
+      title: "Darul Ifta Android App v2",
+      category: "Mobile App",
+      language: "Kotlin",
+      liveUrl: "https://darulifta-bkfbzf6u.manus.space/",
+      githubUrl:
+        "https://github.com/DotDaniyal/Darul-Ifta-Irshad-us-Saileen-app2",
+      technologies: [
+        "Kotlin",
+        "Android SDK",
+        "Offline Caching",
+        "XML Layouts",
+        "Mobile Architecture"
+      ],
+      metrics: [
+        { label: "PLATFORM", value: "Native Android" },
+        { label: "STORAGE", value: "SQLite / Room" },
+        { label: "LANGUAGE", value: "100% Kotlin" }
+      ],
+      overview:
+        "Second-generation native Android companion app engineered to bring verified fatwa archives and consultation tools directly to Android devices.",
+      problem:
+        "Mobile users in low-connectivity regions needed offline access to previously read fatwas and fast local search indexing.",
+      design:
+        "Adhered to modern Android Material guidelines with optimized touch targets, intuitive tab bars, and clear Arabic/Urdu script typography.",
+      solution:
+        "Engineered in Kotlin using Android SDK components, local database caching, lazy view binding, and defensive network error handling.",
+      result:
+        "Delivered a rock-solid native companion app that brings essential guidance directly to mobile users anywhere, anytime.",
+      features: [
+        "Offline fatwa reading cache backed by local SQLite/Room storage",
+        "Fast bilingual search indexing across categorized rulings",
+        "Refined Material Design layouts with customizable font scaling",
+        "Low memory footprint optimized for entry-level Android devices"
+      ]
+    },
+    "soutnaqi-ai": {
+      index: "10",
+      title: "SOUTNAQI AI Audio Suite",
+      category: "AI & Audio",
+      language: "TypeScript",
+      liveUrl: "https://daniyal-hayat-portfolio.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal/cortexiq-by-dnyl",
+      technologies: [
+        "TypeScript",
+        "Audio Processing",
+        "AI Models",
+        "Node.js",
+        "Tailwind CSS"
+      ],
+      metrics: [
+        { label: "PROCESSING", value: "Real-time Telemetry" },
+        { label: "ARCHITECTURE", value: "Server-Side Proxy" },
+        { label: "INTERFACE", value: "Audio Canvas Visualizer" }
+      ],
+      overview:
+        "SOUTNAQI AI is an experimental speech and audio processing interface designed for clarity, voice diagnostics, and automated transcription.",
+      problem:
+        "Voice and audio tools often suffer from clunky multi-step upload workflows that delay feedback.",
+      design:
+        "Cyber-obsidian aesthetic with electric cyan audio waves and clear signal telemetry gauges.",
+      solution:
+        "Authored in TypeScript utilizing Web Audio API, decoupled requestAnimationFrame canvas visualizer loops, and backend proxy endpoints for model inference.",
+      result:
+        "A responsive, futuristic audio intelligence playground showcasing Daniyal's technical depth in AI and canvas physics.",
+      features: [
+        "Real-time audio frequency spectrum analyzer on HTML5 Canvas",
+        "AI-accelerated speech clarity and transcript generation pipelines",
+        "Low-latency streaming audio buffers",
+        "Secure key protection with Node.js backend routes"
+      ]
+    },
+    "motorcycle-sprint-2d": {
+      index: "11",
+      title: "Motorcycle Sprint Racing 2D",
+      category: "Interactive Game",
+      language: "JavaScript",
+      liveUrl: "https://daniyal-hayat-portfolio.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal",
+      technologies: [
+        "JavaScript",
+        "HTML5 Canvas",
+        "Game Physics",
+        "Touch Ergonomics"
+      ],
+      metrics: [
+        { label: "ENGINE", value: "Custom 2D Loop" },
+        { label: "FRAME RATE", value: "Locked 60 FPS" },
+        { label: "CONTROLS", value: "Mobile Touch" }
+      ],
+      overview:
+        "Motorcycle Sprint 2D is a pure canvas algorithmic game engineered to explore low-overhead physics and mobile ergonomics.",
+      problem:
+        "Many browser games rely on heavy game engines that take seconds to load on cellular connections.",
+      design:
+        "Retro-futuristic neon highway aesthetic with crisp collision hitboxes and fluid parallax road markings.",
+      solution:
+        "Engineered using deterministic timestamp game loops (requestAnimationFrame) and raycast trajectory sweeps between consecutive frames for 100% reliable collision checks.",
+      result:
+        "An addictive, instant-loading web arcade game running at a rock-solid 60 FPS on any device.",
+      features: [
+        "Variable vehicle acceleration and centrifugal friction physics",
+        "Dynamic obstacle generation with scalable difficulty curve",
+        "Haptic visual feedback on collisions and near misses",
+        "Zero-dependency pure canvas implementation with sub-15kb bundle footprint"
+      ]
+    },
+    "daniyal-hayat-portfolio": {
+      index: "12",
+      title: "Daniyal Hayat Portfolio Platform",
+      category: "Web Application",
+      language: "TypeScript",
+      liveUrl: "https://daniyal-hayat-portfolio.vercel.app/",
+      githubUrl: "https://github.com/DotDaniyal/Daniyal-Hayat-Portfolio",
+      technologies: ["React", "TypeScript", "Tailwind CSS", "Vite", "Motion"],
+      metrics: [
+        { label: "DEPLOYMENT", value: "Vercel Live" },
+        { label: "SPEED", value: "95+ Lighthouse" },
+        { label: "SYNC", value: "Live GitHub API" }
+      ],
+      overview:
+        "The digital portfolio of Daniyal Hayat represents his design philosophy: modern, fast, transparent, and focused on tangible engineering value.",
+      problem:
+        "Many developer portfolios rely on generic templates, static fake numbers, or bloated graphics that harm load performance and accessibility.",
+      design:
+        "Balanced negative space, refined display and monospace typography, and purposeful interactive feedback.",
+      solution:
+        "Constructed with hardware-accelerated CSS transforms, GPU-powered animations, and defensive localStorage caching for external APIs.",
+      result:
+        "A world-class personal brand platform showcasing verified capabilities and real projects to employers, collaborators, and clients worldwide.",
+      features: [
+        "Live GitHub repository data synchronization with resilient local fallback",
+        "Accessible high-contrast dark theme with smooth scroll choreography",
+        "Interactive project case studies and 3D perspective stage previews",
+        "Clean modular architecture with zero-error compilation"
+      ]
+    }
+  };
+
+  function initProjectsSection() {
+    const projectsSection = document.getElementById("projects");
+    if (!projectsSection) return;
+
+    const headerRevealNodes = Array.from(
+      projectsSection.querySelectorAll(
+        '[data-projects-reveal]:not([data-projects-reveal="monolith"]):not([data-projects-reveal="archive-card"])'
+      )
+    );
+    const monolithCards = Array.from(
+      projectsSection.querySelectorAll(
+        '.project-monolith[data-projects-reveal="monolith"]'
+      )
+    );
+    const archiveCards = Array.from(
+      projectsSection.querySelectorAll(
+        '.archive-card[data-projects-reveal="archive-card"]'
+      )
+    );
+    const allProjectItems = [...monolithCards, ...archiveCards];
+    const filterBtns = Array.from(
+      projectsSection.querySelectorAll(
+        ".project-filter-btn[data-project-filter]"
+      )
+    );
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+
+    // 1. Scroll Reveal Observers
+    if (prefersReducedMotion) {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      allProjectItems.forEach((el) => el.classList.add("is-inview"));
+    } else if ("IntersectionObserver" in window) {
+      const headerObs = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-inview");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16, rootMargin: "0px 0px -5% 0px" }
+      );
+      headerRevealNodes.forEach((el) => headerObs.observe(el));
+
+      const projectObs = new IntersectionObserver(
+        (entries, obs) => {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .map((e) => e.target);
+          visible.forEach((item, idx) => {
+            item.style.transitionDelay = `${Math.min(idx * 65, 260)}ms`;
+            item.classList.add("is-inview");
+            window.setTimeout(() => {
+              item.style.transitionDelay = "0ms";
+            }, 800 + idx * 65);
+            obs.unobserve(item);
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -4% 0px" }
+      );
+      allProjectItems.forEach((el) => projectObs.observe(el));
+
+      // Active navigation highlight for #projects
+      const projectsNavObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.classList.toggle(
+                  "is-active",
+                  link.getAttribute("href") === "#projects"
+                );
+              });
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      projectsNavObs.observe(projectsSection);
+    } else {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      allProjectItems.forEach((el) => el.classList.add("is-inview"));
+    }
+
+    // 2. Domain Category Filter System
+    let activeProjectFilter = "all";
+    let projFilterTimer = null;
+
+    function applyProjectFilter(category) {
+      if (category === activeProjectFilter) return;
+      activeProjectFilter = category;
+
+      filterBtns.forEach((btn) => {
+        const isMatch =
+          btn.getAttribute("data-project-filter") === category;
+        btn.classList.toggle("is-active", isMatch);
+        btn.setAttribute("aria-pressed", String(isMatch));
+      });
+
+      if (prefersReducedMotion) {
+        allProjectItems.forEach((item) => {
+          const tags = (item.getAttribute("data-project-tags") || "").split(
+            " "
+          );
+          const show = category === "all" || tags.includes(category);
+          item.classList.toggle("is-hidden-project", !show);
+          item.classList.remove("is-filtering-out");
+          if (show) item.classList.add("is-inview");
+        });
+        return;
+      }
+
+      if (projFilterTimer) window.clearTimeout(projFilterTimer);
+
+      allProjectItems.forEach((item) => {
+        item.style.transitionDelay = "0ms";
+        item.classList.add("is-filtering-out");
+      });
+
+      projFilterTimer = window.setTimeout(() => {
+        let visIdx = 0;
+        allProjectItems.forEach((item) => {
+          const tags = (item.getAttribute("data-project-tags") || "").split(
+            " "
+          );
+          const show = category === "all" || tags.includes(category);
+          if (show) {
+            item.classList.remove("is-hidden-project");
+            item.style.transitionDelay = `${Math.min(visIdx * 55, 280)}ms`;
+            visIdx++;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                item.classList.remove("is-filtering-out");
+                item.classList.add("is-inview");
+              });
+            });
+          } else {
+            item.classList.add("is-hidden-project");
+          }
+        });
+      }, 210);
+    }
+
+    filterBtns.forEach((btn, idx) => {
+      btn.addEventListener("click", () => {
+        const cat = btn.getAttribute("data-project-filter") || "all";
+        applyProjectFilter(cat);
+      });
+
+      btn.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          const dir = event.key === "ArrowRight" ? 1 : -1;
+          const nextIdx = (idx + dir + filterBtns.length) % filterBtns.length;
+          filterBtns[nextIdx].focus();
+          filterBtns[nextIdx].click();
+        }
+      });
+    });
+
+    // 3. Mouse Spotlight & 3D Tilt on Flagship Visual Stages (Clamped <= 4 deg)
+    if (isFinePointer && !prefersReducedMotion) {
+      monolithCards.forEach((monolith) => {
+        const stage = monolith.querySelector("[data-project-tilt]");
+        monolith.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = monolith.getBoundingClientRect();
+            const mx = event.clientX - rect.left;
+            const my = event.clientY - rect.top;
+            monolith.style.setProperty("--proj-mouse-x", `${mx.toFixed(1)}px`);
+            monolith.style.setProperty("--proj-mouse-y", `${my.toFixed(1)}px`);
+
+            if (stage) {
+              const sRect = stage.getBoundingClientRect();
+              const sx = event.clientX - sRect.left;
+              const sy = event.clientY - sRect.top;
+              const relX = (sx - sRect.width / 2) / (sRect.width / 2);
+              const relY = (sy - sRect.height / 2) / (sRect.height / 2);
+              const maxDeg = 3.5;
+              const rotY = Math.max(-maxDeg, Math.min(maxDeg, relX * maxDeg));
+              const rotX = Math.max(-maxDeg, Math.min(maxDeg, -relY * maxDeg));
+              stage.style.transform = `rotateX(${rotX.toFixed(
+                2
+              )}deg) rotateY(${rotY.toFixed(2)}deg)`;
+              stage.style.setProperty(
+                "--stage-glare-x",
+                `${((sx / sRect.width) * 100).toFixed(1)}%`
+              );
+              stage.style.setProperty(
+                "--stage-glare-y",
+                `${((sy / sRect.height) * 100).toFixed(1)}%`
+              );
+            }
+          },
+          { passive: true }
+        );
+
+        monolith.addEventListener("mouseleave", () => {
+          if (stage) {
+            stage.style.transform = "";
+          }
+        });
+      });
+
+      archiveCards.forEach((card) => {
+        card.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty(
+              "--arch-mouse-x",
+              `${(event.clientX - rect.left).toFixed(1)}px`
+            );
+            card.style.setProperty(
+              "--arch-mouse-y",
+              `${(event.clientY - rect.top).toFixed(1)}px`
+            );
+          },
+          { passive: true }
+        );
+      });
+    }
+
+    // 4. Deep-Dive Case Study Modal Controller
+    const modal = document.getElementById("project-case-modal");
+    const closeBtn = document.getElementById("case-modal-close");
+    const modalIndex = document.getElementById("case-modal-index");
+    const modalCategory = document.getElementById("case-modal-category");
+    const modalLang = document.getElementById("case-modal-lang");
+    const modalTitle = document.getElementById("case-modal-title");
+    const modalOverview = document.getElementById("case-modal-overview");
+    const modalMetrics = document.getElementById("case-modal-metrics");
+    const modalProblem = document.getElementById("case-modal-problem");
+    const modalDesign = document.getElementById("case-modal-design");
+    const modalSolution = document.getElementById("case-modal-solution");
+    const modalResult = document.getElementById("case-modal-result");
+    const modalFeatures = document.getElementById("case-modal-features");
+    const modalStack = document.getElementById("case-modal-stack");
+    const modalLive = document.getElementById("case-modal-live");
+    const modalGithub = document.getElementById("case-modal-github");
+    let lastFocusedTrigger = null;
+
+    function openCaseStudyModal(projectId, triggerEl) {
+      const data = REAL_PROJECTS_DATA[projectId];
+      if (!data || !modal) return;
+
+      lastFocusedTrigger = triggerEl || document.activeElement;
+
+      if (modalIndex) modalIndex.textContent = data.index;
+      if (modalCategory) modalCategory.textContent = data.category;
+      if (modalLang) modalLang.textContent = data.language;
+      if (modalTitle) modalTitle.textContent = data.title;
+      if (modalOverview) modalOverview.textContent = data.overview;
+      if (modalProblem) modalProblem.textContent = data.problem;
+      if (modalDesign) modalDesign.textContent = data.design;
+      if (modalSolution) modalSolution.textContent = data.solution;
+      if (modalResult) modalResult.textContent = data.result;
+
+      if (modalMetrics) {
+        modalMetrics.innerHTML = data.metrics
+          .map(
+            (m) => `
+            <div class="monolith-metric-item">
+              <span class="metric-label">${m.label}</span>
+              <span class="metric-value">${m.value}</span>
+            </div>
+          `
+          )
+          .join("");
+      }
+
+      if (modalFeatures) {
+        modalFeatures.innerHTML = data.features
+          .map((feat) => `<li>${feat}</li>`)
+          .join("");
+      }
+
+      if (modalStack) {
+        modalStack.innerHTML = data.technologies
+          .map((t) => `<span>${t}</span>`)
+          .join('<span aria-hidden="true">·</span>');
+      }
+
+      if (modalLive) modalLive.setAttribute("href", data.liveUrl);
+      if (modalGithub) modalGithub.setAttribute("href", data.githubUrl);
+
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      if (closeBtn) closeBtn.focus();
+    }
+
+    function closeCaseStudyModal() {
+      if (!modal || !modal.classList.contains("is-open")) return;
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      if (lastFocusedTrigger && typeof lastFocusedTrigger.focus === "function") {
+        lastFocusedTrigger.focus();
+      }
+    }
+
+    const caseTriggers = document.querySelectorAll("[data-open-case]");
+    caseTriggers.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const projId = btn.getAttribute("data-open-case");
+        if (projId) openCaseStudyModal(projId, btn);
+      });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", closeCaseStudyModal);
+    }
+
+    if (modal) {
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeCaseStudyModal();
+        }
+      });
+    }
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeCaseStudyModal();
+      }
+    });
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
@@ -893,11 +1658,13 @@
       initParticlesCanvas();
       initAboutScrollAnimations();
       initSkillsSection();
+      initProjectsSection();
     });
   } else {
     initPageLoadSequence();
     initParticlesCanvas();
     initAboutScrollAnimations();
     initSkillsSection();
+    initProjectsSection();
   }
 })();
