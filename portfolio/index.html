@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daniyal Hayat — Full-Stack Developer &amp; Creative Builder</title>
+    <meta
+      name="description"
+      content="Portfolio of Daniyal Hayat — Full-Stack Developer &amp; Creative Builder architecting high-performance web platforms, native Android apps in Kotlin, and intelligent generative AI systems."
+    />
+    <meta property="og:title" content="Daniyal Hayat — Full-Stack Developer &amp; Creative Builder" />
+    <meta
+      property="og:description"
+      content="Full-Stack Developer &amp; Creative Builder architecting high-performance web platforms, native Android apps in Kotlin, and intelligent generative AI systems."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#05060a" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/script.js" defer></script>
+  </head>
+  <body class="is-loading">
+    <!-- Accessibility Skip Link -->
+    <a href="#hero" class="skip-link">Skip to main content</a>
+
+    <!-- Custom Desktop Cursor (Pointer Fine Only) -->
+    <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" id="cursor-ring" aria-hidden="true">
+      <span class="cursor-label" id="cursor-label"></span>
+    </div>
+
+    <!-- Ambient Background Layer (0.00s Fade-in) -->
+    <div class="hero-backdrop" id="hero-backdrop" aria-hidden="true">
+      <div class="backdrop-radial backdrop-radial--primary" id="glow-primary"></div>
+      <div class="backdrop-radial backdrop-radial--secondary" id="glow-secondary"></div>
+      <div class="backdrop-cursor-glow" id="cursor-glow"></div>
+      <div class="backdrop-grid" id="backdrop-grid"></div>
+      <canvas class="backdrop-particles" id="particles-canvas"></canvas>
+      <div class="backdrop-noise"></div>
+      <div class="backdrop-vignette"></div>
+    </div>
+
+    <!-- Top Navigation Bar (0.20s Reveal | 3-Zone Contract) -->
+    <header class="site-header" id="site-header">
+      <div class="header-inner">
+        <!-- Zone 1: Single Text Brand Wordmark -->
+        <a href="#hero" class="brand-wordmark" data-magnetic="0.18" aria-label="Daniyal Hayat Home">
+          DANIYAL HAYAT
+        </a>
+
+        <!-- Zone 2: Primary Navigation Links (Placeholder section IDs for upcoming sections) -->
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary Navigation">
+          <ul class="nav-list">
+            <li><a href="#about" class="nav-link" data-section="About">About</a></li>
+            <li><a href="#skills" class="nav-link" data-section="Skills">Skills</a></li>
+            <li><a href="#projects" class="nav-link" data-section="Projects">Projects</a></li>
+            <li><a href="#experience" class="nav-link" data-section="Experience">Experience</a></li>
+            <li><a href="#contact" class="nav-link" data-section="Contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <!-- Zone 3: Primary Action + Mobile Hamburger -->
+        <div class="header-actions">
+          <a
+            href="https://github.com/DotDaniyal"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="header-action-link"
+            data-magnetic="0.22"
+            data-cursor-text="GITHUB"
+            aria-label="Daniyal Hayat GitHub (@DotDaniyal)"
+          >
+            <span>@DotDaniyal</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17L17 7" />
+              <path d="M7 7h10v10" />
+            </svg>
+          </a>
+
+          <button
+            type="button"
+            class="menu-toggle"
+            id="menu-toggle"
+            aria-expanded="false"
+            aria-controls="mobile-drawer"
+            aria-label="Toggle navigation menu"
+          >
+            <span class="menu-toggle-bar"></span>
+            <span class="menu-toggle-bar"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Drawer -->
+      <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+        <nav class="mobile-nav" aria-label="Mobile Navigation">
+          <ul class="mobile-nav-list">
+            <li><a href="#about" class="mobile-nav-link" data-section="About">01. About</a></li>
+            <li><a href="#skills" class="mobile-nav-link" data-section="Skills">02. Skills</a></li>
+            <li><a href="#projects" class="mobile-nav-link" data-section="Projects">03. Projects</a></li>
+            <li><a href="#experience" class="mobile-nav-link" data-section="Experience">04. Experience</a></li>
+            <li><a href="#contact" class="mobile-nav-link" data-section="Contact">05. Contact</a></li>
+          </ul>
+          <div class="mobile-drawer-footer">
+            <a href="mailto:mdaniyalhayyat@gmail.com" class="mobile-mail-link">mdaniyalhayyat@gmail.com</a>
+            <a href="https://github.com/DotDaniyal" target="_blank" rel="noopener noreferrer" class="mobile-social-link">
+              GitHub · @DotDaniyal
+            </a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Hero Section (100vh Full-Screen) -->
+    <main id="main-content">
+      <section class="hero-section" id="hero" aria-labelledby="hero-heading">
+        <div class="hero-container">
+          <div class="hero-grid">
+            <!-- LEFT COLUMN: Typographic Composition & Actions -->
+            <div class="hero-content">
+              <!-- 0.40s: Availability / Status Line -->
+              <div class="hero-status-wrap" data-animate="status">
+                <span class="status-indicator" aria-hidden="true">
+                  <span class="status-dot-ping"></span>
+                  <span class="status-dot-core"></span>
+                </span>
+                <span class="status-text">Available Globally &amp; Remote</span>
+                <span class="status-separator" aria-hidden="true">·</span>
+                <span class="status-subtext">Open to High-Impact Opportunities</span>
+              </div>
+
+              <!-- 0.55s: Monumental Name Reveal -->
+              <h1 class="hero-heading" id="hero-heading">
+                <span class="reveal-mask">
+                  <span class="reveal-line hero-greeting" data-animate="name-1">HELLO, I’M</span>
+                </span>
+                <span class="reveal-mask">
+                  <span class="reveal-line hero-name" data-animate="name-2">
+                    DANIYAL <span class="hero-name-accent">HAYAT.</span>
+                  </span>
+                </span>
+              </h1>
+
+              <!-- 0.75s: Professional Title Reveal -->
+              <div class="hero-title-wrap">
+                <div class="reveal-mask">
+                  <p class="reveal-line hero-title" data-animate="title">
+                    <span class="title-primary">Full-Stack Developer &amp; Creative Builder</span>
+                  </p>
+                </div>
+                <div class="hero-specialty-line" data-animate="title-sub" aria-live="polite">
+                  <span class="specialty-prefix">Focus</span>
+                  <span class="specialty-divider" aria-hidden="true">/</span>
+                  <span class="specialty-dynamic" id="specialty-rotator">Full-Stack Web Platforms</span>
+                </div>
+              </div>
+
+              <!-- 0.95s: Short Professional Description -->
+              <div class="reveal-mask">
+                <p class="reveal-line hero-description" data-animate="description">
+                  Architecting high-performance web platforms, cross-platform native Android mobile apps in Kotlin, and intelligent generative AI systems with Google AI Studio &amp; Gemini.
+                </p>
+              </div>
+
+              <!-- 1.10s: Primary & Secondary CTA Buttons -->
+              <div class="hero-actions" data-animate="buttons">
+                <a
+                  href="#projects"
+                  class="cta-btn cta-btn--primary"
+                  id="btn-view-work"
+                  data-magnetic="0.28"
+                  data-cursor-text="EXPLORE"
+                >
+                  <span class="cta-border-glow" aria-hidden="true"></span>
+                  <span class="cta-text">VIEW MY WORK</span>
+                  <span class="cta-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M7 17L17 7" />
+                      <path d="M7 7h10v10" />
+                    </svg>
+                  </span>
+                </a>
+
+                <a
+                  href="mailto:mdaniyalhayyat@gmail.com"
+                  class="cta-btn cta-btn--secondary"
+                  id="btn-contact-me"
+                  data-magnetic="0.28"
+                  data-cursor-text="EMAIL"
+                >
+                  <span class="cta-text">CONTACT ME</span>
+                  <span class="cta-icon" aria-hidden="true">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                  </span>
+                </a>
+
+                <button
+                  type="button"
+                  class="cta-copy-email"
+                  id="btn-copy-email"
+                  data-email="mdaniyalhayyat@gmail.com"
+                  data-magnetic="0.2"
+                  aria-label="Copy email address mdaniyalhayyat@gmail.com"
+                  title="Copy mdaniyalhayyat@gmail.com"
+                >
+                  <span class="copy-email-label" id="copy-email-label">mdaniyalhayyat@gmail.com</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Editorial Unboxed Proof Strip (Real Portfolio Facts) -->
+              <div class="hero-proof-strip" data-animate="buttons">
+                <span class="proof-item"><strong>7+</strong> Public Repositories</span>
+                <span class="proof-sep" aria-hidden="true">·</span>
+                <span class="proof-item"><strong>React &amp; TypeScript</strong> Web</span>
+                <span class="proof-sep" aria-hidden="true">·</span>
+                <span class="proof-item"><strong>Kotlin</strong> Android</span>
+                <span class="proof-sep" aria-hidden="true">·</span>
+                <span class="proof-item"><strong>Gemini AI</strong> Systems</span>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: 1.20s Profile Image Frame + 1.40s Floating Skill Elements -->
+            <div class="hero-visual-column">
+              <div class="profile-stage" id="profile-stage">
+                <!-- Ambient Backlight Aura -->
+                <div class="profile-aura" id="profile-aura" aria-hidden="true"></div>
+
+                <!-- 3D Tilt Wrapper (Clamped to max 5deg rotation) -->
+                <div class="profile-tilt-rig" id="profile-tilt-rig" data-animate="profile">
+                  <!-- Glassmorphic Outer Architectural Frame -->
+                  <figure class="profile-frame" id="profile-frame">
+                    <!-- Animated Conic Light Beam Around Frame -->
+                    <div class="frame-light-beam" aria-hidden="true"></div>
+
+                    <!-- Inner Mask Container -->
+                    <div class="profile-image-mask">
+                      <!-- Fallback Monogram Layer (Zero-Broken-Image Resilience) -->
+                      <div class="profile-fallback" aria-hidden="true">
+                        <span class="fallback-initials">DH</span>
+                        <span class="fallback-caption">Daniyal Hayat</span>
+                      </div>
+
+                      <!-- Real Profile Photograph -->
+                      <img
+                        src="assets/images/profile.jpg"
+                        alt="Daniyal Hayat — Full-Stack Developer and Creative Builder"
+                        class="profile-image"
+                        id="profile-image"
+                        width="800"
+                        height="1000"
+                        fetchpriority="high"
+                        decoding="async"
+                        referrerpolicy="no-referrer"
+                      />
+
+                      <!-- Subtle Mouse-Following Specular Glare -->
+                      <div class="profile-glare" id="profile-glare" aria-hidden="true"></div>
+
+                      <!-- Measured Contrast Scrim at Bottom -->
+                      <div class="profile-scrim" aria-hidden="true"></div>
+
+                      <!-- Editorial Caption Inside Frame -->
+                      <figcaption class="profile-caption">
+                        <div class="caption-meta">
+                          <span class="caption-name">Daniyal Hayat</span>
+                          <span class="caption-sep" aria-hidden="true">/</span>
+                          <span class="caption-handle">@DotDaniyal</span>
+                        </div>
+                        <span class="caption-role">Software &amp; Creative Engineering</span>
+                      </figcaption>
+                    </div>
+                  </figure>
+                </div>
+
+                <!-- 1.40s: Floating UI Skill Nodes (Strictly Daniyal Hayat's Real Skills) -->
+                <div
+                  class="floating-node floating-node--tl"
+                  data-animate="float"
+                  data-parallax="1.35"
+                  aria-label="Competency: Full-Stack Web with React, Next.js, and TypeScript"
+                >
+                  <span class="node-index">01</span>
+                  <div class="node-body">
+                    <span class="node-title">FULL-STACK WEB</span>
+                    <span class="node-meta">React · Next.js · TypeScript</span>
+                  </div>
+                </div>
+
+                <div
+                  class="floating-node floating-node--tr"
+                  data-animate="float"
+                  data-parallax="-1.15"
+                  aria-label="Competency: Native Android with Kotlin and Android SDK"
+                >
+                  <span class="node-index">02</span>
+                  <div class="node-body">
+                    <span class="node-title">NATIVE ANDROID</span>
+                    <span class="node-meta">Kotlin · Android SDK</span>
+                  </div>
+                </div>
+
+                <div
+                  class="floating-node floating-node--bl"
+                  data-animate="float"
+                  data-parallax="1.05"
+                  aria-label="Competency: AI Systems with Google Gemini AI and AI Studio"
+                >
+                  <span class="node-index">03</span>
+                  <div class="node-body">
+                    <span class="node-title">AI SYSTEMS</span>
+                    <span class="node-meta">Gemini AI · AI Studio</span>
+                  </div>
+                </div>
+
+                <div
+                  class="floating-node floating-node--br"
+                  data-animate="float"
+                  data-parallax="-1.4"
+                  aria-label="Competency: UI/UX and Motion with HTML5, CSS3, and Figma"
+                >
+                  <span class="node-index">04</span>
+                  <div class="node-body">
+                    <span class="node-title">UI/UX &amp; MOTION</span>
+                    <span class="node-meta">HTML5 · CSS3 · Figma</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Scroll Indicator -->
+        <a
+          href="#about"
+          class="scroll-indicator"
+          id="scroll-indicator"
+          data-animate="scroll"
+          aria-label="Scroll to explore upcoming sections"
+        >
+          <span class="scroll-label">SCROLL TO EXPLORE</span>
+          <span class="scroll-line-track" aria-hidden="true">
+            <span class="scroll-line-runner"></span>
+          </span>
+        </a>
+      </section>
+    </main>
+
+    <!-- Non-Intrusive Interactive Status Toast (Handles Placeholder Section Clicks Cleanly) -->
+    <div class="interaction-toast" id="interaction-toast" role="status" aria-live="polite" aria-hidden="true">
+      <div class="toast-content">
+        <span class="toast-dot" aria-hidden="true"></span>
+        <p class="toast-message" id="toast-message"></p>
+      </div>
+      <div class="toast-actions">
+        <a
+          href="https://github.com/DotDaniyal"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="toast-action-link"
+          id="toast-github-link"
+        >
+          View GitHub (@DotDaniyal) ↗
+        </a>
+        <button type="button" class="toast-close" id="toast-close" aria-label="Dismiss notification">✕</button>
+      </div>
+    </div>
+  </body>
+</html>
