@@ -7199,7 +7199,541 @@ body.is-loaded .scroll-indicator {
 }
 
 /* ==========================================================================
-   18. RESPONSIVE BREAKPOINTS (DESKTOP -> TABLET -> MOBILE)
+   18. 08 — PREMIUM FOOTER / FINAL CTA (THE CLOSING SCENE)
+   ========================================================================== */
+
+.site-footer {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 8, 12, 0.94) 0%,
+    #04060b 100%
+  );
+  border-top: 1px solid rgba(245, 245, 240, 0.08);
+  padding: clamp(4.5rem, 8vw, 7rem) 0 clamp(3rem, 5vw, 4.5rem);
+  overflow: hidden;
+}
+
+.footer-top-border-beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(820px, 85vw);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-ice) 35%,
+    var(--accent-gold) 65%,
+    transparent 100%
+  );
+  opacity: 0.7;
+}
+
+.footer-ambient-glow {
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1020px, 95vw);
+  height: 520px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(56, 189, 248, 0.085) 0%,
+    rgba(226, 194, 144, 0.045) 45%,
+    transparent 74%
+  );
+  filter: blur(95px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Pure CSS Subtle Noise/Grain Overlay */
+.footer-grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.032;
+  background-image: radial-gradient(
+      rgba(255, 255, 255, 0.7) 0.55px,
+      transparent 0.55px
+    ),
+    radial-gradient(
+      rgba(56, 189, 248, 0.65) 0.55px,
+      transparent 0.55px
+    );
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+.footer-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-pad);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3.5rem, 6vw, 5.5rem);
+}
+
+/* 1. Top Telemetry & Status Bar */
+.footer-status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid rgba(245, 245, 240, 0.08);
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity 0.75s var(--ease-cinematic),
+    transform 0.75s var(--ease-cinematic);
+}
+
+.footer-status-bar.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.footer-status-left,
+.footer-status-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-index-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--accent-ice);
+}
+
+.footer-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: 9px;
+  background: rgba(245, 245, 240, 0.03);
+  border: 1px solid rgba(245, 245, 240, 0.1);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  color: var(--text-primary);
+}
+
+.footer-clock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: 9px;
+  background: rgba(245, 245, 240, 0.024);
+  border: 1px solid rgba(245, 245, 240, 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+.footer-clock-pill svg {
+  color: var(--accent-ice);
+}
+
+.footer-clock-pill strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.footer-back-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.48rem 0.95rem;
+  border-radius: 9px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: transform 0.25s var(--ease-cinematic),
+    border-color 0.25s var(--ease-cinematic),
+    background-color 0.25s var(--ease-cinematic);
+}
+
+.footer-back-top-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-ice);
+  background: rgba(56, 189, 248, 0.16);
+}
+
+/* 2. Large Closing Statement / Final CTA */
+.footer-closing-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.4rem;
+  max-width: 960px;
+}
+
+.footer-closing-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--accent-gold);
+}
+
+.footer-closing-heading {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 5.8vw, 5.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.footer-heading-accent {
+  background: linear-gradient(
+    130deg,
+    var(--text-primary) 10%,
+    var(--accent-ice) 52%,
+    var(--accent-gold) 95%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.footer-closing-subtext {
+  font-size: clamp(0.98rem, 1.15vw, 1.12rem);
+  line-height: 1.68;
+  color: var(--text-secondary);
+  max-width: 64ch;
+}
+
+.footer-closing-subtext strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.footer-closing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.4rem;
+}
+
+/* 3. Main Footer Grid (Brand + Navigation + Deployments + Contact) */
+.footer-main-grid {
+  display: grid;
+  grid-template-columns: 1.45fr 0.75fr 0.95fr 1fr;
+  gap: clamp(2rem, 3.5vw, 3.5rem);
+  padding: clamp(2.5rem, 4.5vw, 3.75rem) 0;
+  border-top: 1px solid rgba(245, 245, 240, 0.08);
+  border-bottom: 1px solid rgba(245, 245, 240, 0.08);
+}
+
+.footer-brand-col,
+.footer-nav-col,
+.footer-deployments-col,
+.footer-contact-col {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 0.75s var(--ease-cinematic),
+    transform 0.75s var(--ease-cinematic);
+}
+
+.footer-brand-col.is-inview,
+.footer-nav-col.is-inview,
+.footer-deployments-col.is-inview,
+.footer-contact-col.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.footer-brand-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.footer-brand-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+}
+
+.footer-avatar-link {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  flex-shrink: 0;
+  display: block;
+}
+
+.footer-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.footer-brand-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.footer-brand-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.footer-brand-role {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent-ice);
+}
+
+.footer-brand-desc {
+  font-size: 0.88rem;
+  line-height: 1.64;
+  color: var(--text-secondary);
+  max-width: 44ch;
+}
+
+.footer-brand-pillars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--accent-gold);
+}
+
+.footer-col-heading {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+  margin-bottom: 1.1rem;
+}
+
+.footer-nav-list,
+.footer-deployments-list,
+.footer-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.68rem;
+}
+
+.footer-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.22s var(--ease-cinematic),
+    transform 0.22s var(--ease-cinematic);
+}
+
+.footer-nav-link span {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--accent-ice);
+  font-variant-numeric: tabular-nums;
+}
+
+.footer-nav-link:hover {
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.footer-ext-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.22s var(--ease-cinematic),
+    transform 0.22s var(--ease-cinematic);
+}
+
+.footer-ext-link .ext-arrow {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  transition: transform 0.22s var(--ease-cinematic),
+    color 0.22s var(--ease-cinematic);
+}
+
+.footer-ext-link:hover {
+  color: var(--text-primary);
+  transform: translateX(3px);
+}
+
+.footer-ext-link:hover .ext-arrow {
+  color: var(--accent-ice);
+  transform: translate(2px, -2px);
+}
+
+.footer-contact-list {
+  gap: 0.9rem;
+}
+
+.footer-contact-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.footer-contact-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.footer-contact-link {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.22s var(--ease-cinematic);
+}
+
+.footer-contact-link:hover {
+  color: var(--accent-ice);
+}
+
+.footer-contact-link--phone {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.footer-contact-static {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* 4. Monumental Architectural Wordmark */
+.footer-monument-wrap {
+  user-select: none;
+  overflow: hidden;
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 0.85s var(--ease-cinematic),
+    transform 0.85s var(--ease-cinematic);
+}
+
+.footer-monument-wrap.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.footer-monument-wordmark {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(3.1rem, 11.2vw, 10.2rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  text-align: center;
+  background: linear-gradient(
+    180deg,
+    rgba(245, 245, 240, 0.16) 0%,
+    rgba(56, 189, 248, 0.06) 65%,
+    rgba(245, 245, 240, 0.015) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: opacity 0.35s var(--ease-cinematic);
+}
+
+.footer-monument-wrap:hover .footer-monument-wordmark {
+  background: linear-gradient(
+    180deg,
+    rgba(245, 245, 240, 0.26) 0%,
+    rgba(56, 189, 248, 0.14) 65%,
+    rgba(226, 194, 144, 0.04) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* 5. Bottom Copyright Bar */
+.footer-bottom-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(245, 245, 240, 0.07);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.footer-copyright strong {
+  color: var(--text-secondary);
+}
+
+.footer-bottom-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.footer-bottom-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.22s var(--ease-cinematic);
+}
+
+.footer-bottom-links a:hover {
+  color: var(--accent-ice);
+}
+
+/* ==========================================================================
+   19. RESPONSIVE BREAKPOINTS (DESKTOP -> TABLET -> MOBILE)
    ========================================================================== */
 
 /* Tablet Breakpoint */
@@ -7295,7 +7829,7 @@ body.is-loaded .scroll-indicator {
     grid-row: 1;
   }
 
-  /* Services & Contact Tablet Layout */
+  /* Services, Contact & Footer Tablet Layout */
   .services-header-grid,
   .services-showcase-layout,
   .contact-header-grid,
@@ -7307,6 +7841,11 @@ body.is-loaded .scroll-indicator {
   .services-visual-col {
     position: relative;
     top: 0;
+  }
+
+  .footer-main-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem;
   }
 }
 
@@ -7414,7 +7953,8 @@ body.is-loaded .scroll-indicator {
   .srv-android-mockup,
   .srv-vitals-row,
   .contact-socials-grid,
-  .orb-stage-footer {
+  .orb-stage-footer,
+  .footer-main-grid {
     grid-template-columns: 1fr;
   }
 
@@ -7485,7 +8025,8 @@ body.is-loaded .scroll-indicator {
   .service-card-footer,
   .srv-stage-footer,
   .success-actions-row,
-  .climax-cta-actions {
+  .climax-cta-actions,
+  .footer-closing-actions {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
@@ -7499,7 +8040,7 @@ body.is-loaded .scroll-indicator {
 }
 
 /* ==========================================================================
-   19. ACCESSIBILITY: PREFERS-REDUCED-MOTION COMPLIANCE
+   20. ACCESSIBILITY: PREFERS-REDUCED-MOTION COMPLIANCE
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -7556,7 +8097,13 @@ body.is-loaded .scroll-indicator {
   .contact-channel-item,
   .contact-socials-block,
   .contact-right-col,
-  .contact-climax-cta {
+  .contact-climax-cta,
+  .footer-status-bar,
+  .footer-brand-col,
+  .footer-nav-col,
+  .footer-deployments-col,
+  .footer-contact-col,
+  .footer-monument-wrap {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;

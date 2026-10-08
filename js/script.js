@@ -290,7 +290,7 @@
 
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
-      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .journey-currently-card, .currently-action-btn, .service-card, .srv-stage-tab, .service-action-link, .contact-orb-card, .contact-channel-item, .contact-social-btn, .contact-input, .channel-copy-btn"
+      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .journey-currently-card, .currently-action-btn, .service-card, .srv-stage-tab, .service-action-link, .contact-orb-card, .contact-channel-item, .contact-social-btn, .contact-input, .channel-copy-btn, .footer-back-top-btn, .footer-nav-link, .footer-ext-link, .footer-contact-link, .footer-monument-wrap"
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
@@ -2671,6 +2671,122 @@
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // 11. 08 — PREMIUM FOOTER / FINAL CTA ENGINE
+  // ---------------------------------------------------------------------------
+  function initFooterSection() {
+    const footerEl = document.getElementById("footer");
+    if (!footerEl) return;
+
+    const footerRevealLines = footerEl.querySelectorAll('[data-footer-reveal="line"]');
+    const footerRevealItems = footerEl.querySelectorAll('[data-footer-reveal="item"]');
+    const localTimeEl = document.getElementById("footer-local-time");
+    const yearEl = document.getElementById("footer-year");
+    const backTopBtn = document.getElementById("footer-back-top-btn");
+    const getInTouchBtn = document.getElementById("footer-get-in-touch-btn");
+
+    // 1. Dynamic Year
+    if (yearEl) {
+      yearEl.textContent = String(new Date().getFullYear());
+    }
+
+    // 2. Live Local Time in Pakistan (Asia/Karachi — UTC+5)
+    function updatePakistanLocalTime() {
+      if (!localTimeEl) return;
+      try {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Karachi",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true
+        });
+        localTimeEl.textContent = `${formatter.format(now)} GMT+5`;
+      } catch {
+        const now = new Date();
+        localTimeEl.textContent = now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
+    }
+
+    updatePakistanLocalTime();
+    window.setInterval(updatePakistanLocalTime, 1000);
+
+    // 3. Smooth Back-to-Top & Get-in-Touch Navigation
+    if (backTopBtn) {
+      backTopBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: prefersReducedMotion ? "auto" : "smooth"
+        });
+      });
+    }
+
+    if (getInTouchBtn) {
+      getInTouchBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        const contactSection = document.getElementById("contact");
+        const nameInput = document.getElementById("contact-name");
+        if (contactSection) {
+          contactSection.scrollIntoView({
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+            block: "start"
+          });
+        }
+        window.setTimeout(() => {
+          if (nameInput) nameInput.focus();
+        }, 480);
+      });
+    }
+
+    // 4. Scroll Reveal Choreography for Closing CTA & Footer Columns
+    if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+      footerRevealLines.forEach((line) => line.classList.add("is-inview"));
+      footerRevealItems.forEach((item) => item.classList.add("is-inview"));
+    } else {
+      const footerCtaWrap = footerEl.querySelector('[data-footer-reveal="cta"]');
+      if (footerCtaWrap) {
+        const ctaObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                footerRevealLines.forEach((line, idx) => {
+                  window.setTimeout(() => {
+                    line.classList.add("is-inview");
+                  }, idx * 115);
+                });
+                ctaObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2 }
+        );
+        ctaObserver.observe(footerCtaWrap);
+      }
+
+      const itemsObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-inview");
+              itemsObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.14 }
+      );
+
+      footerRevealItems.forEach((item, idx) => {
+        item.style.transitionDelay = `${idx * 65}ms`;
+        itemsObserver.observe(item);
+      });
+    }
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
@@ -2682,6 +2798,7 @@
       initJourneySection();
       initServicesSection();
       initContactSection();
+      initFooterSection();
     });
   } else {
     initPageLoadSequence();
@@ -2692,5 +2809,6 @@
     initJourneySection();
     initServicesSection();
     initContactSection();
+    initFooterSection();
   }
 })();
