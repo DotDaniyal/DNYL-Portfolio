@@ -290,7 +290,7 @@
 
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
-      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card"
+      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .journey-currently-card, .currently-action-btn, .service-card, .srv-stage-tab, .service-action-link"
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
@@ -1651,6 +1651,507 @@
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // 11. 05 — MY JOURNEY / EXPERIENCE & TIMELINE ENGINE
+  // ---------------------------------------------------------------------------
+  function initJourneySection() {
+    const journeySection = document.getElementById("experience");
+    if (!journeySection) return;
+
+    const headerRevealNodes = Array.from(
+      journeySection.querySelectorAll('[data-journey-reveal="header"]')
+    );
+    const milestoneItems = Array.from(
+      journeySection.querySelectorAll('.timeline-item[data-journey-reveal="milestone"]')
+    );
+    const currentlyWrap = journeySection.querySelector(
+      '[data-journey-reveal="currently"]'
+    );
+    const timelineContainer = document.getElementById("journey-timeline");
+    const timelineFill = document.getElementById("journey-timeline-fill");
+    const timelinePulse = document.getElementById("journey-timeline-pulse");
+    const timelineCards = Array.from(
+      journeySection.querySelectorAll(".timeline-card")
+    );
+    const currentlyCard = journeySection.querySelector(
+      ".journey-currently-card"
+    );
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+
+    // 1. Scroll Reveal Observers
+    if (prefersReducedMotion) {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      milestoneItems.forEach((el) => {
+        el.classList.add("is-inview", "is-active-node");
+      });
+      if (currentlyWrap) currentlyWrap.classList.add("is-inview");
+      if (timelineFill) timelineFill.style.height = "100%";
+      if (timelinePulse) timelinePulse.style.top = "100%";
+    } else if ("IntersectionObserver" in window) {
+      const headerObs = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-inview");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.18, rootMargin: "0px 0px -6% 0px" }
+      );
+      headerRevealNodes.forEach((el) => headerObs.observe(el));
+
+      const milestoneObs = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-inview");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
+      );
+      milestoneItems.forEach((el) => milestoneObs.observe(el));
+
+      if (currentlyWrap) {
+        const currentlyObs = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-inview");
+                obs.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.18, rootMargin: "0px 0px -5% 0px" }
+        );
+        currentlyObs.observe(currentlyWrap);
+      }
+
+      // Active navigation highlight for #experience (05 — Experience / Journey)
+      const journeyNavObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.classList.toggle(
+                  "is-active",
+                  link.getAttribute("href") === "#experience"
+                );
+              });
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+      journeyNavObs.observe(journeySection);
+    } else {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      milestoneItems.forEach((el) => {
+        el.classList.add("is-inview", "is-active-node");
+      });
+      if (currentlyWrap) currentlyWrap.classList.add("is-inview");
+    }
+
+    // 2. Scroll-Activated Timeline Spine Drawing & Node Illumination
+    if (timelineContainer && timelineFill && !prefersReducedMotion) {
+      let spineTicking = false;
+
+      function updateTimelineSpine() {
+        spineTicking = false;
+        const rect = timelineContainer.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        // Start drawing when timeline top enters 72% down the viewport
+        const triggerPoint = viewportHeight * 0.68;
+        const distanceScrolled = triggerPoint - rect.top;
+        const totalLength = Math.max(1, rect.height);
+        const progress = Math.max(
+          0,
+          Math.min(1, distanceScrolled / totalLength)
+        );
+        const percent = (progress * 100).toFixed(2);
+
+        timelineFill.style.height = `${percent}%`;
+        if (timelinePulse) {
+          timelinePulse.style.top = `${percent}%`;
+          timelinePulse.style.opacity =
+            progress > 0.01 && progress < 0.995 ? "1" : "0.35";
+        }
+
+        // Illuminate each milestone node when the scroll line reaches its vertical center
+        const fillBottomY = rect.top + totalLength * progress;
+        milestoneItems.forEach((item) => {
+          const nodeWrap = item.querySelector(".timeline-node-wrap");
+          if (!nodeWrap) return;
+          const nodeRect = nodeWrap.getBoundingClientRect();
+          const nodeCenterY = nodeRect.top + nodeRect.height * 0.35;
+          const isReached = fillBottomY >= nodeCenterY;
+          item.classList.toggle("is-active-node", isReached);
+        });
+      }
+
+      window.addEventListener(
+        "scroll",
+        () => {
+          if (!spineTicking) {
+            spineTicking = true;
+            requestAnimationFrame(updateTimelineSpine);
+          }
+        },
+        { passive: true }
+      );
+
+      window.addEventListener("resize", updateTimelineSpine, { passive: true });
+      updateTimelineSpine();
+    }
+
+    // 3. Cursor-Tracking Ambient Glow on Timeline & Currently Cards
+    if (isFinePointer && !prefersReducedMotion) {
+      timelineCards.forEach((card) => {
+        card.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty(
+              "--tl-mouse-x",
+              `${(event.clientX - rect.left).toFixed(1)}px`
+            );
+            card.style.setProperty(
+              "--tl-mouse-y",
+              `${(event.clientY - rect.top).toFixed(1)}px`
+            );
+          },
+          { passive: true }
+        );
+      });
+
+      if (currentlyCard) {
+        currentlyCard.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = currentlyCard.getBoundingClientRect();
+            currentlyCard.style.setProperty(
+              "--curr-mouse-x",
+              `${(event.clientX - rect.left).toFixed(1)}px`
+            );
+            currentlyCard.style.setProperty(
+              "--curr-mouse-y",
+              `${(event.clientY - rect.top).toFixed(1)}px`
+            );
+          },
+          { passive: true }
+        );
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 12. 06 — WHAT I DO / SERVICES & INTERACTIVE VISUAL STAGE ENGINE
+  // ---------------------------------------------------------------------------
+  const SERVICE_STAGE_META = {
+    "srv-web": {
+      num: "01 / 04",
+      label: "Full-Stack Web Development",
+      theme: "web"
+    },
+    "srv-android": {
+      num: "02 / 04",
+      label: "Native Android Mobile Apps",
+      theme: "android"
+    },
+    "srv-ai": {
+      num: "03 / 04",
+      label: "Google AI Studio & AI App Engineering",
+      theme: "ai"
+    },
+    "srv-uiux": {
+      num: "04 / 04",
+      label: "UI/UX Craft & Performance Audits",
+      theme: "uiux"
+    }
+  };
+
+  function initServicesSection() {
+    const servicesSection = document.getElementById("services");
+    if (!servicesSection) return;
+
+    const headerRevealNodes = Array.from(
+      servicesSection.querySelectorAll('[data-services-reveal="header"]')
+    );
+    const serviceCards = Array.from(
+      servicesSection.querySelectorAll('.service-card[data-services-reveal="card"]')
+    );
+    const visualCol = servicesSection.querySelector(
+      '[data-services-reveal="stage"]'
+    );
+    const visualStage = document.getElementById("services-visual-stage");
+    const ambientGlow = document.getElementById("services-ambient-glow");
+    const stageTabs = Array.from(
+      servicesSection.querySelectorAll(".srv-stage-tab[data-stage-target]")
+    );
+    const stagePanels = Array.from(
+      servicesSection.querySelectorAll(".srv-visual-panel[data-service-panel]")
+    );
+    const stageActiveNum = document.getElementById("srv-stage-active-num");
+    const stageActiveLabel = document.getElementById("srv-stage-active-label");
+    const filterTriggerLinks = Array.from(
+      servicesSection.querySelectorAll("[data-service-filter-trigger]")
+    );
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+
+    // 1. Scroll Reveal Choreography
+    if (prefersReducedMotion) {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      serviceCards.forEach((el) => el.classList.add("is-inview"));
+      if (visualCol) visualCol.classList.add("is-inview");
+    } else if ("IntersectionObserver" in window) {
+      const headerObs = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-inview");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.18, rootMargin: "0px 0px -6% 0px" }
+      );
+      headerRevealNodes.forEach((el) => headerObs.observe(el));
+
+      const cardObs = new IntersectionObserver(
+        (entries, obs) => {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .map((e) => e.target);
+          visible.forEach((card, idx) => {
+            card.style.transitionDelay = `${Math.min(idx * 85, 280)}ms`;
+            card.classList.add("is-inview");
+            window.setTimeout(() => {
+              card.style.transitionDelay = "0ms";
+            }, 850 + idx * 85);
+            obs.unobserve(card);
+          });
+        },
+        { threshold: 0.14, rootMargin: "0px 0px -5% 0px" }
+      );
+      serviceCards.forEach((el) => cardObs.observe(el));
+
+      if (visualCol) {
+        const stageObs = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-inview");
+                obs.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15, rootMargin: "0px 0px -5% 0px" }
+        );
+        stageObs.observe(visualCol);
+      }
+
+      // Active navigation highlight for #services
+      const servicesNavObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.classList.toggle(
+                  "is-active",
+                  link.getAttribute("href") === "#services"
+                );
+              });
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+      servicesNavObs.observe(servicesSection);
+    } else {
+      headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
+      serviceCards.forEach((el) => el.classList.add("is-inview"));
+      if (visualCol) visualCol.classList.add("is-inview");
+    }
+
+    // 2. Interactive Service Synchronization (Cards <-> Sticky Visual Stage)
+    let currentServiceId = "srv-web";
+
+    function activateService(serviceId) {
+      if (!serviceId || serviceId === currentServiceId) return;
+      currentServiceId = serviceId;
+
+      const meta = SERVICE_STAGE_META[serviceId] || SERVICE_STAGE_META["srv-web"];
+
+      serviceCards.forEach((card) => {
+        const isActive = card.getAttribute("data-service-id") === serviceId;
+        card.classList.toggle("is-active-service", isActive);
+      });
+
+      stageTabs.forEach((tab) => {
+        const isActive = tab.getAttribute("data-stage-target") === serviceId;
+        tab.classList.toggle("is-active", isActive);
+        tab.setAttribute("aria-selected", String(isActive));
+      });
+
+      stagePanels.forEach((panel) => {
+        const isActive =
+          panel.getAttribute("data-service-panel") === serviceId;
+        panel.classList.toggle("is-active", isActive);
+      });
+
+      if (visualStage) {
+        visualStage.setAttribute("data-active-service", serviceId);
+      }
+      if (ambientGlow) {
+        ambientGlow.setAttribute("data-active-theme", meta.theme);
+      }
+      if (stageActiveNum) {
+        stageActiveNum.textContent = meta.num;
+      }
+      if (stageActiveLabel) {
+        stageActiveLabel.textContent = meta.label;
+      }
+    }
+
+    serviceCards.forEach((card, idx) => {
+      const srvId = card.getAttribute("data-service-id");
+      card.addEventListener("mouseenter", () => {
+        if (srvId) activateService(srvId);
+      });
+      card.addEventListener("focus", () => {
+        if (srvId) activateService(srvId);
+      });
+      card.addEventListener("click", (event) => {
+        if (event.target.closest("a")) return;
+        if (srvId) activateService(srvId);
+      });
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          if (document.activeElement === card && srvId) {
+            event.preventDefault();
+            activateService(srvId);
+          }
+        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const dir = event.key === "ArrowDown" ? 1 : -1;
+          const nextIdx =
+            (idx + dir + serviceCards.length) % serviceCards.length;
+          serviceCards[nextIdx].focus();
+        }
+      });
+    });
+
+    stageTabs.forEach((tab, idx) => {
+      tab.addEventListener("click", () => {
+        const targetId = tab.getAttribute("data-stage-target");
+        if (targetId) activateService(targetId);
+      });
+
+      tab.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+          event.preventDefault();
+          const dir = event.key === "ArrowRight" ? 1 : -1;
+          const nextIdx = (idx + dir + stageTabs.length) % stageTabs.length;
+          stageTabs[nextIdx].focus();
+          stageTabs[nextIdx].click();
+        }
+      });
+    });
+
+    // Clicking "VIEW SERVICE WORK" activates the matching category filter in #projects
+    filterTriggerLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        const cat = link.getAttribute("data-service-filter-trigger");
+        if (!cat) return;
+        const projFilterBtn = document.querySelector(
+          `.project-filter-btn[data-project-filter="${cat}"]`
+        );
+        if (projFilterBtn) {
+          projFilterBtn.click();
+        }
+      });
+    });
+
+    // 3. Desktop Mouse Spotlight & Subtle 3D Tilt (Strictly clamped <= 3 deg)
+    if (isFinePointer && !prefersReducedMotion) {
+      const MAX_SRV_TILT = 2.8;
+
+      serviceCards.forEach((card) => {
+        let rafId = null;
+        let targetRotX = 0;
+        let targetRotY = 0;
+        let currRotX = 0;
+        let currRotY = 0;
+        let isHovered = false;
+
+        function animateCardTilt() {
+          currRotX += (targetRotX - currRotX) * 0.16;
+          currRotY += (targetRotY - currRotY) * 0.16;
+
+          card.style.transform = `translate3d(0, -3px, 0) perspective(1000px) rotateX(${currRotX.toFixed(
+            2
+          )}deg) rotateY(${currRotY.toFixed(2)}deg)`;
+
+          if (
+            isHovered ||
+            Math.abs(targetRotX - currRotX) > 0.02 ||
+            Math.abs(targetRotY - currRotY) > 0.02
+          ) {
+            rafId = requestAnimationFrame(animateCardTilt);
+          } else {
+            card.style.transform = "";
+            rafId = null;
+          }
+        }
+
+        card.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = card.getBoundingClientRect();
+            const mx = event.clientX - rect.left;
+            const my = event.clientY - rect.top;
+
+            card.style.setProperty("--srv-mouse-x", `${mx.toFixed(1)}px`);
+            card.style.setProperty("--srv-mouse-y", `${my.toFixed(1)}px`);
+
+            const relX = (mx - rect.width / 2) / (rect.width / 2);
+            const relY = (my - rect.height / 2) / (rect.height / 2);
+
+            targetRotY = Math.max(
+              -MAX_SRV_TILT,
+              Math.min(MAX_SRV_TILT, relX * MAX_SRV_TILT)
+            );
+            targetRotX = Math.max(
+              -MAX_SRV_TILT,
+              Math.min(MAX_SRV_TILT, -relY * MAX_SRV_TILT)
+            );
+
+            if (!isHovered) {
+              isHovered = true;
+              if (!rafId) rafId = requestAnimationFrame(animateCardTilt);
+            }
+          },
+          { passive: true }
+        );
+
+        card.addEventListener("mouseleave", () => {
+          isHovered = false;
+          targetRotX = 0;
+          targetRotY = 0;
+          currRotX = 0;
+          currRotY = 0;
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+          card.style.transform = "";
+        });
+      });
+    }
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
@@ -1659,6 +2160,8 @@
       initAboutScrollAnimations();
       initSkillsSection();
       initProjectsSection();
+      initJourneySection();
+      initServicesSection();
     });
   } else {
     initPageLoadSequence();
@@ -1666,5 +2169,7 @@
     initAboutScrollAnimations();
     initSkillsSection();
     initProjectsSection();
+    initJourneySection();
+    initServicesSection();
   }
 })();
