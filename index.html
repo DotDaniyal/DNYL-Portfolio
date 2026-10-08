@@ -343,13 +343,310 @@
           class="scroll-indicator"
           id="scroll-indicator"
           data-animate="scroll"
-          aria-label="Scroll to explore upcoming sections"
+          aria-label="Scroll to explore About Me section"
         >
           <span class="scroll-label">SCROLL TO EXPLORE</span>
           <span class="scroll-line-track" aria-hidden="true">
             <span class="scroll-line-runner"></span>
           </span>
         </a>
+      </section>
+
+      <!-- Seamless Cinematic Transition Bridge (Hero -> About) -->
+      <div class="section-transition-bridge" aria-hidden="true">
+        <div class="bridge-line"></div>
+        <div class="bridge-glow"></div>
+      </div>
+
+      <!-- ====================================================================
+           01 — ABOUT ME SECTION (REAL PORTFOLIO DATA ONLY)
+           ==================================================================== -->
+      <section class="about-section" id="about" aria-labelledby="about-heading">
+        <!-- Subtle Section Ambient Glow -->
+        <div class="about-ambient-glow" id="about-ambient-glow" aria-hidden="true"></div>
+
+        <div class="about-container">
+          <!-- Section Header: 01 — ABOUT ME + Monumental Line-by-Line Heading -->
+          <header class="about-header">
+            <div class="about-eyebrow" data-scroll-reveal="eyebrow">
+              <span class="about-section-num">01</span>
+              <span class="about-section-Rule" aria-hidden="true"></span>
+              <span class="about-section-label">ABOUT ME</span>
+              <span class="about-section-sep" aria-hidden="true">·</span>
+              <span class="about-section-sub">Engineering Philosophy</span>
+            </div>
+
+            <h2 class="about-heading" id="about-heading">
+              <span class="about-reveal-mask">
+                <span class="about-reveal-line" data-scroll-reveal="heading-1">
+                  ARCHITECTING RESILIENT
+                </span>
+              </span>
+              <span class="about-reveal-mask">
+                <span class="about-reveal-line" data-scroll-reveal="heading-2">
+                  &amp; <span class="about-heading-accent">SCALABLE SOFTWARE.</span>
+                </span>
+              </span>
+            </h2>
+          </header>
+
+          <!-- Main Two-Column Content: LEFT Visual | RIGHT Introduction, Info Grid & Stats -->
+          <div class="about-grid">
+            <!-- LEFT COLUMN: Large Animated Profile / About Visual -->
+            <div class="about-visual-col">
+              <div class="about-visual-stage" id="about-visual-stage">
+                <!-- Fine Decorative Architectural Lines -->
+                <div class="about-deco-lines" aria-hidden="true">
+                  <span class="deco-line deco-line--top"></span>
+                  <span class="deco-line deco-line--left"></span>
+                  <span class="deco-corner deco-corner--tl"></span>
+                  <span class="deco-corner deco-corner--br"></span>
+                  <span class="deco-coord">SYS // 01 · DANIYAL.HAYAT</span>
+                </div>
+
+                <!-- Soft Ambient Gradient Lighting Behind Frame -->
+                <div class="about-visual-glow" aria-hidden="true"></div>
+
+                <!-- Parallax & Clip-Path Masked Glass Frame -->
+                <div
+                  class="about-image-rig"
+                  id="about-image-rig"
+                  data-scroll-reveal="visual"
+                  data-scroll-parallax="-0.08"
+                >
+                  <figure class="about-glass-frame" id="about-glass-frame">
+                    <div class="about-frame-border-light" aria-hidden="true"></div>
+
+                    <div class="about-image-inner">
+                      <!-- Fallback Layer -->
+                      <div class="profile-fallback" aria-hidden="true">
+                        <span class="fallback-initials">DH</span>
+                        <span class="fallback-caption">Daniyal Hayat</span>
+                      </div>
+
+                      <img
+                        src="assets/images/profile.jpg"
+                        alt="Daniyal Hayat — Software Engineer and Creative Builder"
+                        class="about-image"
+                        id="about-image"
+                        width="800"
+                        height="1000"
+                        loading="lazy"
+                        decoding="async"
+                        referrerpolicy="no-referrer"
+                      />
+
+                      <!-- Subtle Gradient Lighting & Contrast Scrim -->
+                      <div class="about-image-lighting" aria-hidden="true"></div>
+                      <div class="about-image-scrim" aria-hidden="true"></div>
+
+                      <!-- Editorial Frame Footer -->
+                      <figcaption class="about-frame-caption">
+                        <div class="about-frame-caption-top">
+                          <span class="about-frame-status-dot" aria-hidden="true"></span>
+                          <span class="about-frame-tag">PRODUCTION DISCIPLINE</span>
+                        </div>
+                        <p class="about-frame-quote">
+                          “Every pixel and API request treated with deliberate intent.”
+                        </p>
+                      </figcaption>
+                    </div>
+                  </figure>
+                </div>
+
+                <!-- Small Floating UI Elements (Real Portfolio Milestones & Principles) -->
+                <div
+                  class="about-float-card about-float-card--top"
+                  data-scroll-reveal="float-1"
+                  data-scroll-parallax="0.12"
+                >
+                  <span class="about-float-index">2023 — 2026</span>
+                  <div class="about-float-text">
+                    <span class="about-float-title">CONTINUOUS EVOLUTION</span>
+                    <span class="about-float-sub">Web · Native Android · AI</span>
+                  </div>
+                </div>
+
+                <div
+                  class="about-float-card about-float-card--bottom"
+                  data-scroll-reveal="float-2"
+                  data-scroll-parallax="-0.14"
+                >
+                  <span class="about-float-index">VERIFIED</span>
+                  <div class="about-float-text">
+                    <span class="about-float-title">CROSS-PLATFORM DEPTH</span>
+                    <span class="about-float-sub">React &amp; TypeScript · Kotlin</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Real Introduction, Personal Info Grid & Real Statistics -->
+            <div class="about-narrative-col">
+              <!-- Engineering Philosophy Blockquote -->
+              <blockquote class="about-philosophy" data-scroll-reveal="text-1">
+                <p>
+                  “Great software is where
+                  <span class="about-word-highlight">mathematical precision</span>
+                  meets
+                  <span class="about-word-highlight">intuitive craftsmanship</span>.
+                  If it doesn’t feel instant, effortless, and accessible, the work isn’t done.”
+                </p>
+              </blockquote>
+
+              <!-- Short Readable Paragraphs from Real Portfolio -->
+              <div class="about-prose">
+                <p class="about-paragraph" data-scroll-reveal="text-2">
+                  My engineering journey began with a passion for understanding how
+                  <span class="about-word-highlight">interactive digital systems</span>
+                  behave under the hood. Over time, that curiosity crystallized into a disciplined practice of shipping
+                  <span class="about-word-highlight">production-grade web platforms</span>
+                  and native Android mobile applications in
+                  <span class="about-word-highlight">Kotlin</span>.
+                </p>
+
+                <p class="about-paragraph" data-scroll-reveal="text-3">
+                  I build digital products that prioritize real user utility,
+                  <span class="about-word-highlight">zero bloat</span>, and rock-solid code maintainability. I have architected full-lifecycle platforms including
+                  <strong class="about-strong">Darul Ifta Irshad us Saileen</strong>—evolving it from a community guidance initiative into a responsive production web platform and native Android app with
+                  <span class="about-word-highlight">offline caching</span>.
+                </p>
+
+                <p class="about-paragraph" data-scroll-reveal="text-4">
+                  In the generative AI space, I designed and engineered
+                  <strong class="about-strong">CortexIQ by DNYL</strong>, pairing real-time
+                  <span class="about-word-highlight">Google Gemini AI</span>
+                  inference with a reactive, type-safe
+                  <span class="about-word-highlight">TypeScript &amp; React</span>
+                  architecture.
+                </p>
+              </div>
+
+              <!-- Minimal Personal Information Grid (Strictly Real Portfolio Data) -->
+              <div class="about-info-grid" aria-label="Personal and Professional Information">
+                <!-- Card 1: Name -->
+                <div class="about-info-card" data-scroll-reveal="card-1">
+                  <div class="info-card-header">
+                    <span class="info-card-label">NAME</span>
+                    <svg class="info-card-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <p class="info-card-value">Daniyal Hayat</p>
+                </div>
+
+                <!-- Card 2: Role -->
+                <div class="about-info-card" data-scroll-reveal="card-2">
+                  <div class="info-card-header">
+                    <span class="info-card-label">ROLE</span>
+                    <svg class="info-card-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="16 18 22 12 16 6" />
+                      <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                  </div>
+                  <p class="info-card-value">Full-Stack Developer &amp; Creative Builder</p>
+                </div>
+
+                <!-- Card 3: Specialization -->
+                <div class="about-info-card" data-scroll-reveal="card-3">
+                  <div class="info-card-header">
+                    <span class="info-card-label">SPECIALIZATION</span>
+                    <svg class="info-card-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="4" y="4" width="16" height="16" rx="2" />
+                      <rect x="9" y="9" width="6" height="6" />
+                      <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
+                    </svg>
+                  </div>
+                  <p class="info-card-value">Web · Native Android · Gemini AI</p>
+                </div>
+
+                <!-- Card 4: Availability / Location Mode -->
+                <div class="about-info-card" data-scroll-reveal="card-4">
+                  <div class="info-card-header">
+                    <span class="info-card-label">AVAILABILITY</span>
+                    <svg class="info-card-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  </div>
+                  <p class="info-card-value">Available Globally &amp; Remote</p>
+                </div>
+
+                <!-- Card 5: GitHub -->
+                <a
+                  href="https://github.com/DotDaniyal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="about-info-card about-info-card--interactive"
+                  data-scroll-reveal="card-5"
+                  data-cursor-text="GITHUB"
+                >
+                  <div class="info-card-header">
+                    <span class="info-card-label">GITHUB</span>
+                    <svg class="info-card-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M7 17L17 7" />
+                      <path d="M7 7h10v10" />
+                    </svg>
+                  </div>
+                  <p class="info-card-value">github.com/DotDaniyal</p>
+                </a>
+
+                <!-- Card 6: Email -->
+                <a
+                  href="mailto:mdaniyalhayyat@gmail.com"
+                  class="about-info-card about-info-card--interactive"
+                  data-scroll-reveal="card-6"
+                  data-cursor-text="EMAIL"
+                >
+                  <div class="info-card-header">
+                    <span class="info-card-label">EMAIL</span>
+                    <svg class="info-card-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                  </div>
+                  <p class="info-card-value">mdaniyalhayyat@gmail.com</p>
+                </a>
+              </div>
+
+              <!-- Real Portfolio Statistics (Count-Up on Viewport Entry) -->
+              <div class="about-stats-bar" data-scroll-reveal="stats" aria-label="Verified Portfolio Metrics">
+                <div class="about-stat-item">
+                  <div class="about-stat-number-wrap">
+                    <span class="about-stat-number" data-count-to="7">0</span>
+                    <span class="about-stat-suffix">+</span>
+                  </div>
+                  <span class="about-stat-label">PUBLIC REPOSITORIES</span>
+                </div>
+
+                <div class="about-stat-item">
+                  <div class="about-stat-number-wrap">
+                    <span class="about-stat-number" data-count-to="15">0</span>
+                  </div>
+                  <span class="about-stat-label">CORE TECHNOLOGIES</span>
+                </div>
+
+                <div class="about-stat-item">
+                  <div class="about-stat-number-wrap">
+                    <span class="about-stat-number" data-count-to="3">0</span>
+                    <span class="about-stat-suffix">+</span>
+                  </div>
+                  <span class="about-stat-label">LIVE WEB PLATFORMS</span>
+                </div>
+
+                <div class="about-stat-item">
+                  <div class="about-stat-number-wrap">
+                    <span class="about-stat-number" data-count-to="100">0</span>
+                    <span class="about-stat-suffix">%</span>
+                  </div>
+                  <span class="about-stat-label">OPEN-SOURCE COMMITMENT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
 

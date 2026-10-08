@@ -26,6 +26,12 @@
   const profileTiltRig = document.getElementById("profile-tilt-rig");
   const profileFrame = document.getElementById("profile-frame");
   const profileImage = document.getElementById("profile-image");
+  const aboutImage = document.getElementById("about-image");
+  const aboutVisualStage = document.getElementById("about-visual-stage");
+  const aboutGlassFrame = document.getElementById("about-glass-frame");
+  const heroSectionEl = document.getElementById("hero");
+  const heroContentEl = document.querySelector(".hero-content");
+  const heroVisualColEl = document.querySelector(".hero-visual-column");
   const specialtyRotator = document.getElementById("specialty-rotator");
   const copyEmailBtn = document.getElementById("btn-copy-email");
   const copyEmailLabel = document.getElementById("copy-email-label");
@@ -61,11 +67,13 @@
   // ---------------------------------------------------------------------------
   // 2. RESILIENT PROFILE IMAGE FALLBACK HANDLER
   // ---------------------------------------------------------------------------
-  if (profileImage) {
-    profileImage.addEventListener("error", () => {
-      profileImage.style.opacity = "0";
-    });
-  }
+  [profileImage, aboutImage].forEach((imgEl) => {
+    if (imgEl) {
+      imgEl.addEventListener("error", () => {
+        imgEl.style.opacity = "0";
+      });
+    }
+  });
 
   // ---------------------------------------------------------------------------
   // 3. REAL SPECIALTY ROTATOR (From Daniyal Hayat's Existing Portfolio)
@@ -282,7 +290,7 @@
 
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
-      "a, button, .floating-node, .profile-frame"
+      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame"
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
@@ -456,14 +464,204 @@
     requestAnimationFrame(drawParticles);
   }
 
+  // ---------------------------------------------------------------------------
+  // 8. ABOUT SECTION SCROLL REVEALS, COUNT-UP STATS & SEAMLESS PARALLAX
+  // ---------------------------------------------------------------------------
+  function animateStatCounter(el) {
+    if (!el || el.getAttribute("data-counted") === "true") return;
+    el.setAttribute("data-counted", "true");
+
+    const target = parseInt(el.getAttribute("data-count-to") || "0", 10);
+    if (prefersReducedMotion || target <= 0) {
+      el.textContent = String(target);
+      return;
+    }
+
+    const duration = 1500;
+    const startTime = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      // Smooth easeOutQuart curve (no bounce)
+      const eased = 1 - Math.pow(1 - progress, 4);
+      const currentVal = Math.round(eased * target);
+      el.textContent = String(currentVal);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = String(target);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  function initAboutScrollAnimations() {
+    const revealNodes = Array.from(
+      document.querySelectorAll("[data-scroll-reveal]")
+    );
+    const statNumbers = Array.from(
+      document.querySelectorAll(".about-stat-number[data-count-to]")
+    );
+    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+    const aboutSection = document.getElementById("about");
+
+    if (prefersReducedMotion) {
+      revealNodes.forEach((el) => el.classList.add("is-inview"));
+      statNumbers.forEach((el) => {
+        el.textContent = el.getAttribute("data-count-to") || "0";
+      });
+      return;
+    }
+
+    if ("IntersectionObserver" in window) {
+      const revealObserver = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const target = entry.target;
+              target.classList.add("is-inview");
+
+              if (target.getAttribute("data-scroll-reveal") === "stats") {
+                statNumbers.forEach((numEl) => animateStatCounter(numEl));
+              }
+
+              obs.unobserve(target);
+            }
+          });
+        },
+        {
+          threshold: 0.16,
+          rootMargin: "0px 0px -6% 0px"
+        }
+      );
+
+      revealNodes.forEach((el) => revealObserver.observe(el));
+
+      // Active navigation link state on scroll
+      if (aboutSection) {
+        const navObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              navLinks.forEach((link) => {
+                if (link.getAttribute("href") === "#about") {
+                  link.classList.toggle("is-active", entry.isIntersecting);
+                }
+              });
+            });
+          },
+          { threshold: 0.28 }
+        );
+        navObserver.observe(aboutSection);
+      }
+    } else {
+      revealNodes.forEach((el) => el.classList.add("is-inview"));
+      statNumbers.forEach((numEl) => animateStatCounter(numEl));
+    }
+
+    // Seamless Hero -> About Scroll Transition & Parallax via requestAnimationFrame
+    const parallaxElements = Array.from(
+      document.querySelectorAll("[data-scroll-parallax]")
+    );
+
+    let currentScrollY = window.scrollY;
+    let smoothScrollY = currentScrollY;
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        currentScrollY = window.scrollY;
+      },
+      { passive: true }
+    );
+
+    // Subtle 3D tilt on About Visual Frame (Desktop only, max 4 deg)
+    let aboutTargetRotX = 0;
+    let aboutTargetRotY = 0;
+    let aboutCurrRotX = 0;
+    let aboutCurrRotY = 0;
+
+    if (isFinePointer && aboutVisualStage && aboutGlassFrame) {
+      aboutVisualStage.addEventListener(
+        "mousemove",
+        (event) => {
+          const rect = aboutVisualStage.getBoundingClientRect();
+          const relX = (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+          const relY = (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+          const maxDeg = 4;
+          aboutTargetRotY = Math.max(-maxDeg, Math.min(maxDeg, relX * maxDeg));
+          aboutTargetRotX = Math.max(-maxDeg, Math.min(maxDeg, -relY * maxDeg));
+        },
+        { passive: true }
+      );
+
+      aboutVisualStage.addEventListener("mouseleave", () => {
+        aboutTargetRotX = 0;
+        aboutTargetRotY = 0;
+      });
+    }
+
+    function updateScrollParallaxLoop() {
+      smoothScrollY += (currentScrollY - smoothScrollY) * 0.1;
+      const vh = window.innerHeight || 800;
+
+      // 1. Subtle Hero recession as user scrolls toward About
+      if (heroSectionEl && smoothScrollY < vh * 1.2) {
+        const progress = Math.min(1, Math.max(0, smoothScrollY / vh));
+        const translateTextY = progress * -34;
+        const translateVisualY = progress * -20;
+        const heroOpacity = Math.max(0.18, 1 - progress * 0.72);
+
+        if (heroContentEl) {
+          heroContentEl.style.transform = `translate3d(0, ${translateTextY.toFixed(
+            2
+          )}px, 0)`;
+          heroContentEl.style.opacity = heroOpacity.toFixed(3);
+        }
+        if (heroVisualColEl) {
+          heroVisualColEl.style.transform = `translate3d(0, ${translateVisualY.toFixed(
+            2
+          )}px, 0)`;
+        }
+      }
+
+      // 2. About Visual & Floating Milestone Cards Parallax
+      parallaxElements.forEach((el) => {
+        if (!el.classList.contains("is-inview")) return;
+        const rect = el.getBoundingClientRect();
+        const centerOffset = rect.top + rect.height / 2 - vh / 2;
+        const speed = parseFloat(el.getAttribute("data-scroll-parallax") || "0");
+        const yOffset = Math.max(-28, Math.min(28, centerOffset * speed));
+        el.style.transform = `translate3d(0, ${yOffset.toFixed(2)}px, 0)`;
+      });
+
+      // 3. Smooth 3D tilt on About Glass Frame
+      if (isFinePointer && aboutGlassFrame) {
+        aboutCurrRotX += (aboutTargetRotX - aboutCurrRotX) * 0.1;
+        aboutCurrRotY += (aboutTargetRotY - aboutCurrRotY) * 0.1;
+        aboutGlassFrame.style.transform = `rotateX(${aboutCurrRotX.toFixed(
+          2
+        )}deg) rotateY(${aboutCurrRotY.toFixed(2)}deg)`;
+      }
+
+      requestAnimationFrame(updateScrollParallaxLoop);
+    }
+
+    requestAnimationFrame(updateScrollParallaxLoop);
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       initPageLoadSequence();
       initParticlesCanvas();
+      initAboutScrollAnimations();
     });
   } else {
     initPageLoadSequence();
     initParticlesCanvas();
+    initAboutScrollAnimations();
   }
 })();
