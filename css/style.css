@@ -8861,11 +8861,20 @@ html[data-theme="light"] .intro-curtain {
   color: #f5f5f0;
 }
 
+.intro-dnyl-mask,
+.intro-title-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
 .intro-dnyl-glyph,
 .intro-dnyl-dot {
   display: inline-block;
   opacity: 0;
-  transform: translate3d(0, 105%, 0);
+  transform: translate3d(0, 110%, 0);
   filter: blur(4px);
   will-change: transform, opacity, filter;
   transition: transform 0.58s var(--ease-cinematic),
@@ -8947,15 +8956,19 @@ html[data-theme="light"] .intro-curtain {
   font-weight: 600;
   letter-spacing: 0.24em;
   color: rgba(226, 194, 144, 0.88);
+}
+
+.intro-kicker-inner {
+  display: inline-block;
   opacity: 0;
-  transform: translate3d(0, 10px, 0);
+  transform: translate3d(0, 108%, 0);
   will-change: transform, opacity;
   transition: opacity 0.55s var(--ease-cinematic),
     transform 0.55s var(--ease-cinematic);
 }
 
-.dnyl-intro.scene-name .intro-name-kicker,
-.dnyl-intro.scene-identity .intro-name-kicker {
+.dnyl-intro.scene-name .intro-kicker-inner,
+.dnyl-intro.scene-identity .intro-kicker-inner {
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
@@ -9049,23 +9062,13 @@ html[data-theme="light"] .intro-curtain {
   transform: translate3d(360%, 0, 0) skewX(-22deg);
 }
 
-/* Scene 4 — The Professional Identity (Real Portfolio Title) */
+/* Scene 4 — The Professional Identity (Real Portfolio Title — Masked Typography) */
 .intro-identity-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.55rem;
-  max-width: 720px;
-  opacity: 0;
-  transform: translate3d(0, 16px, 0);
-  will-change: transform, opacity;
-  transition: opacity 0.62s var(--ease-cinematic),
-    transform 0.62s var(--ease-cinematic);
-}
-
-.dnyl-intro.scene-identity .intro-identity-stage {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
+  max-width: 760px;
 }
 
 .intro-identity-row {
@@ -9077,20 +9080,36 @@ html[data-theme="light"] .intro-curtain {
 }
 
 .intro-identity-label {
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   color: #38bdf8;
+  opacity: 0;
+  transform: translate3d(0, 108%, 0);
+  will-change: transform, opacity;
+  transition: opacity 0.55s var(--ease-cinematic),
+    transform 0.55s var(--ease-cinematic);
 }
 
 .intro-identity-sep {
   width: 26px;
   height: 1px;
   background: linear-gradient(90deg, #38bdf8, #e2c290);
+  transform: scaleX(0);
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: transform 0.55s var(--ease-cinematic),
+    opacity 0.55s var(--ease-cinematic);
 }
 
 .intro-identity-title {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.32em;
   font-family: var(--font-display);
   font-size: clamp(1rem, 2vw, 1.38rem);
   font-weight: 700;
@@ -9098,11 +9117,48 @@ html[data-theme="light"] .intro-curtain {
   color: #f5f5f0;
 }
 
+.intro-title-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 112%, 0);
+  filter: blur(3px);
+  will-change: transform, opacity, filter;
+  transition: transform 0.6s var(--ease-cinematic),
+    opacity 0.6s var(--ease-cinematic),
+    filter 0.55s var(--ease-cinematic);
+}
+
+.intro-title-word--amp {
+  color: #e2c290;
+}
+
 .intro-identity-domains {
   font-family: var(--font-mono);
   font-size: clamp(0.68rem, 1.1vw, 0.78rem);
   letter-spacing: 0.08em;
   color: #a6adbb;
+}
+
+.intro-domains-inner {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 108%, 0);
+  will-change: transform, opacity;
+  transition: opacity 0.58s var(--ease-cinematic) 0.1s,
+    transform 0.58s var(--ease-cinematic) 0.1s;
+}
+
+.dnyl-intro.scene-identity .intro-identity-label,
+.dnyl-intro.scene-identity .intro-title-word,
+.dnyl-intro.scene-identity .intro-domains-inner {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0px);
+}
+
+.dnyl-intro.scene-identity .intro-identity-sep {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
 .intro-identity-underline {
@@ -9123,6 +9179,33 @@ html[data-theme="light"] .intro-curtain {
 
 .dnyl-intro.scene-identity .intro-identity-underline {
   transform: scaleX(1);
+}
+
+/* When GSAP drives the 3s intro timeline, disable CSS transitions on GSAP-tweened child nodes to guarantee 60fps zero-conflict choreography */
+.dnyl-intro.gsap-intro-active .intro-curtain,
+.dnyl-intro.gsap-intro-active .intro-void-layer,
+.dnyl-intro.gsap-intro-active .intro-void-radial,
+.dnyl-intro.gsap-intro-active .intro-void-beam,
+.dnyl-intro.gsap-intro-active .intro-geo-line,
+.dnyl-intro.gsap-intro-active .intro-geo-corner,
+.dnyl-intro.gsap-intro-active .intro-geo-coord,
+.dnyl-intro.gsap-intro-active .intro-bg-monolith,
+.dnyl-intro.gsap-intro-active .intro-stage,
+.dnyl-intro.gsap-intro-active .intro-horizon-line,
+.dnyl-intro.gsap-intro-active .intro-svg-frame-path,
+.dnyl-intro.gsap-intro-active .intro-svg-accent-path,
+.dnyl-intro.gsap-intro-active .intro-dnyl-glyph,
+.dnyl-intro.gsap-intro-active .intro-dnyl-dot,
+.dnyl-intro.gsap-intro-active .intro-signature-sweep,
+.dnyl-intro.gsap-intro-active .intro-kicker-inner,
+.dnyl-intro.gsap-intro-active .intro-char,
+.dnyl-intro.gsap-intro-active .intro-name-light-sweep,
+.dnyl-intro.gsap-intro-active .intro-identity-label,
+.dnyl-intro.gsap-intro-active .intro-identity-sep,
+.dnyl-intro.gsap-intro-active .intro-title-word,
+.dnyl-intro.gsap-intro-active .intro-domains-inner,
+.dnyl-intro.gsap-intro-active .intro-identity-underline {
+  transition: none !important;
 }
 
 /* Accessible Skip Intro Control */

@@ -176,13 +176,13 @@
               />
             </svg>
 
-            <!-- DNYL Signature Glyphs + Moving Light Sweep -->
+            <!-- DNYL Signature Glyphs + Moving Light Sweep (Masked Typography) -->
             <div class="intro-dnyl-letters" aria-hidden="true">
-              <span class="intro-dnyl-glyph" data-dnyl-glyph="0">D</span>
-              <span class="intro-dnyl-glyph" data-dnyl-glyph="1">N</span>
-              <span class="intro-dnyl-glyph" data-dnyl-glyph="2">Y</span>
-              <span class="intro-dnyl-glyph" data-dnyl-glyph="3">L</span>
-              <span class="intro-dnyl-dot" aria-hidden="true">.</span>
+              <span class="intro-dnyl-mask"><span class="intro-dnyl-glyph" data-dnyl-glyph="0">D</span></span>
+              <span class="intro-dnyl-mask"><span class="intro-dnyl-glyph" data-dnyl-glyph="1">N</span></span>
+              <span class="intro-dnyl-mask"><span class="intro-dnyl-glyph" data-dnyl-glyph="2">Y</span></span>
+              <span class="intro-dnyl-mask"><span class="intro-dnyl-glyph" data-dnyl-glyph="3">L</span></span>
+              <span class="intro-dnyl-mask"><span class="intro-dnyl-dot" aria-hidden="true">.</span></span>
               <span class="intro-signature-sweep" id="intro-signature-sweep"></span>
             </div>
           </div>
@@ -191,9 +191,7 @@
         <!-- Scene 3: The Name Reveal (DANIYAL HAYAT — Visual Centerpiece) -->
         <div class="intro-name-stage" id="intro-name-stage">
           <p class="intro-name-kicker" id="intro-name-kicker">
-            <span>PORTFOLIO EXPERIENCE</span>
-            <span class="intro-kicker-dot" aria-hidden="true">·</span>
-            <span>EDITION 2026</span>
+            <span class="intro-title-mask"><span class="intro-kicker-inner">PORTFOLIO EXPERIENCE · EDITION 2026</span></span>
           </p>
 
           <div
@@ -214,15 +212,31 @@
           </div>
         </div>
 
-        <!-- Scene 4: The Professional Identity (100% Real Portfolio Title) -->
+        <!-- Scene 4: The Professional Identity (100% Real Portfolio Title — Masked Typography) -->
         <div class="intro-identity-stage" id="intro-identity-stage">
           <div class="intro-identity-row">
-            <span class="intro-identity-label">ARCHITECTURE &amp; ENGINEERING</span>
-            <span class="intro-identity-sep" aria-hidden="true"></span>
-            <span class="intro-identity-title">Full-Stack Developer &amp; Creative Builder</span>
+            <span class="intro-title-mask">
+              <span class="intro-identity-label" id="intro-identity-label">ARCHITECTURE &amp; ENGINEERING</span>
+            </span>
+            <span class="intro-identity-sep" id="intro-identity-sep" aria-hidden="true"></span>
+            <span
+              class="intro-identity-title"
+              id="intro-identity-title"
+              aria-label="Full-Stack Developer & Creative Builder"
+            >
+              <span class="intro-title-mask"><span class="intro-title-word">Full-Stack</span></span>
+              <span class="intro-title-mask"><span class="intro-title-word">Developer</span></span>
+              <span class="intro-title-mask"><span class="intro-title-word intro-title-word--amp">&amp;</span></span>
+              <span class="intro-title-mask"><span class="intro-title-word">Creative</span></span>
+              <span class="intro-title-mask"><span class="intro-title-word">Builder</span></span>
+            </span>
           </div>
-          <p class="intro-identity-domains">
-            React &amp; TypeScript <span aria-hidden="true">·</span> Native Kotlin Android <span aria-hidden="true">·</span> Google Gemini AI
+          <p class="intro-identity-domains" id="intro-identity-domains">
+            <span class="intro-title-mask">
+              <span class="intro-domains-inner">
+                React &amp; TypeScript <span aria-hidden="true">·</span> Native Kotlin Android <span aria-hidden="true">·</span> Google Gemini AI
+              </span>
+            </span>
           </p>
           <div class="intro-identity-underline" id="intro-identity-underline" aria-hidden="true"></div>
         </div>
