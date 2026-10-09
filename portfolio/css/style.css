@@ -9743,10 +9743,15 @@ html[data-theme="light"] .cmd-palette-close {
 
 @media (prefers-reduced-motion: reduce) {
   .dnyl-intro:not(.is-complete):not(.is-removed) .intro-void-radial,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-bg-monolith {
+    opacity: 1 !important;
+    transform: translate3d(-50%, -50%, 0) scale(1) !important;
+    filter: none !important;
+  }
+
   .dnyl-intro:not(.is-complete):not(.is-removed) .intro-geo-line,
   .dnyl-intro:not(.is-complete):not(.is-removed) .intro-geo-corner,
   .dnyl-intro:not(.is-complete):not(.is-removed) .intro-geo-coord,
-  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-bg-monolith,
   .dnyl-intro:not(.is-complete):not(.is-removed) .intro-horizon-line,
   .dnyl-intro:not(.is-complete):not(.is-removed) .intro-dnyl-glyph,
   .dnyl-intro:not(.is-complete):not(.is-removed) .intro-dnyl-dot,
