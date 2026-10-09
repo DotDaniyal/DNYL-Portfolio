@@ -82,6 +82,8 @@
         ]
       }
     </script>
+    <script src="js/vendor/gsap.min.js" defer></script>
+    <script src="js/vendor/ScrollTrigger.min.js" defer></script>
     <script src="js/script.js" defer></script>
   </head>
   <body class="is-loading">
@@ -92,6 +94,152 @@
     <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
     <div class="cursor-ring" id="cursor-ring" aria-hidden="true">
       <span class="cursor-label" id="cursor-label"></span>
+    </div>
+
+    <!-- =======================================================================
+         00 — CINEMATIC INTRO SEQUENCE: "ENTER THE WORLD OF DNYL"
+         5 Connected Scenes:
+         Scene 1: The Void (Radial Atmosphere, Film Grain, Geometric Axes, Light Beam)
+         Scene 2: The Signature (Custom SVG & Typographic DNYL Mark + Light Sweep)
+         Scene 3: The Name Reveal (DANIYAL HAYAT Monumental Character Stagger)
+         Scene 4: The Professional Identity (Full-Stack Developer & Creative Builder)
+         Scene 5: The Cinematic Transition (Synchronized Curtain & Perspective Reveal)
+         ======================================================================= -->
+    <div
+      class="dnyl-intro"
+      id="dnyl-cinematic-intro"
+      role="region"
+      aria-label="Opening Intro Sequence — Daniyal Hayat Portfolio"
+    >
+      <!-- Scene 5 Split Curtain Panels (GPU-Composited scaleY / translate3d) -->
+      <div class="intro-curtain intro-curtain--top" id="intro-curtain-top" aria-hidden="true"></div>
+      <div class="intro-curtain intro-curtain--bottom" id="intro-curtain-bottom" aria-hidden="true"></div>
+
+      <!-- Scene 1: The Void Atmosphere -->
+      <div class="intro-void-layer" id="intro-void-layer" aria-hidden="true">
+        <div class="intro-void-radial"></div>
+        <div class="intro-void-beam"></div>
+        <div class="intro-void-grain"></div>
+
+        <!-- Thin Architectural Geometric Lines & Telemetry Coordinates -->
+        <div class="intro-geo-axes">
+          <span class="intro-geo-line intro-geo-line--h"></span>
+          <span class="intro-geo-line intro-geo-line--v"></span>
+          <span class="intro-geo-corner intro-geo-corner--tl"></span>
+          <span class="intro-geo-corner intro-geo-corner--tr"></span>
+          <span class="intro-geo-corner intro-geo-corner--bl"></span>
+          <span class="intro-geo-corner intro-geo-corner--br"></span>
+          <span class="intro-geo-coord intro-geo-coord--tl">SYS // DNYL.WORLD · 001</span>
+          <span class="intro-geo-coord intro-geo-coord--br" id="intro-progress-readout">SEQ // 01 — INITIALIZING</span>
+        </div>
+
+        <!-- Faint Oversized Background Typography (Spatial Depth Layer) -->
+        <div class="intro-bg-monolith" id="intro-bg-monolith">DNYL</div>
+      </div>
+
+      <!-- Central Stage (Perspective Depth Rig) -->
+      <div class="intro-stage" id="intro-stage">
+        <!-- Scene 2: The Signature (Custom DNYL SVG + Typographic Brand Mark) -->
+        <div class="intro-signature-wrap" id="intro-signature-wrap">
+          <div class="intro-horizon-line" id="intro-horizon-line" aria-hidden="true"></div>
+
+          <div class="intro-brand-badge" id="intro-brand-badge" aria-label="DNYL">
+            <!-- Custom Architectural SVG Frame & Vector Mark -->
+            <svg
+              class="intro-signature-svg"
+              viewBox="0 0 260 68"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="dnylStrokeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="50%" stop-color="#f5f5f0" />
+                  <stop offset="100%" stop-color="#e2c290" />
+                </linearGradient>
+              </defs>
+              <!-- Outer Precision Chamfered Frame Path -->
+              <path
+                class="intro-svg-frame-path"
+                d="M 14 4 L 246 4 L 256 14 L 256 54 L 246 64 L 14 64 L 4 54 L 4 14 Z"
+                stroke="url(#dnylStrokeGrad)"
+                stroke-width="1.25"
+              />
+              <!-- Corner Accent Ticks -->
+              <path
+                class="intro-svg-accent-path"
+                d="M 22 14 L 36 14 M 224 54 L 238 54"
+                stroke="#38bdf8"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+
+            <!-- DNYL Signature Glyphs + Moving Light Sweep -->
+            <div class="intro-dnyl-letters" aria-hidden="true">
+              <span class="intro-dnyl-glyph" data-dnyl-glyph="0">D</span>
+              <span class="intro-dnyl-glyph" data-dnyl-glyph="1">N</span>
+              <span class="intro-dnyl-glyph" data-dnyl-glyph="2">Y</span>
+              <span class="intro-dnyl-glyph" data-dnyl-glyph="3">L</span>
+              <span class="intro-dnyl-dot" aria-hidden="true">.</span>
+              <span class="intro-signature-sweep" id="intro-signature-sweep"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 3: The Name Reveal (DANIYAL HAYAT — Visual Centerpiece) -->
+        <div class="intro-name-stage" id="intro-name-stage">
+          <p class="intro-name-kicker" id="intro-name-kicker">
+            <span>PORTFOLIO EXPERIENCE</span>
+            <span class="intro-kicker-dot" aria-hidden="true">·</span>
+            <span>EDITION 2026</span>
+          </p>
+
+          <div
+            class="intro-monument-name"
+            id="intro-monument-name"
+            role="heading"
+            aria-level="2"
+            aria-label="Daniyal Hayat"
+          >
+            <span class="intro-word-group" aria-hidden="true">
+              <span class="intro-char-mask"><span class="intro-char">D</span></span><span class="intro-char-mask"><span class="intro-char">A</span></span><span class="intro-char-mask"><span class="intro-char">N</span></span><span class="intro-char-mask"><span class="intro-char">I</span></span><span class="intro-char-mask"><span class="intro-char">Y</span></span><span class="intro-char-mask"><span class="intro-char">A</span></span><span class="intro-char-mask"><span class="intro-char">L</span></span>
+            </span>
+            <span class="intro-word-space" aria-hidden="true">&nbsp;</span>
+            <span class="intro-word-group intro-word-group--accent" aria-hidden="true">
+              <span class="intro-char-mask"><span class="intro-char intro-char--accent">H</span></span><span class="intro-char-mask"><span class="intro-char intro-char--accent">A</span></span><span class="intro-char-mask"><span class="intro-char intro-char--accent">Y</span></span><span class="intro-char-mask"><span class="intro-char intro-char--accent">A</span></span><span class="intro-char-mask"><span class="intro-char intro-char--accent">T</span></span>
+            </span>
+            <span class="intro-name-light-sweep" id="intro-name-light-sweep" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <!-- Scene 4: The Professional Identity (100% Real Portfolio Title) -->
+        <div class="intro-identity-stage" id="intro-identity-stage">
+          <div class="intro-identity-row">
+            <span class="intro-identity-label">ARCHITECTURE &amp; ENGINEERING</span>
+            <span class="intro-identity-sep" aria-hidden="true"></span>
+            <span class="intro-identity-title">Full-Stack Developer &amp; Creative Builder</span>
+          </div>
+          <p class="intro-identity-domains">
+            React &amp; TypeScript <span aria-hidden="true">·</span> Native Kotlin Android <span aria-hidden="true">·</span> Google Gemini AI
+          </p>
+          <div class="intro-identity-underline" id="intro-identity-underline" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- Accessible Skip Intro Control (Keyboard Focusable + Touch Friendly) -->
+      <div class="intro-controls">
+        <button
+          type="button"
+          class="intro-skip-btn"
+          id="intro-skip-btn"
+          aria-label="Skip intro sequence and enter portfolio"
+        >
+          <span class="intro-skip-text">SKIP INTRO</span>
+          <span class="intro-skip-kbd" aria-hidden="true">ESC</span>
+        </button>
+      </div>
     </div>
 
     <!-- Ambient Background Layer (0.00s Fade-in) -->

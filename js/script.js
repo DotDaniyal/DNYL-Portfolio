@@ -44,24 +44,215 @@
   );
 
   // ---------------------------------------------------------------------------
-  // 1. PAGE LOAD ORCHESTRATION (0.00s -> 1.40s Choreography)
+  // 1. CINEMATIC INTRO SEQUENCE ("ENTER THE WORLD OF DNYL") & HERO SYNC
+  //    5 Connected Scenes -> Synchronized Split-Curtain Hero Reveal
   // ---------------------------------------------------------------------------
+  const INTRO_SESSION_KEY = "dnyl_portfolio_intro_seen_v1";
+
   function initPageLoadSequence() {
-    if (prefersReducedMotion) {
+    const introEl = document.getElementById("dnyl-cinematic-intro");
+    const skipBtn = document.getElementById("intro-skip-btn");
+    const progressReadout = document.getElementById("intro-progress-readout");
+    const introChars = introEl
+      ? Array.from(introEl.querySelectorAll(".intro-char"))
+      : [];
+
+    introChars.forEach((ch, idx) => {
+      ch.style.setProperty("--intro-char-idx", String(idx));
+    });
+
+    let introFinished = false;
+    const activeTimers = [];
+
+    function scheduleTimer(fn, delayMs) {
+      const id = window.setTimeout(fn, delayMs);
+      activeTimers.push(id);
+      return id;
+    }
+
+    function clearAllIntroTimers() {
+      while (activeTimers.length > 0) {
+        window.clearTimeout(activeTimers.pop());
+      }
+    }
+
+    function markIntroSeenInSession() {
+      try {
+        sessionStorage.setItem(INTRO_SESSION_KEY, "true");
+      } catch {
+        // Safe fallback if sessionStorage is restricted
+      }
+    }
+
+    function hasSeenIntroInSession() {
+      try {
+        return sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
+      } catch {
+        return false;
+      }
+    }
+
+    function revealHeroNow() {
       body.classList.remove("is-loading");
       body.classList.add("is-loaded");
+      window.dispatchEvent(new CustomEvent("dnyl:hero-reveal"));
+
+      scheduleTimer(() => {
+        body.classList.add("tilt-ready", "motion-ready");
+      }, 1150);
+    }
+
+    // Reduced Motion: Skip intro immediately and reveal Hero with zero delay
+    if (prefersReducedMotion || !introEl) {
+      if (introEl) {
+        introEl.classList.add("is-complete", "is-removed");
+        introEl.setAttribute("aria-hidden", "true");
+      }
+      revealHeroNow();
       return;
     }
 
-    requestAnimationFrame(() => {
-      body.classList.remove("is-loading");
-      body.classList.add("is-loaded");
+    // Subtle Desktop Pointer Parallax Inside Intro Stage (Cleaned up on exit)
+    function onIntroPointerMove(event) {
+      if (introFinished) return;
+      const normX = event.clientX / Math.max(1, window.innerWidth) - 0.5;
+      const normY = event.clientY / Math.max(1, window.innerHeight) - 0.5;
+      introEl.style.setProperty(
+        "--intro-parallax-x",
+        `${(normX * -24).toFixed(1)}px`
+      );
+      introEl.style.setProperty(
+        "--intro-parallax-y",
+        `${(normY * -18).toFixed(1)}px`
+      );
+      introEl.style.setProperty(
+        "--intro-stage-x",
+        `${(normX * 10).toFixed(1)}px`
+      );
+      introEl.style.setProperty(
+        "--intro-stage-y",
+        `${(normY * 8).toFixed(1)}px`
+      );
+    }
 
-      // Enable interactive 3D tilt and floating loop after 1.40s entrance finishes
+    if (isFinePointer) {
+      window.addEventListener("mousemove", onIntroPointerMove, {
+        passive: true
+      });
+    }
+
+    function transitionIntoHero(isImmediateSkip) {
+      if (introFinished) return;
+      introFinished = true;
+      clearAllIntroTimers();
+      markIntroSeenInSession();
+
+      if (isFinePointer) {
+        window.removeEventListener("mousemove", onIntroPointerMove);
+      }
+      window.removeEventListener("keydown", onIntroKeyDown);
+
+      if (progressReadout) {
+        progressReadout.textContent = "SEQ // 05 — ENTERING PORTFOLIO";
+      }
+
+      // Trigger Scene 5 Split-Curtain & Perspective Exit + Synchronized Hero Reveal
+      introEl.classList.add("is-exiting");
+      revealHeroNow();
+
+      const cleanupDelay = isImmediateSkip ? 420 : 820;
       window.setTimeout(() => {
-        body.classList.add("tilt-ready", "motion-ready");
-      }, 1450);
-    });
+        introEl.classList.add("is-complete");
+        introEl.setAttribute("aria-hidden", "true");
+      }, cleanupDelay);
+
+      window.setTimeout(() => {
+        introEl.classList.add("is-removed");
+      }, cleanupDelay + 320);
+    }
+
+    function onIntroKeyDown(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        transitionIntoHero(true);
+      }
+    }
+
+    window.addEventListener("keydown", onIntroKeyDown);
+
+    if (skipBtn) {
+      skipBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        transitionIntoHero(true);
+      });
+    }
+
+    const isCompactViewport = window.innerWidth <= 768;
+    const isRepeatSessionVisit = hasSeenIntroInSession();
+
+    if (isRepeatSessionVisit) {
+      // Repeat visit in same browser session: brisk ~0.45s signature flash -> Hero curtain reveal
+      requestAnimationFrame(() => {
+        introEl.classList.add("scene-void", "scene-signature", "scene-name");
+        if (progressReadout) {
+          progressReadout.textContent = "SEQ // SESSION ACTIVE — READY";
+        }
+      });
+
+      scheduleTimer(() => {
+        transitionIntoHero(false);
+      }, 420);
+    } else {
+      // First visit in browser session: Full 5-Scene "Enter the World of DNYL" Choreography
+      const tSignature = isCompactViewport ? 160 : 200;
+      const tName = isCompactViewport ? 560 : 680;
+      const tIdentity = isCompactViewport ? 1050 : 1260;
+      const tTransition = isCompactViewport ? 1680 : 2050;
+
+      // Scene 1: The Void (0.00s)
+      requestAnimationFrame(() => {
+        introEl.classList.add("scene-void");
+        if (progressReadout) {
+          progressReadout.textContent = "SEQ // 01 — THE VOID";
+        }
+      });
+
+      // Scene 2: The Signature — DNYL SVG & Typographic Mark
+      scheduleTimer(() => {
+        introEl.classList.add("scene-signature");
+        if (progressReadout) {
+          progressReadout.textContent = "SEQ // 02 — SIGNATURE · DNYL";
+        }
+      }, tSignature);
+
+      // Scene 3: The Name Reveal — DANIYAL HAYAT
+      scheduleTimer(() => {
+        introEl.classList.add("scene-name");
+        if (progressReadout) {
+          progressReadout.textContent = "SEQ // 03 — DANIYAL HAYAT";
+        }
+      }, tName);
+
+      // Scene 4: The Professional Identity — Full-Stack Developer & Creative Builder
+      scheduleTimer(() => {
+        introEl.classList.add("scene-identity");
+        if (progressReadout) {
+          progressReadout.textContent = "SEQ // 04 — IDENTITY VERIFIED";
+        }
+      }, tIdentity);
+
+      // Scene 5: The Cinematic Transition into Hero
+      scheduleTimer(() => {
+        transitionIntoHero(false);
+      }, tTransition);
+    }
+
+    // Hard Fail-Safe Watchdog: Guarantees overlay can never get stuck
+    window.setTimeout(() => {
+      if (!introFinished) {
+        transitionIntoHero(true);
+      }
+    }, 3200);
   }
 
   // ---------------------------------------------------------------------------
@@ -88,6 +279,7 @@
   let specialtyIndex = 0;
   if (specialtyRotator && !prefersReducedMotion) {
     window.setInterval(() => {
+      if (document.hidden) return;
       specialtyRotator.classList.add("is-switching");
       window.setTimeout(() => {
         specialtyIndex = (specialtyIndex + 1) % realSpecialties.length;
@@ -436,7 +628,7 @@
 
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
-      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .journey-currently-card, .currently-action-btn, .service-card, .srv-stage-tab, .service-action-link, .contact-orb-card, .contact-channel-item, .contact-social-btn, .contact-input, .channel-copy-btn, .footer-back-top-btn, .footer-nav-link, .footer-ext-link, .footer-contact-link, .footer-monument-wrap"
+      "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .currently-card, .service-card, .srv-stage-tab, .service-action-link, .contact-orb-card, .contact-channel-item, .contact-social-btn, .contact-input, .channel-copy-btn, .footer-back-top-btn, .footer-nav-link, .footer-ext-link, .footer-contact-link, .footer-monument-wrap"
     );
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
@@ -485,8 +677,12 @@
       });
     });
 
-    // Single Master requestAnimationFrame Loop
+    // Single Master requestAnimationFrame Loop (Pauses automatically when tab is hidden)
     function renderInteractiveLoop() {
+      if (document.hidden) {
+        requestAnimationFrame(renderInteractiveLoop);
+        return;
+      }
       // Smooth cursor ring interpolation
       ringX += (mouseX - ringX) * 0.18;
       ringY += (mouseY - ringY) * 0.18;
@@ -597,7 +793,7 @@
     }
 
     function drawParticles() {
-      if (isHeroVisible) {
+      if (isHeroVisible && !document.hidden) {
         ctx.clearRect(0, 0, width, height);
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
@@ -1682,28 +1878,47 @@
       if (modalResult) modalResult.textContent = data.result;
 
       if (modalMetrics) {
-        modalMetrics.innerHTML = data.metrics
-          .map(
-            (m) => `
-            <div class="monolith-metric-item">
-              <span class="metric-label">${m.label}</span>
-              <span class="metric-value">${m.value}</span>
-            </div>
-          `
-          )
-          .join("");
+        modalMetrics.replaceChildren();
+        data.metrics.forEach((m) => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "monolith-metric-item";
+
+          const labelEl = document.createElement("span");
+          labelEl.className = "metric-label";
+          labelEl.textContent = m.label;
+
+          const valEl = document.createElement("span");
+          valEl.className = "metric-value";
+          valEl.textContent = m.value;
+
+          itemEl.appendChild(labelEl);
+          itemEl.appendChild(valEl);
+          modalMetrics.appendChild(itemEl);
+        });
       }
 
       if (modalFeatures) {
-        modalFeatures.innerHTML = data.features
-          .map((feat) => `<li>${feat}</li>`)
-          .join("");
+        modalFeatures.replaceChildren();
+        data.features.forEach((feat) => {
+          const li = document.createElement("li");
+          li.textContent = feat;
+          modalFeatures.appendChild(li);
+        });
       }
 
       if (modalStack) {
-        modalStack.innerHTML = data.technologies
-          .map((t) => `<span>${t}</span>`)
-          .join('<span aria-hidden="true">·</span>');
+        modalStack.replaceChildren();
+        data.technologies.forEach((t, idx) => {
+          if (idx > 0) {
+            const sep = document.createElement("span");
+            sep.setAttribute("aria-hidden", "true");
+            sep.textContent = "·";
+            modalStack.appendChild(sep);
+          }
+          const span = document.createElement("span");
+          span.textContent = t;
+          modalStack.appendChild(span);
+        });
       }
 
       if (modalLive) modalLive.setAttribute("href", data.liveUrl);
@@ -1758,33 +1973,37 @@
     if (!journeySection) return;
 
     const headerRevealNodes = Array.from(
-      journeySection.querySelectorAll('[data-journey-reveal="header"]')
+      journeySection.querySelectorAll(
+        '[data-journey-reveal]:not([data-journey-reveal="currently"])'
+      )
     );
     const milestoneItems = Array.from(
-      journeySection.querySelectorAll('.timeline-item[data-journey-reveal="milestone"]')
+      journeySection.querySelectorAll(".timeline-item[data-milestone-index]")
+    );
+    const storyArcSteps = Array.from(
+      journeySection.querySelectorAll(".story-arc-step[data-arc-step]")
     );
     const currentlyWrap = journeySection.querySelector(
       '[data-journey-reveal="currently"]'
     );
     const timelineContainer = document.getElementById("journey-timeline");
-    const timelineFill = document.getElementById("journey-timeline-fill");
-    const timelinePulse = document.getElementById("journey-timeline-pulse");
+    const timelineFill = document.getElementById("timeline-spine-progress");
     const timelineCards = Array.from(
       journeySection.querySelectorAll(".timeline-card")
     );
-    const currentlyCard = journeySection.querySelector(
-      ".journey-currently-card"
-    );
+    const currentlyCard = journeySection.querySelector(".currently-card");
 
     // 1. Scroll Reveal Observers
     if (prefersReducedMotion) {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
       milestoneItems.forEach((el) => {
-        el.classList.add("is-inview", "is-active-node");
+        el.classList.add("is-inview", "is-reached", "is-current");
       });
       if (currentlyWrap) currentlyWrap.classList.add("is-inview");
-      if (timelineFill) timelineFill.style.height = "100%";
-      if (timelinePulse) timelinePulse.style.top = "100%";
+      if (timelineFill) {
+        timelineFill.style.setProperty("--timeline-draw", "100%");
+        timelineFill.style.height = "100%";
+      }
     } else if ("IntersectionObserver" in window) {
       const headerObs = new IntersectionObserver(
         (entries, obs) => {
@@ -1808,7 +2027,7 @@
             }
           });
         },
-        { threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
+        { threshold: 0.14, rootMargin: "0px 0px -6% 0px" }
       );
       milestoneItems.forEach((el) => milestoneObs.observe(el));
 
@@ -1822,14 +2041,14 @@
               }
             });
           },
-          { threshold: 0.18, rootMargin: "0px 0px -5% 0px" }
+          { threshold: 0.16, rootMargin: "0px 0px -5% 0px" }
         );
         currentlyObs.observe(currentlyWrap);
       }
     } else {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
       milestoneItems.forEach((el) => {
-        el.classList.add("is-inview", "is-active-node");
+        el.classList.add("is-inview", "is-reached", "is-current");
       });
       if (currentlyWrap) currentlyWrap.classList.add("is-inview");
     }
@@ -1842,7 +2061,7 @@
         spineTicking = false;
         const rect = timelineContainer.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
-        // Start drawing when timeline top enters 72% down the viewport
+        // Start drawing when timeline top enters 68% down the viewport
         const triggerPoint = viewportHeight * 0.68;
         const distanceScrolled = triggerPoint - rect.top;
         const totalLength = Math.max(1, rect.height);
@@ -1850,24 +2069,33 @@
           0,
           Math.min(1, distanceScrolled / totalLength)
         );
-        const percent = (progress * 100).toFixed(2);
+        const scaleVal = progress.toFixed(4);
 
-        timelineFill.style.height = `${percent}%`;
-        if (timelinePulse) {
-          timelinePulse.style.top = `${percent}%`;
-          timelinePulse.style.opacity =
-            progress > 0.01 && progress < 0.995 ? "1" : "0.35";
-        }
+        timelineFill.style.setProperty("--timeline-scale", scaleVal);
+        timelineFill.style.transform = `scaleY(${scaleVal})`;
 
-        // Illuminate each milestone node when the scroll line reaches its vertical center
+        // Illuminate each milestone marker when the scroll line reaches its vertical center
         const fillBottomY = rect.top + totalLength * progress;
-        milestoneItems.forEach((item) => {
-          const nodeWrap = item.querySelector(".timeline-node-wrap");
-          if (!nodeWrap) return;
-          const nodeRect = nodeWrap.getBoundingClientRect();
-          const nodeCenterY = nodeRect.top + nodeRect.height * 0.35;
-          const isReached = fillBottomY >= nodeCenterY;
-          item.classList.toggle("is-active-node", isReached);
+        let currentIdx = 0;
+
+        milestoneItems.forEach((item, idx) => {
+          const markerEl = item.querySelector(".timeline-marker");
+          if (!markerEl) return;
+          const markerRect = markerEl.getBoundingClientRect();
+          const markerCenterY = markerRect.top + markerRect.height * 0.5;
+          const isReached = fillBottomY >= markerCenterY;
+          item.classList.toggle("is-reached", isReached);
+          if (isReached) {
+            currentIdx = idx;
+          }
+        });
+
+        milestoneItems.forEach((item, idx) => {
+          item.classList.toggle("is-current", idx === currentIdx);
+        });
+
+        storyArcSteps.forEach((step, idx) => {
+          step.classList.toggle("is-active", idx === currentIdx);
         });
       }
 
@@ -1912,11 +2140,11 @@
           (event) => {
             const rect = currentlyCard.getBoundingClientRect();
             currentlyCard.style.setProperty(
-              "--curr-mouse-x",
+              "--tl-mouse-x",
               `${(event.clientX - rect.left).toFixed(1)}px`
             );
             currentlyCard.style.setProperty(
-              "--curr-mouse-y",
+              "--tl-mouse-y",
               `${(event.clientY - rect.top).toFixed(1)}px`
             );
           },
@@ -2788,7 +3016,7 @@
 
     // 2. Live Local Time in Pakistan (Asia/Karachi — UTC+5)
     function updatePakistanLocalTime() {
-      if (!localTimeEl) return;
+      if (!localTimeEl || document.hidden) return;
       try {
         const now = new Date();
         const formatter = new Intl.DateTimeFormat("en-US", {
@@ -2883,9 +3111,1104 @@
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // 15. CINEMATIC TYPOGRAPHY & SCROLL STORYTELLING ENGINE
+  //     - Character-by-character Hero headline reveal (accessible aria-label)
+  //     - Word-by-word masked section heading reveal
+  //     - Text scramble effect on small section labels
+  //     - Pointer-reactive kinetic headings
+  //     - Scroll-drawn section transition bridges
+  // ---------------------------------------------------------------------------
+  function initCinematicTypographyAndMotion() {
+    if (prefersReducedMotion) {
+      document
+        .querySelectorAll(".section-transition-bridge")
+        .forEach((b) => b.classList.add("is-drawn"));
+      return;
+    }
+
+    // 1. Character-by-Character Hero Headline Splitter (Screen-Reader Safe)
+    function splitElementIntoChars(el, baseDelaySec) {
+      if (!el || el.getAttribute("data-char-split") === "true") return;
+      const fullText = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (!fullText) return;
+
+      el.setAttribute("data-char-split", "true");
+      el.setAttribute("aria-label", fullText);
+      el.style.setProperty("--base-delay", `${baseDelaySec}s`);
+
+      const childNodes = Array.from(el.childNodes);
+      el.replaceChildren();
+
+      let charGlobalIndex = 0;
+
+      function appendTextAsChars(textStr, targetParent, extraClass) {
+        const words = textStr.split(" ");
+        words.forEach((word, wIdx) => {
+          if (!word) return;
+          const wordWrap = document.createElement("span");
+          wordWrap.style.display = "inline-block";
+          wordWrap.style.whiteSpace = "nowrap";
+          wordWrap.setAttribute("aria-hidden", "true");
+
+          for (let c = 0; c < word.length; c++) {
+            const mask = document.createElement("span");
+            mask.className = "char-mask";
+
+            const unit = document.createElement("span");
+            unit.className = extraClass
+              ? `char-unit ${extraClass}`
+              : "char-unit";
+            unit.style.setProperty("--char-index", String(charGlobalIndex));
+            unit.textContent = word[c];
+            charGlobalIndex++;
+
+            mask.appendChild(unit);
+            wordWrap.appendChild(mask);
+          }
+
+          targetParent.appendChild(wordWrap);
+
+          if (wIdx < words.length - 1) {
+            const space = document.createTextNode(" ");
+            targetParent.appendChild(space);
+          }
+        });
+      }
+
+      childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const raw = (node.textContent || "").replace(/\s+/g, " ");
+          const leadingSpace = raw.startsWith(" ");
+          const trailingSpace = raw.endsWith(" ");
+          const trimmed = raw.trim();
+          if (leadingSpace && el.childNodes.length > 0) {
+            el.appendChild(document.createTextNode(" "));
+          }
+          if (trimmed) {
+            appendTextAsChars(trimmed, el, "");
+          }
+          if (trailingSpace) {
+            el.appendChild(document.createTextNode(" "));
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const elem = node;
+          const text = (elem.textContent || "").trim();
+          const cls = elem.className || "";
+          if (text) {
+            appendTextAsChars(text, el, cls);
+          }
+        }
+      });
+    }
+
+    const heroGreetingEl = document.querySelector(".hero-greeting");
+    const heroNameEl = document.querySelector(".hero-name");
+    splitElementIntoChars(heroGreetingEl, 0.48);
+    splitElementIntoChars(heroNameEl, 0.58);
+
+    // 2. Word-by-Word Masked Section Heading Splitter (Screen-Reader Safe)
+    const sectionRevealLines = document.querySelectorAll(".about-reveal-line");
+    sectionRevealLines.forEach((lineEl) => {
+      if (lineEl.getAttribute("data-word-split") === "true") return;
+      const fullText = (lineEl.textContent || "").replace(/\s+/g, " ").trim();
+      if (!fullText) return;
+
+      lineEl.setAttribute("data-word-split", "true");
+      lineEl.setAttribute("aria-label", fullText);
+
+      const childNodes = Array.from(lineEl.childNodes);
+      lineEl.replaceChildren();
+      let wordGlobalIndex = 0;
+
+      function appendWords(textStr, extraClass) {
+        const words = textStr.split(/\s+/).filter(Boolean);
+        words.forEach((word, idx) => {
+          if (lineEl.childNodes.length > 0 || idx > 0) {
+            lineEl.appendChild(document.createTextNode(" "));
+          }
+          const mask = document.createElement("span");
+          mask.className = "word-mask";
+          mask.setAttribute("aria-hidden", "true");
+
+          const unit = document.createElement("span");
+          unit.className = extraClass ? `word-unit ${extraClass}` : "word-unit";
+          unit.style.setProperty("--word-index", String(wordGlobalIndex));
+          unit.textContent = word;
+          wordGlobalIndex++;
+
+          mask.appendChild(unit);
+          lineEl.appendChild(mask);
+        });
+      }
+
+      childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const clean = (node.textContent || "").replace(/\s+/g, " ").trim();
+          if (clean) appendWords(clean, "");
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const elem = node;
+          const clean = (elem.textContent || "").replace(/\s+/g, " ").trim();
+          if (clean) appendWords(clean, elem.className || "");
+        }
+      });
+    });
+
+    // 3. Sophisticated Text Scrambler for Small Section Labels & Brand Wordmark
+    const SCRAMBLE_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789//·";
+
+    function scrambleTextElement(el, durationMs) {
+      if (!el || prefersReducedMotion || el.dataset.scrambling === "true") {
+        return;
+      }
+      const original = el.dataset.originalText || (el.textContent || "").trim();
+      if (!original) return;
+      el.dataset.originalText = original;
+      el.dataset.scrambling = "true";
+
+      const totalFrames = Math.max(10, Math.round((durationMs || 480) / 28));
+      let frame = 0;
+
+      const timer = window.setInterval(() => {
+        if (document.hidden) return;
+        frame++;
+        const progress = frame / totalFrames;
+        const resolvedCount = Math.floor(progress * original.length);
+        let output = "";
+
+        for (let i = 0; i < original.length; i++) {
+          const ch = original[i];
+          if (ch === " " || i < resolvedCount) {
+            output += ch;
+          } else {
+            output +=
+              SCRAMBLE_GLYPHS[
+                Math.floor(Math.random() * SCRAMBLE_GLYPHS.length)
+              ];
+          }
+        }
+
+        el.textContent = output;
+
+        if (frame >= totalFrames) {
+          window.clearInterval(timer);
+          el.textContent = original;
+          el.dataset.scrambling = "false";
+        }
+      }, 28);
+    }
+
+    const scrambleLabels = document.querySelectorAll(
+      ".about-section-label, .section-index-label, .footer-index-tag, .climax-cta-eyebrow, .footer-closing-eyebrow"
+    );
+    if ("IntersectionObserver" in window) {
+      const scrambleObserver = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              scrambleTextElement(entry.target, 520);
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.4 }
+      );
+      scrambleLabels.forEach((lbl) => scrambleObserver.observe(lbl));
+    }
+
+    if (isFinePointer) {
+      const brandWordmark = document.querySelector(".brand-wordmark");
+      if (brandWordmark) {
+        brandWordmark.addEventListener("mouseenter", () => {
+          scrambleTextElement(brandWordmark, 380);
+        });
+      }
+    }
+
+    // 4. Interactive Pointer-Reactive Kinetic Headings (Desktop Fine Pointer)
+    if (isFinePointer) {
+      const kineticHeadings = document.querySelectorAll(
+        ".hero-heading, .about-heading, .skills-heading, .projects-heading, .journey-heading, .services-heading, .contact-heading, .footer-closing-heading"
+      );
+      kineticHeadings.forEach((heading) => {
+        heading.setAttribute("data-kinetic-heading", "true");
+        heading.addEventListener(
+          "mousemove",
+          (event) => {
+            const rect = heading.getBoundingClientRect();
+            const relX =
+              (event.clientX - (rect.left + rect.width / 2)) /
+              Math.max(1, rect.width / 2);
+            const relY =
+              (event.clientY - (rect.top + rect.height / 2)) /
+              Math.max(1, rect.height / 2);
+            const shiftX = Math.max(-5, Math.min(5, relX * 4.5));
+            const shiftY = Math.max(-3.5, Math.min(3.5, relY * 3));
+            heading.style.setProperty("--kinetic-x", `${shiftX.toFixed(2)}px`);
+            heading.style.setProperty("--kinetic-y", `${shiftY.toFixed(2)}px`);
+          },
+          { passive: true }
+        );
+        heading.addEventListener("mouseleave", () => {
+          heading.style.setProperty("--kinetic-x", "0px");
+          heading.style.setProperty("--kinetic-y", "0px");
+        });
+      });
+    }
+
+    // 5. Scroll-Triggered Divider Line Drawing on Section Transition Bridges
+    const bridges = document.querySelectorAll(".section-transition-bridge");
+    if ("IntersectionObserver" in window) {
+      const bridgeObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-drawn");
+            }
+          });
+        },
+        { threshold: 0.25 }
+      );
+      bridges.forEach((b) => bridgeObserver.observe(b));
+    } else {
+      bridges.forEach((b) => b.classList.add("is-drawn"));
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 16. GSAP SCROLLTRIGGER CINEMATIC MASK-REVEAL & STAGGER SYSTEM
+  //     - Smooth clip-path mask-reveal + word/char stagger for section headings
+  //     - Curtain & inset mask-reveal + inner scale settle + parallax scrub for images
+  //     - Staggered ScrollTrigger batch reveals for project monoliths & cards
+  //     - Strict prefers-reduced-motion compliance via gsap.matchMedia()
+  // ---------------------------------------------------------------------------
+  function initGSAPScrollTriggerSystem() {
+    const gsapInstance = window.gsap;
+    const ScrollTriggerPlugin = window.ScrollTrigger;
+
+    if (!gsapInstance || !ScrollTriggerPlugin) {
+      return;
+    }
+
+    gsapInstance.registerPlugin(ScrollTriggerPlugin);
+    ScrollTriggerPlugin.config({
+      ignoreMobileResize: true,
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize"
+    });
+
+    document.documentElement.classList.add("gsap-scrolltrigger-ready");
+
+    const mm = gsapInstance.matchMedia();
+
+    // -------------------------------------------------------------------------
+    // BRANCH A: ACCESSIBILITY — PREFERS-REDUCED-MOTION: REDUCE
+    // -------------------------------------------------------------------------
+    mm.add("(prefers-reduced-motion: reduce)", () => {
+      const allTargets = document.querySelectorAll(
+        ".reveal-line, .char-unit, .about-reveal-line, .word-unit, .about-eyebrow, .skills-eyebrow, .projects-eyebrow, .journey-eyebrow, .services-eyebrow-wrap, .contact-eyebrow-wrap, .footer-closing-eyebrow, .skills-intro, .projects-intro, .journey-intro, .services-intro-wrap, .contact-intro-wrap, .footer-closing-subtext, #profile-frame, #profile-image, #about-image-rig, #about-image, .about-float-card, .project-monolith, .monolith-stage, .archive-card, .skill-card, .timeline-card, .service-card, .services-stage-card, .contact-orb-card, .contact-channel-item, .footer-avatar-link, .footer-avatar-img, .footer-brand-col, .footer-nav-col, .footer-deployments-col, .footer-contact-col, .footer-monument-wrap"
+      );
+
+      gsapInstance.set(allTargets, {
+        clearProps: "all",
+        opacity: 1,
+        x: 0,
+        y: 0,
+        scale: 1,
+        clipPath: "none",
+        filter: "none"
+      });
+
+      document
+        .querySelectorAll(".gsap-image-curtain")
+        .forEach((curtain) => curtain.remove());
+    });
+
+    // -------------------------------------------------------------------------
+    // BRANCH B: CINEMATIC MOTION — PREFERS-REDUCED-MOTION: NO-PREFERENCE
+    // -------------------------------------------------------------------------
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // Helper: Inject a smooth architectural curtain overlay inside an image mask container
+      function ensureImageCurtain(maskContainer) {
+        if (!maskContainer) return null;
+        let curtain = maskContainer.querySelector(".gsap-image-curtain");
+        if (!curtain) {
+          curtain = document.createElement("div");
+          curtain.className = "gsap-image-curtain";
+          curtain.setAttribute("aria-hidden", "true");
+          maskContainer.appendChild(curtain);
+        }
+        return curtain;
+      }
+
+      // 1. HERO SECTION: SYNCHRONIZED WITH DNYL INTRO CURTAIN REVEAL
+      const heroChars = document.querySelectorAll("#hero-heading .char-unit");
+      const heroTitleLine = document.querySelector(".hero-title");
+      const profileFrame = document.getElementById("profile-frame");
+      const profileImage = document.getElementById("profile-image");
+      const profileMask = document.querySelector(".profile-image-mask");
+      const heroNodes = document.querySelectorAll("#profile-stage .floating-node");
+
+      let heroEntrancePlayed = false;
+
+      function playHeroSynchronizedEntrance() {
+        if (heroEntrancePlayed) return;
+        heroEntrancePlayed = true;
+
+        if (heroChars.length > 0) {
+          heroChars.forEach((ch) =>
+            ch.setAttribute("data-gsap-controlled", "true")
+          );
+          gsapInstance.fromTo(
+            heroChars,
+            {
+              yPercent: 112,
+              rotateZ: 1.8,
+              opacity: 0,
+              filter: "blur(4px)"
+            },
+            {
+              yPercent: 0,
+              rotateZ: 0,
+              opacity: 1,
+              filter: "blur(0px)",
+              duration: 0.88,
+              stagger: 0.022,
+              delay: 0.14,
+              ease: "power4.out"
+            }
+          );
+        }
+
+        if (heroTitleLine) {
+          heroTitleLine.setAttribute("data-gsap-controlled", "true");
+          gsapInstance.fromTo(
+            heroTitleLine,
+            {
+              clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
+              yPercent: 100,
+              opacity: 0
+            },
+            {
+              clipPath: "polygon(0% 0%, 100% 0%, 100% 118%, 0% 118%)",
+              yPercent: 0,
+              opacity: 1,
+              duration: 0.92,
+              delay: 0.36,
+              ease: "power4.out"
+            }
+          );
+        }
+
+        if (profileFrame && profileImage) {
+          profileFrame.setAttribute("data-gsap-controlled", "true");
+          profileImage.setAttribute("data-gsap-controlled", "true");
+          const heroCurtain = ensureImageCurtain(profileMask);
+
+          const heroImgTl = gsapInstance.timeline({ delay: 0.2 });
+          if (heroCurtain) {
+            gsapInstance.set(heroCurtain, {
+              scaleY: 1,
+              transformOrigin: "bottom center"
+            });
+          }
+
+          heroImgTl
+            .fromTo(
+              profileFrame,
+              {
+                clipPath: "inset(14% 10% 14% 10% round 24px)",
+                opacity: 0,
+                y: 26
+              },
+              {
+                clipPath: "inset(0% 0% 0% 0% round 24px)",
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: "expo.out"
+              },
+              0
+            )
+            .fromTo(
+              profileImage,
+              {
+                scale: 1.14,
+                filter: "blur(6px)"
+              },
+              {
+                scale: 1,
+                filter: "blur(0px)",
+                duration: 1.4,
+                ease: "expo.out"
+              },
+              0.04
+            );
+
+          if (heroCurtain) {
+            heroImgTl.to(
+              heroCurtain,
+              {
+                scaleY: 0,
+                duration: 1.0,
+                ease: "expo.inOut"
+              },
+              0.06
+            );
+          }
+
+          if (heroNodes.length > 0) {
+            heroImgTl.fromTo(
+              heroNodes,
+              {
+                y: 22,
+                opacity: 0,
+                scale: 0.92
+              },
+              {
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                duration: 0.76,
+                stagger: 0.08,
+                ease: "back.out(1.35)"
+              },
+              0.34
+            );
+          }
+        }
+      }
+
+      if (body.classList.contains("is-loaded")) {
+        playHeroSynchronizedEntrance();
+      } else {
+        window.addEventListener(
+          "dnyl:hero-reveal",
+          playHeroSynchronizedEntrance,
+          { once: true }
+        );
+      }
+
+      if (profileImage) {
+        // Scroll-scrubbed subtle depth parallax on Hero portrait
+        gsapInstance.to(profileImage, {
+          yPercent: 7,
+          ease: "none",
+          scrollTrigger: {
+            trigger: "#hero",
+            start: "top top",
+            end: "bottom top",
+            scrub: 0.65
+          }
+        });
+      }
+
+      // 2. UNIVERSAL SECTION HEADINGS MASK-REVEAL & STAGGER SYSTEM
+      //    Covers 02 About, 03 Skills, 04 Projects, 05 Experience, 06 Services, 07 Contact, 08 Footer
+      const sectionHeaderConfigs = [
+        {
+          container: ".about-header",
+          eyebrow: ".about-eyebrow",
+          lines: ".about-reveal-line",
+          intro: ".about-philosophy"
+        },
+        {
+          container: ".skills-header",
+          eyebrow: ".skills-eyebrow",
+          lines: ".about-reveal-line",
+          intro: ".skills-intro"
+        },
+        {
+          container: ".projects-header",
+          eyebrow: ".projects-eyebrow",
+          lines: ".about-reveal-line",
+          intro: ".projects-intro"
+        },
+        {
+          container: ".journey-header",
+          eyebrow: ".journey-eyebrow",
+          lines: ".about-reveal-line",
+          intro: ".journey-intro"
+        },
+        {
+          container: ".services-header-grid",
+          eyebrow: ".services-eyebrow-wrap",
+          lines: ".about-reveal-line",
+          intro: ".services-intro-wrap"
+        },
+        {
+          container: ".contact-header-grid",
+          eyebrow: ".contact-eyebrow-wrap",
+          lines: ".about-reveal-line",
+          intro: ".contact-intro-wrap"
+        },
+        {
+          container: ".footer-closing-cta",
+          eyebrow: ".footer-closing-eyebrow",
+          lines: ".about-reveal-line",
+          intro: ".footer-closing-subtext"
+        }
+      ];
+
+      sectionHeaderConfigs.forEach((cfg) => {
+        const headerEl = document.querySelector(cfg.container);
+        if (!headerEl) return;
+
+        const eyebrowEl = headerEl.querySelector(cfg.eyebrow);
+        const lineEls = headerEl.querySelectorAll(cfg.lines);
+        const wordUnits = headerEl.querySelectorAll(".word-unit");
+        const introEl =
+          headerEl.querySelector(cfg.intro) ||
+          (cfg.container === ".about-header"
+            ? document.querySelector(".about-philosophy")
+            : null);
+
+        if (eyebrowEl) eyebrowEl.setAttribute("data-gsap-controlled", "true");
+        lineEls.forEach((l) => l.setAttribute("data-gsap-controlled", "true"));
+        wordUnits.forEach((w) => w.setAttribute("data-gsap-controlled", "true"));
+        if (introEl) introEl.setAttribute("data-gsap-controlled", "true");
+
+        const tl = gsapInstance.timeline({
+          scrollTrigger: {
+            trigger: headerEl,
+            start: "top 84%",
+            toggleActions: "play none none none",
+            once: true,
+            onEnter: () => {
+              if (eyebrowEl) eyebrowEl.classList.add("is-inview");
+              lineEls.forEach((l) => l.classList.add("is-inview"));
+              if (introEl) introEl.classList.add("is-inview");
+            }
+          }
+        });
+
+        if (eyebrowEl) {
+          tl.fromTo(
+            eyebrowEl,
+            { y: 16, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.65,
+              ease: "power3.out"
+            },
+            0
+          );
+        }
+
+        if (lineEls.length > 0) {
+          tl.fromTo(
+            lineEls,
+            {
+              clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
+              y: 24,
+              opacity: 0
+            },
+            {
+              clipPath: "polygon(0% 0%, 100% 0%, 100% 120%, 0% 120%)",
+              y: 0,
+              opacity: 1,
+              duration: 0.92,
+              stagger: 0.12,
+              ease: "power4.out"
+            },
+            0.08
+          );
+        }
+
+        if (wordUnits.length > 0) {
+          tl.fromTo(
+            wordUnits,
+            {
+              yPercent: 110,
+              opacity: 0,
+              filter: "blur(4px)"
+            },
+            {
+              yPercent: 0,
+              opacity: 1,
+              filter: "blur(0px)",
+              duration: 0.85,
+              stagger: 0.048,
+              ease: "power4.out"
+            },
+            0.12
+          );
+        }
+
+        if (introEl) {
+          tl.fromTo(
+            introEl,
+            { y: 20, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.78,
+              ease: "power3.out"
+            },
+            0.26
+          );
+        }
+      });
+
+      // 3. ABOUT PORTRAIT IMAGE MASK-REVEAL, CURTAIN WIPE & STAGGERED FLOAT CARDS
+      const aboutImageRig = document.getElementById("about-image-rig");
+      const aboutImage = document.getElementById("about-image");
+      const aboutImageInner = document.querySelector(".about-image-inner");
+      const aboutFloatCards = document.querySelectorAll(".about-float-card");
+      const aboutParagraphs = document.querySelectorAll(".about-paragraph");
+      const aboutInfoCards = document.querySelectorAll(".about-info-card");
+
+      if (aboutImageRig && aboutImage) {
+        aboutImageRig.setAttribute("data-gsap-controlled", "true");
+        aboutImage.setAttribute("data-gsap-controlled", "true");
+        const aboutCurtain = ensureImageCurtain(aboutImageInner);
+
+        if (aboutCurtain) {
+          gsapInstance.set(aboutCurtain, {
+            scaleY: 1,
+            transformOrigin: "bottom center"
+          });
+        }
+
+        const aboutImgTl = gsapInstance.timeline({
+          scrollTrigger: {
+            trigger: "#about-visual-stage",
+            start: "top 82%",
+            toggleActions: "play none none none",
+            once: true,
+            onEnter: () => {
+              aboutImageRig.classList.add("is-inview");
+              aboutFloatCards.forEach((c) => c.classList.add("is-inview"));
+            }
+          }
+        });
+
+        aboutImgTl
+          .fromTo(
+            aboutImageRig,
+            {
+              clipPath: "inset(18% 12% 18% 12% round 24px)",
+              opacity: 0,
+              y: 34,
+              scale: 0.94
+            },
+            {
+              clipPath: "inset(0% 0% 0% 0% round 24px)",
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 1.25,
+              ease: "expo.out"
+            },
+            0
+          )
+          .fromTo(
+            aboutImage,
+            {
+              scale: 1.16,
+              filter: "blur(6px)"
+            },
+            {
+              scale: 1,
+              filter: "blur(0px)",
+              duration: 1.45,
+              ease: "expo.out"
+            },
+            0.05
+          );
+
+        if (aboutCurtain) {
+          aboutImgTl.to(
+            aboutCurtain,
+            {
+              scaleY: 0,
+              duration: 1.05,
+              ease: "expo.inOut"
+            },
+            0.08
+          );
+        }
+
+        if (aboutFloatCards.length > 0) {
+          aboutFloatCards.forEach((c) =>
+            c.setAttribute("data-gsap-controlled", "true")
+          );
+          aboutImgTl.fromTo(
+            aboutFloatCards,
+            {
+              y: 24,
+              opacity: 0,
+              scale: 0.9
+            },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.82,
+              stagger: 0.14,
+              ease: "back.out(1.4)"
+            },
+            0.38
+          );
+        }
+
+        // Smooth scroll-linked parallax scrub on About portrait image
+        gsapInstance.fromTo(
+          aboutImage,
+          { yPercent: -5 },
+          {
+            yPercent: 5,
+            ease: "none",
+            scrollTrigger: {
+              trigger: "#about-visual-stage",
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.65
+            }
+          }
+        );
+      }
+
+      if (aboutParagraphs.length > 0) {
+        gsapInstance.fromTo(
+          aboutParagraphs,
+          { y: 22, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.78,
+            stagger: 0.12,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".about-prose",
+              start: "top 85%",
+              once: true,
+              onEnter: () => {
+                aboutParagraphs.forEach((p) => p.classList.add("is-inview"));
+              }
+            }
+          }
+        );
+      }
+
+      if (aboutInfoCards.length > 0) {
+        gsapInstance.fromTo(
+          aboutInfoCards,
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.72,
+            stagger: 0.08,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".about-info-grid",
+              start: "top 86%",
+              once: true,
+              onEnter: () => {
+                aboutInfoCards.forEach((c) => c.classList.add("is-inview"));
+              }
+            }
+          }
+        );
+      }
+
+      // 4. SELECTED PROJECTS: MONOLITH VISUAL STAGE MASK-REVEAL & STAGGERED DETAILS
+      const projectMonoliths = document.querySelectorAll(".project-monolith");
+      projectMonoliths.forEach((monolith) => {
+        const stageEl = monolith.querySelector(".monolith-stage");
+        const screenEl = monolith.querySelector(".monolith-screen");
+        const previewItems = monolith.querySelectorAll(
+          ".ui-preview-topbar, .ui-preview-hero-block, .ui-mini-card, .ui-telemetry-box, .ui-weather-primary, .ui-weather-stat, .ui-hud-item, .ui-studio-card"
+        );
+        const contentItems = monolith.querySelectorAll(
+          ".monolith-meta-top, .monolith-title, .monolith-tagline, .monolith-desc, .monolith-metric-item, .monolith-tech-tag, .monolith-actions .project-btn"
+        );
+
+        if (stageEl) stageEl.setAttribute("data-gsap-controlled", "true");
+        const stageCurtain = ensureImageCurtain(screenEl);
+        if (stageCurtain) {
+          gsapInstance.set(stageCurtain, {
+            scaleY: 1,
+            transformOrigin: "bottom center"
+          });
+        }
+
+        const projTl = gsapInstance.timeline({
+          scrollTrigger: {
+            trigger: monolith,
+            start: "top 82%",
+            toggleActions: "play none none none",
+            once: true,
+            onEnter: () => {
+              monolith.classList.add("is-inview");
+            }
+          }
+        });
+
+        if (stageEl) {
+          projTl.fromTo(
+            stageEl,
+            {
+              clipPath: "inset(14% 8% 14% 8% round 18px)",
+              opacity: 0,
+              y: 28,
+              scale: 0.95
+            },
+            {
+              clipPath: "inset(0% 0% 0% 0% round 18px)",
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 1.15,
+              ease: "expo.out"
+            },
+            0
+          );
+        }
+
+        if (stageCurtain) {
+          projTl.to(
+            stageCurtain,
+            {
+              scaleY: 0,
+              duration: 0.95,
+              ease: "expo.inOut"
+            },
+            0.06
+          );
+        }
+
+        if (previewItems.length > 0) {
+          projTl.fromTo(
+            previewItems,
+            { y: 16, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.65,
+              stagger: 0.055,
+              ease: "power3.out"
+            },
+            0.22
+          );
+        }
+
+        if (contentItems.length > 0) {
+          projTl.fromTo(
+            contentItems,
+            { y: 18, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.68,
+              stagger: 0.045,
+              ease: "power3.out"
+            },
+            0.14
+          );
+        }
+      });
+
+      // 5. STAGGERED BATCH REVEALS FOR SKILLS, ARCHIVE PROJECTS, TIMELINE & SERVICES
+      ScrollTriggerPlugin.batch(".skill-card", {
+        start: "top 88%",
+        once: true,
+        onEnter: (batch) => {
+          batch.forEach((card) => card.classList.add("is-inview"));
+          gsapInstance.fromTo(
+            batch,
+            { y: 26, opacity: 0, scale: 0.97 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.75,
+              stagger: 0.06,
+              ease: "power3.out",
+              overwrite: "auto"
+            }
+          );
+        }
+      });
+
+      ScrollTriggerPlugin.batch(".archive-card", {
+        start: "top 88%",
+        once: true,
+        onEnter: (batch) => {
+          batch.forEach((card) => card.classList.add("is-inview"));
+          gsapInstance.fromTo(
+            batch,
+            {
+              clipPath: "inset(10% 6% 10% 6% round 20px)",
+              y: 28,
+              opacity: 0
+            },
+            {
+              clipPath: "inset(0% 0% 0% 0% round 20px)",
+              y: 0,
+              opacity: 1,
+              duration: 0.85,
+              stagger: 0.08,
+              ease: "expo.out",
+              overwrite: "auto"
+            }
+          );
+        }
+      });
+
+      ScrollTriggerPlugin.batch(".timeline-card", {
+        start: "top 86%",
+        once: true,
+        onEnter: (batch) => {
+          batch.forEach((card) => {
+            card.classList.add("is-inview");
+            const parentItem = card.closest(".timeline-item");
+            if (parentItem) parentItem.classList.add("is-inview");
+          });
+          gsapInstance.fromTo(
+            batch,
+            {
+              clipPath: "inset(8% 4% 8% 4% round 22px)",
+              y: 26,
+              opacity: 0
+            },
+            {
+              clipPath: "inset(0% 0% 0% 0% round 22px)",
+              y: 0,
+              opacity: 1,
+              duration: 0.88,
+              stagger: 0.1,
+              ease: "expo.out",
+              overwrite: "auto"
+            }
+          );
+        }
+      });
+
+      // 6. SERVICES VISUAL STAGE, CONTACT ORB & FOOTER AVATAR MASK-REVEALS
+      const servicesStageCard = document.querySelector(".services-stage-card");
+      if (servicesStageCard) {
+        servicesStageCard.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          servicesStageCard,
+          {
+            clipPath: "inset(12% 8% 12% 8% round 24px)",
+            y: 28,
+            opacity: 0
+          },
+          {
+            clipPath: "inset(0% 0% 0% 0% round 24px)",
+            y: 0,
+            opacity: 1,
+            duration: 1.1,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: servicesStageCard,
+              start: "top 84%",
+              once: true,
+              onEnter: () => {
+                const col = servicesStageCard.closest(".services-visual-col");
+                if (col) col.classList.add("is-inview");
+              }
+            }
+          }
+        );
+      }
+
+      const contactOrbCard = document.querySelector(".contact-orb-card");
+      if (contactOrbCard) {
+        contactOrbCard.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          contactOrbCard,
+          {
+            clipPath: "inset(12% 8% 12% 8% round 24px)",
+            y: 26,
+            opacity: 0
+          },
+          {
+            clipPath: "inset(0% 0% 0% 0% round 24px)",
+            y: 0,
+            opacity: 1,
+            duration: 1.1,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: contactOrbCard,
+              start: "top 84%",
+              once: true,
+              onEnter: () => {
+                contactOrbCard.classList.add("is-inview");
+              }
+            }
+          }
+        );
+      }
+
+      const footerAvatarLink = document.querySelector(".footer-avatar-link");
+      const footerAvatarImg = document.querySelector(".footer-avatar-img");
+      const footerCols = document.querySelectorAll(
+        ".footer-brand-col, .footer-nav-col, .footer-deployments-col, .footer-contact-col"
+      );
+
+      if (footerCols.length > 0) {
+        gsapInstance.fromTo(
+          footerCols,
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.82,
+            stagger: 0.09,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".footer-main-grid",
+              start: "top 86%",
+              once: true,
+              onEnter: () => {
+                footerCols.forEach((c) => c.classList.add("is-inview"));
+              }
+            }
+          }
+        );
+      }
+
+      if (footerAvatarLink && footerAvatarImg) {
+        gsapInstance.fromTo(
+          footerAvatarLink,
+          {
+            clipPath: "inset(20% 20% 20% 20% round 14px)",
+            scale: 0.9
+          },
+          {
+            clipPath: "inset(0% 0% 0% 0% round 14px)",
+            scale: 1,
+            duration: 0.95,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: ".footer-main-grid",
+              start: "top 86%",
+              once: true
+            }
+          }
+        );
+      }
+
+      // Refresh ScrollTrigger once images and layout settle
+      window.addEventListener(
+        "load",
+        () => {
+          ScrollTriggerPlugin.refresh();
+        },
+        { once: true }
+      );
+    });
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
+      initCinematicTypographyAndMotion();
+      initGSAPScrollTriggerSystem();
       initPageLoadSequence();
       initParticlesCanvas();
       initAboutScrollAnimations();
@@ -2897,6 +4220,8 @@
       initFooterSection();
     });
   } else {
+    initCinematicTypographyAndMotion();
+    initGSAPScrollTriggerSystem();
     initPageLoadSequence();
     initParticlesCanvas();
     initAboutScrollAnimations();
