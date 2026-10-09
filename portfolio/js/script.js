@@ -44,12 +44,16 @@
   );
 
   // ---------------------------------------------------------------------------
-  // 1. CINEMATIC 3S GSAP INTRO SEQUENCE ("ENTER THE WORLD OF DNYL") & HERO SYNC
-  //    Uses GSAP master timeline (~3.0s) to reveal:
-  //    - Scene 1 & 2 (0.00s–0.70s): The Void + DNYL Logo SVG & Masked Glyphs
-  //    - Scene 3     (0.55s–1.45s): Developer's Name (DANIYAL HAYAT) Masked Chars
-  //    - Scene 4     (1.30s–2.15s): Professional Title Masked Words & Domains
-  //    - Scene 5     (2.15s–3.00s): Split-Curtain & Perspective Transition -> Hero
+  // 1. CINEMATIC ~2S GSAP INTRO SEQUENCE ("ENTER THE WORLD OF DNYL") & HERO SYNC
+  //    7-Step Opening Choreography (~2.1s total, visible by default on every load):
+  //    1. 0.00s: Full-screen dark cinematic background (#030408, z-index: 9990)
+  //    2. 0.04s: Thin glowing horizon line draws across the screen
+  //    3. 0.10s: DNYL. brand mark & SVG chamfered signature frame reveal
+  //    4. 0.30s: "DANIYAL HAYAT" animates into view with staggered masked chars
+  //    5. 0.68s: Real professional title ("Full-Stack Developer & Creative Builder")
+  //    6. 0.85s: Subtle specular light sweep crosses the screen
+  //    7. 1.52s–2.12s: Intro stage exits first (preventing duplicate name headings),
+  //       then split curtains part seamlessly to reveal the coordinated Hero section
   // ---------------------------------------------------------------------------
   const INTRO_SESSION_KEY = "dnyl_portfolio_intro_seen_v1";
 
@@ -64,6 +68,14 @@
     introChars.forEach((ch, idx) => {
       ch.style.setProperty("--intro-char-idx", String(idx));
     });
+
+    // STEP 3: Clear any legacy stored flags that could hide or skip the intro
+    try {
+      sessionStorage.removeItem(INTRO_SESSION_KEY);
+      localStorage.removeItem(INTRO_SESSION_KEY);
+    } catch {
+      // Ignore storage access restrictions
+    }
 
     let introFinished = false;
     let heroRevealed = false;
@@ -82,22 +94,6 @@
       }
     }
 
-    function markIntroSeenInSession() {
-      try {
-        sessionStorage.setItem(INTRO_SESSION_KEY, "true");
-      } catch {
-        // Safe fallback if sessionStorage is restricted
-      }
-    }
-
-    function hasSeenIntroInSession() {
-      try {
-        return sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
-      } catch {
-        return false;
-      }
-    }
-
     function revealHeroNow() {
       if (heroRevealed) return;
       heroRevealed = true;
@@ -107,22 +103,26 @@
 
       scheduleTimer(() => {
         body.classList.add("tilt-ready", "motion-ready");
-      }, 1050);
+      }, 950);
     }
 
-    // Reduced Motion: Skip intro immediately and reveal Hero with zero delay
-    if (prefersReducedMotion || !introEl) {
-      if (introEl) {
-        introEl.classList.add("is-complete", "is-removed");
-        introEl.setAttribute("aria-hidden", "true");
-      }
+    if (!introEl) {
+      revealHeroNow();
+      return;
+    }
+
+    // Optional explicit URL parameter (?skipIntro=1) for automated testing bypass
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("skipIntro") === "1") {
+      introEl.classList.add("is-complete", "is-removed");
+      introEl.setAttribute("aria-hidden", "true");
       revealHeroNow();
       return;
     }
 
     // Subtle Desktop Pointer Parallax Inside Intro Stage (Cleaned up on exit)
     function onIntroPointerMove(event) {
-      if (introFinished) return;
+      if (introFinished || prefersReducedMotion) return;
       const normX = event.clientX / Math.max(1, window.innerWidth) - 0.5;
       const normY = event.clientY / Math.max(1, window.innerHeight) - 0.5;
       introEl.style.setProperty(
@@ -143,7 +143,7 @@
       );
     }
 
-    if (isFinePointer) {
+    if (isFinePointer && !prefersReducedMotion) {
       window.addEventListener("mousemove", onIntroPointerMove, {
         passive: true
       });
@@ -153,7 +153,6 @@
       if (introFinished) return;
       introFinished = true;
       clearAllIntroTimers();
-      markIntroSeenInSession();
 
       if (isFinePointer) {
         window.removeEventListener("mousemove", onIntroPointerMove);
@@ -166,13 +165,12 @@
 
       window.setTimeout(() => {
         introEl.classList.add("is-removed");
-      }, 260);
+      }, 220);
     }
 
     function skipIntroImmediately() {
       if (introFinished) return;
       clearAllIntroTimers();
-      markIntroSeenInSession();
 
       if (masterIntroTl) {
         masterIntroTl.kill();
@@ -183,10 +181,11 @@
         progressReadout.textContent = "SEQ // 05 — ENTERING PORTFOLIO";
       }
 
+      introEl.classList.add("is-exiting");
       revealHeroNow();
 
       const gsapInstance = window.gsap;
-      if (gsapInstance) {
+      if (gsapInstance && !prefersReducedMotion) {
         const topCurtain = document.getElementById("intro-curtain-top");
         const bottomCurtain = document.getElementById("intro-curtain-bottom");
         const stageEl = document.getElementById("intro-stage");
@@ -200,8 +199,8 @@
             [stageEl, voidLayer],
             {
               opacity: 0,
-              scale: 1.04,
-              duration: 0.28,
+              scale: 1.03,
+              duration: 0.2,
               ease: "power2.out"
             },
             0
@@ -210,7 +209,7 @@
             topCurtain,
             {
               yPercent: -102,
-              duration: 0.45,
+              duration: 0.36,
               ease: "expo.inOut"
             },
             0
@@ -219,14 +218,13 @@
             bottomCurtain,
             {
               yPercent: 102,
-              duration: 0.45,
+              duration: 0.36,
               ease: "expo.inOut"
             },
             0
           );
       } else {
-        introEl.classList.add("is-exiting");
-        window.setTimeout(finalizeIntroOverlay, 420);
+        finalizeIntroOverlay();
       }
     }
 
@@ -246,8 +244,25 @@
       });
     }
 
+    // Reduced Motion Mode: Render static, legible intro for 1.2s (no sliding/blurring), then fade cleanly to Hero
+    if (prefersReducedMotion) {
+      introEl.classList.add(
+        "scene-void",
+        "scene-signature",
+        "scene-name",
+        "scene-identity"
+      );
+      if (progressReadout) {
+        progressReadout.textContent =
+          "SEQ // REDUCED MOTION — DANIYAL HAYAT PORTFOLIO";
+      }
+      scheduleTimer(() => {
+        finalizeIntroOverlay();
+      }, 1200);
+      return;
+    }
+
     const gsapInstance = window.gsap;
-    const isRepeatSessionVisit = hasSeenIntroInSession();
 
     if (gsapInstance) {
       introEl.classList.add("gsap-intro-active");
@@ -264,7 +279,7 @@
       const bgMonolith = document.getElementById("intro-bg-monolith");
       const stageEl = document.getElementById("intro-stage");
 
-      // Scene 2: DNYL Logo targets
+      // Step 2 & 3: Thin glowing line + DNYL brand mark
       const horizonLine = document.getElementById("intro-horizon-line");
       const svgFramePath = introEl.querySelector(".intro-svg-frame-path");
       const svgAccentPath = introEl.querySelector(".intro-svg-accent-path");
@@ -273,11 +288,11 @@
       );
       const signatureSweep = document.getElementById("intro-signature-sweep");
 
-      // Scene 3: Developer's Name targets (Masked Typography)
+      // Step 4: "DANIYAL HAYAT" staggered masked typography
       const kickerInner = introEl.querySelector(".intro-kicker-inner");
       const nameLightSweep = document.getElementById("intro-name-light-sweep");
 
-      // Scene 4: Professional Title targets (Masked Typography)
+      // Step 5: Real professional title masked typography
       const identityLabel = document.getElementById("intro-identity-label");
       const identitySep = document.getElementById("intro-identity-sep");
       const titleWords = introEl.querySelectorAll(".intro-title-word");
@@ -294,7 +309,7 @@
       gsapInstance.set(voidRadial, {
         xPercent: -50,
         yPercent: -50,
-        scale: 0.84,
+        scale: 0.86,
         opacity: 0
       });
       gsapInstance.set(voidBeam, {
@@ -306,7 +321,7 @@
       gsapInstance.set(geoLineV, { scaleY: 0, opacity: 0 });
       gsapInstance.set(geoCorners, { opacity: 0 });
       gsapInstance.set(geoCoords, { y: 6, opacity: 0 });
-      gsapInstance.set(bgMonolith, { scale: 0.94, opacity: 0 });
+      gsapInstance.set(bgMonolith, { scale: 0.95, opacity: 0 });
 
       gsapInstance.set(horizonLine, { scaleX: 0, opacity: 0 });
       gsapInstance.set(svgFramePath, {
@@ -318,7 +333,7 @@
         strokeDashoffset: 60
       });
       gsapInstance.set(dnylGlyphs, {
-        yPercent: 115,
+        yPercent: 112,
         opacity: 0,
         filter: "blur(4px)"
       });
@@ -328,10 +343,10 @@
         opacity: 0
       });
 
-      gsapInstance.set(kickerInner, { yPercent: 112, opacity: 0 });
+      gsapInstance.set(kickerInner, { yPercent: 110, opacity: 0 });
       gsapInstance.set(introChars, {
-        yPercent: 115,
-        rotateZ: 1.8,
+        yPercent: 112,
+        rotateZ: 1.6,
         opacity: 0,
         filter: "blur(5px)"
       });
@@ -341,23 +356,23 @@
         opacity: 0
       });
 
-      gsapInstance.set(identityLabel, { yPercent: 112, opacity: 0 });
+      gsapInstance.set(identityLabel, { yPercent: 110, opacity: 0 });
       gsapInstance.set(identitySep, { scaleX: 0, opacity: 0 });
       gsapInstance.set(titleWords, {
-        yPercent: 115,
+        yPercent: 112,
         opacity: 0,
         filter: "blur(3px)"
       });
-      gsapInstance.set(domainsInner, { yPercent: 112, opacity: 0 });
+      gsapInstance.set(domainsInner, { yPercent: 110, opacity: 0 });
       gsapInstance.set(identityUnderline, { scaleX: 0 });
 
-      // Build the 3.0s GSAP Master Timeline
+      // Build the ~2.1s GSAP Master Timeline
       masterIntroTl = gsapInstance.timeline({
         defaults: { ease: "power4.out" },
         onComplete: finalizeIntroOverlay
       });
 
-      // --- SCENE 1 & 2 (0.00s – 0.75s): THE VOID & DNYL LOGO REVEAL ---
+      // --- STEP 1, 2 & 3 (0.00s – 0.55s): DARK VOID, GLOWING LINE & DNYL BRAND MARK ---
       masterIntroTl
         .call(
           () => {
@@ -373,7 +388,7 @@
           {
             scale: 1.04,
             opacity: 1,
-            duration: 1.1,
+            duration: 0.85,
             ease: "power3.out"
           },
           0
@@ -384,7 +399,7 @@
             scaleX: 1,
             scaleY: 1,
             opacity: 1,
-            duration: 0.75,
+            duration: 0.55,
             ease: "expo.out"
           },
           0.02
@@ -393,59 +408,59 @@
           geoCorners,
           {
             opacity: 1,
-            duration: 0.45,
-            stagger: 0.04,
+            duration: 0.35,
+            stagger: 0.03,
             ease: "power2.out"
           },
-          0.08
+          0.05
         )
         .to(
           geoCoords,
           {
             y: 0,
             opacity: 1,
-            duration: 0.45,
+            duration: 0.35,
             ease: "power2.out"
           },
-          0.1
+          0.06
         )
         .to(
           bgMonolith,
           {
             scale: 1,
             opacity: 1,
-            duration: 1.2,
+            duration: 0.9,
             ease: "power3.out"
           },
-          0.05
+          0.04
         )
         .to(
           horizonLine,
           {
             scaleX: 1,
-            opacity: 0.88,
-            duration: 0.58,
+            opacity: 0.92,
+            duration: 0.44,
             ease: "expo.out"
           },
-          0.08
+          0.04
         )
         .to(
           svgFramePath,
           {
             strokeDashoffset: 0,
-            duration: 0.72,
+            duration: 0.52,
             ease: "expo.out"
           },
-          0.1
+          0.08
         )
         .to(
           svgAccentPath,
           {
             strokeDashoffset: 0,
-            duration: 0.5,
+            duration: 0.38,
             ease: "power3.out"
           },
-          0.26
+          0.18
         )
         .to(
           dnylGlyphs,
@@ -453,34 +468,24 @@
             yPercent: 0,
             opacity: 1,
             filter: "blur(0px)",
-            duration: 0.56,
-            stagger: 0.045,
+            duration: 0.44,
+            stagger: 0.035,
             ease: "power4.out"
           },
-          0.14
+          0.1
         )
         .to(
           signatureSweep,
           {
             xPercent: 280,
             opacity: 1,
-            duration: 0.68,
+            duration: 0.52,
             ease: "power2.inOut"
-          },
-          0.24
-        )
-        .to(
-          voidBeam,
-          {
-            xPercent: 185,
-            opacity: 1,
-            duration: 2.1,
-            ease: "power2.out"
           },
           0.18
         );
 
-      // --- SCENE 3 (0.55s – 1.45s): DEVELOPER'S NAME MASKED TYPOGRAPHY (DANIYAL HAYAT) ---
+      // --- STEP 4 (0.30s – 0.95s): "DANIYAL HAYAT" STAGGERED TYPOGRAPHY REVEAL ---
       masterIntroTl
         .call(
           () => {
@@ -489,17 +494,17 @@
             }
           },
           null,
-          0.55
+          0.3
         )
         .to(
           kickerInner,
           {
             yPercent: 0,
             opacity: 1,
-            duration: 0.48,
+            duration: 0.38,
             ease: "power3.out"
           },
-          0.55
+          0.3
         )
         .to(
           introChars,
@@ -508,24 +513,14 @@
             rotateZ: 0,
             opacity: 1,
             filter: "blur(0px)",
-            duration: 0.68,
-            stagger: 0.025,
+            duration: 0.54,
+            stagger: 0.02,
             ease: "power4.out"
           },
-          0.6
-        )
-        .to(
-          nameLightSweep,
-          {
-            xPercent: 360,
-            opacity: 1,
-            duration: 0.82,
-            ease: "power2.inOut"
-          },
-          0.78
+          0.34
         );
 
-      // --- SCENE 4 (1.30s – 2.15s): PROFESSIONAL TITLE MASKED TYPOGRAPHY ---
+      // --- STEP 5 & 6 (0.68s – 1.50s): REAL PROFESSIONAL TITLE + LIGHT SWEEP ---
       masterIntroTl
         .call(
           () => {
@@ -535,27 +530,27 @@
             }
           },
           null,
-          1.3
+          0.68
         )
         .to(
           identityLabel,
           {
             yPercent: 0,
             opacity: 1,
-            duration: 0.48,
+            duration: 0.38,
             ease: "power3.out"
           },
-          1.3
+          0.68
         )
         .to(
           identitySep,
           {
             scaleX: 1,
             opacity: 1,
-            duration: 0.45,
+            duration: 0.36,
             ease: "expo.out"
           },
-          1.36
+          0.72
         )
         .to(
           titleWords,
@@ -563,90 +558,108 @@
             yPercent: 0,
             opacity: 1,
             filter: "blur(0px)",
-            duration: 0.56,
-            stagger: 0.045,
+            duration: 0.44,
+            stagger: 0.036,
             ease: "power4.out"
           },
-          1.34
+          0.7
         )
         .to(
           domainsInner,
           {
             yPercent: 0,
             opacity: 1,
-            duration: 0.5,
+            duration: 0.4,
             ease: "power3.out"
           },
-          1.52
+          0.84
         )
         .to(
           identityUnderline,
           {
             scaleX: 1,
-            duration: 0.58,
+            duration: 0.46,
             ease: "expo.out"
           },
-          1.56
+          0.88
+        )
+        .to(
+          nameLightSweep,
+          {
+            xPercent: 360,
+            opacity: 1,
+            duration: 0.68,
+            ease: "power2.inOut"
+          },
+          0.82
+        )
+        .to(
+          voidBeam,
+          {
+            xPercent: 185,
+            opacity: 1,
+            duration: 1.35,
+            ease: "power2.out"
+          },
+          0.2
         );
 
-      // --- SCENE 5 (2.15s – 3.00s): SEAMLESS TRANSITION INTO HERO SECTION ---
+      // --- STEP 7 (1.52s – 2.15s): SEAMLESS NON-OVERLAPPING TRANSITION INTO HERO ---
+      // First (1.52s–1.76s): Fade & elevate out the intro stage typography so two "DANIYAL HAYAT" headings never overlap
       masterIntroTl
+        .to(
+          stageEl,
+          {
+            y: -18,
+            scale: 1.03,
+            opacity: 0,
+            duration: 0.26,
+            ease: "power3.in"
+          },
+          1.52
+        )
+        .to(
+          voidLayer,
+          {
+            scale: 1.05,
+            opacity: 0,
+            duration: 0.32,
+            ease: "power2.inOut"
+          },
+          1.54
+        )
+        // Next (1.68s–2.18s): Part the split curtains and trigger the coordinated Hero entrance
         .call(
           () => {
             if (progressReadout) {
               progressReadout.textContent = "SEQ // 04 — ENTERING PORTFOLIO";
             }
+            introEl.classList.add("is-exiting");
             revealHeroNow();
           },
           null,
-          2.15
-        )
-        .to(
-          stageEl,
-          {
-            y: -22,
-            scale: 1.045,
-            opacity: 0,
-            duration: 0.56,
-            ease: "power3.inOut"
-          },
-          2.15
-        )
-        .to(
-          voidLayer,
-          {
-            scale: 1.06,
-            opacity: 0,
-            duration: 0.62,
-            ease: "power2.inOut"
-          },
-          2.15
+          1.68
         )
         .to(
           topCurtain,
           {
             yPercent: -102,
             scaleY: 0.96,
-            duration: 0.85,
+            duration: 0.5,
             ease: "expo.inOut"
           },
-          2.15
+          1.68
         )
         .to(
           bottomCurtain,
           {
             yPercent: 102,
             scaleY: 0.96,
-            duration: 0.85,
+            duration: 0.5,
             ease: "expo.inOut"
           },
-          2.15
+          1.68
         );
-
-      // Repeat visit in the same session plays at 2.2x speed (~1.35s) so it never feels repetitive
-      if (isRepeatSessionVisit) {
-        masterIntroTl.timeScale(2.2);
-      }
     } else {
       // Fallback if GSAP script is unavailable
       requestAnimationFrame(() => {
@@ -660,8 +673,8 @@
       scheduleTimer(() => {
         introEl.classList.add("is-exiting");
         revealHeroNow();
-      }, 2150);
-      scheduleTimer(finalizeIntroOverlay, 3000);
+      }, 1650);
+      scheduleTimer(finalizeIntroOverlay, 2150);
     }
 
     // Hard Fail-Safe Watchdog: Guarantees overlay can never get stuck
@@ -669,7 +682,7 @@
       if (!introFinished) {
         finalizeIntroOverlay();
       }
-    }, 3600);
+    }, 3000);
   }
 
   // ---------------------------------------------------------------------------
@@ -3621,8 +3634,8 @@
 
     const heroGreetingEl = document.querySelector(".hero-greeting");
     const heroNameEl = document.querySelector(".hero-name");
-    splitElementIntoChars(heroGreetingEl, 0.48);
-    splitElementIntoChars(heroNameEl, 0.58);
+    splitElementIntoChars(heroGreetingEl, 0.08);
+    splitElementIntoChars(heroNameEl, 0.14);
 
     // 2. Word-by-Word Masked Section Heading Splitter (Screen-Reader Safe)
     const sectionRevealLines = document.querySelectorAll(".about-reveal-line");
@@ -3857,156 +3870,12 @@
         return curtain;
       }
 
-      // 1. HERO SECTION: SYNCHRONIZED WITH DNYL INTRO CURTAIN REVEAL
-      const heroChars = document.querySelectorAll("#hero-heading .char-unit");
-      const heroTitleLine = document.querySelector(".hero-title");
-      const profileFrame = document.getElementById("profile-frame");
+      // 1. HERO SECTION: Scroll-scrubbed subtle depth parallax on Hero portrait
+      //    (Hero entrance animations are cleanly driven by body.is-loaded CSS transitions
+      //     with zero competing GSAP entrance tweens on the same elements)
       const profileImage = document.getElementById("profile-image");
-      const profileMask = document.querySelector(".profile-image-mask");
-      const heroNodes = document.querySelectorAll("#profile-stage .floating-node");
-
-      let heroEntrancePlayed = false;
-
-      function playHeroSynchronizedEntrance() {
-        if (heroEntrancePlayed) return;
-        heroEntrancePlayed = true;
-
-        if (heroChars.length > 0) {
-          heroChars.forEach((ch) =>
-            ch.setAttribute("data-gsap-controlled", "true")
-          );
-          gsapInstance.fromTo(
-            heroChars,
-            {
-              yPercent: 112,
-              rotateZ: 1.8,
-              opacity: 0,
-              filter: "blur(4px)"
-            },
-            {
-              yPercent: 0,
-              rotateZ: 0,
-              opacity: 1,
-              filter: "blur(0px)",
-              duration: 0.88,
-              stagger: 0.022,
-              delay: 0.14,
-              ease: "power4.out"
-            }
-          );
-        }
-
-        if (heroTitleLine) {
-          heroTitleLine.setAttribute("data-gsap-controlled", "true");
-          gsapInstance.fromTo(
-            heroTitleLine,
-            {
-              clipPath: "polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)",
-              yPercent: 100,
-              opacity: 0
-            },
-            {
-              clipPath: "polygon(0% 0%, 100% 0%, 100% 118%, 0% 118%)",
-              yPercent: 0,
-              opacity: 1,
-              duration: 0.92,
-              delay: 0.36,
-              ease: "power4.out"
-            }
-          );
-        }
-
-        if (profileFrame && profileImage) {
-          profileFrame.setAttribute("data-gsap-controlled", "true");
-          profileImage.setAttribute("data-gsap-controlled", "true");
-          const heroCurtain = ensureImageCurtain(profileMask);
-
-          const heroImgTl = gsapInstance.timeline({ delay: 0.2 });
-          if (heroCurtain) {
-            gsapInstance.set(heroCurtain, {
-              scaleY: 1,
-              transformOrigin: "bottom center"
-            });
-          }
-
-          heroImgTl
-            .fromTo(
-              profileFrame,
-              {
-                clipPath: "inset(14% 10% 14% 10% round 24px)",
-                opacity: 0,
-                y: 26
-              },
-              {
-                clipPath: "inset(0% 0% 0% 0% round 24px)",
-                opacity: 1,
-                y: 0,
-                duration: 1.2,
-                ease: "expo.out"
-              },
-              0
-            )
-            .fromTo(
-              profileImage,
-              {
-                scale: 1.14,
-                filter: "blur(6px)"
-              },
-              {
-                scale: 1,
-                filter: "blur(0px)",
-                duration: 1.4,
-                ease: "expo.out"
-              },
-              0.04
-            );
-
-          if (heroCurtain) {
-            heroImgTl.to(
-              heroCurtain,
-              {
-                scaleY: 0,
-                duration: 1.0,
-                ease: "expo.inOut"
-              },
-              0.06
-            );
-          }
-
-          if (heroNodes.length > 0) {
-            heroImgTl.fromTo(
-              heroNodes,
-              {
-                y: 22,
-                opacity: 0,
-                scale: 0.92
-              },
-              {
-                y: 0,
-                opacity: 1,
-                scale: 1,
-                duration: 0.76,
-                stagger: 0.08,
-                ease: "back.out(1.35)"
-              },
-              0.34
-            );
-          }
-        }
-      }
-
-      if (body.classList.contains("is-loaded")) {
-        playHeroSynchronizedEntrance();
-      } else {
-        window.addEventListener(
-          "dnyl:hero-reveal",
-          playHeroSynchronizedEntrance,
-          { once: true }
-        );
-      }
 
       if (profileImage) {
-        // Scroll-scrubbed subtle depth parallax on Hero portrait
         gsapInstance.to(profileImage, {
           yPercent: 7,
           ease: "none",

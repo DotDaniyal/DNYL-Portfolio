@@ -119,6 +119,10 @@ body {
   letter-spacing: 0.01em;
 }
 
+body.is-loading {
+  overflow: hidden;
+}
+
 ::selection {
   background: rgba(56, 189, 248, 0.24);
   color: var(--text-primary);
@@ -873,13 +877,13 @@ body.is-loaded .reveal-line {
   letter-spacing: 0.18em;
   color: var(--text-secondary);
   margin-bottom: 0.45rem;
-  transition-delay: 0.55s;
+  transition-delay: 0.1s;
 }
 
 .hero-name {
   font-size: clamp(2.85rem, 6.2vw, 5.5rem);
   color: var(--text-primary);
-  transition-delay: 0.62s;
+  transition-delay: 0.16s;
 }
 
 .hero-name-accent {
@@ -973,7 +977,7 @@ body.is-loaded .reveal-line .word-unit {
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.2;
-  transition-delay: 0.75s;
+  transition-delay: 0.24s;
 }
 
 .title-primary {
@@ -1002,8 +1006,8 @@ body.is-loaded .reveal-line .word-unit {
   color: var(--text-secondary);
   opacity: 0;
   transform: translate3d(0, 10px, 0);
-  transition: opacity 0.75s var(--ease-cinematic) 0.85s,
-    transform 0.75s var(--ease-cinematic) 0.85s;
+  transition: opacity 0.75s var(--ease-cinematic) 0.3s,
+    transform 0.75s var(--ease-cinematic) 0.3s;
 }
 
 body.is-loaded .hero-specialty-line {
@@ -1038,7 +1042,7 @@ body.is-loaded .hero-specialty-line {
   filter: blur(3px);
 }
 
-/* 0.95s: Short Description Reveal */
+/* 0.34s: Short Description Reveal */
 .hero-description {
   max-width: 60ch;
   font-size: clamp(0.98rem, 1.12vw, 1.125rem);
@@ -1046,11 +1050,11 @@ body.is-loaded .hero-specialty-line {
   color: var(--text-secondary);
   font-weight: 400;
   margin-bottom: 2.1rem;
-  transition-delay: 0.95s;
+  transition-delay: 0.34s;
 }
 
 /* ==========================================================================
-   7. 1.10s: CTA BUTTONS (MAGNETIC, GLOW, ARROW & BORDER ANIMATION)
+   7. 0.40s: CTA BUTTONS (MAGNETIC, GLOW, ARROW & BORDER ANIMATION)
    ========================================================================== */
 
 .hero-actions {
@@ -1061,8 +1065,8 @@ body.is-loaded .hero-specialty-line {
   margin-bottom: 2.1rem;
   opacity: 0;
   transform: translate3d(0, 18px, 0);
-  transition: opacity 0.8s var(--ease-cinematic) 1.1s,
-    transform 0.8s var(--ease-cinematic) 1.1s;
+  transition: opacity 0.8s var(--ease-cinematic) 0.4s,
+    transform 0.8s var(--ease-cinematic) 0.4s;
 }
 
 body.is-loaded .hero-actions {
@@ -1194,8 +1198,8 @@ body.is-loaded .hero-actions {
   font-variant-numeric: tabular-nums;
   opacity: 0;
   transform: translate3d(0, 14px, 0);
-  transition: opacity 0.8s var(--ease-cinematic) 1.15s,
-    transform 0.8s var(--ease-cinematic) 1.15s;
+  transition: opacity 0.8s var(--ease-cinematic) 0.45s,
+    transform 0.8s var(--ease-cinematic) 0.45s;
 }
 
 body.is-loaded .hero-proof-strip {
@@ -1244,7 +1248,7 @@ body.is-loaded .hero-proof-strip {
   );
   filter: blur(34px);
   opacity: 0;
-  transition: opacity 1.1s var(--ease-cinematic) 1.2s;
+  transition: opacity 1.1s var(--ease-cinematic) 0.18s;
   pointer-events: none;
 }
 
@@ -1252,7 +1256,7 @@ body.is-loaded .profile-aura {
   opacity: 0.85;
 }
 
-/* 1.20s: Profile Mask & Scale Reveal Rig */
+/* 0.18s: Profile Mask & Scale Reveal Rig */
 .profile-tilt-rig {
   position: relative;
   width: 100%;
@@ -1261,9 +1265,9 @@ body.is-loaded .profile-aura {
   clip-path: inset(14% 8% 14% 8% round 26px);
   transform: scale(0.92) translate3d(0, 24px, 0);
   opacity: 0;
-  transition: clip-path 1.15s var(--ease-cinematic) 1.2s,
-    opacity 0.95s var(--ease-cinematic) 1.2s,
-    transform 0.95s var(--ease-cinematic) 1.2s;
+  transition: clip-path 1.05s var(--ease-cinematic) 0.18s,
+    opacity 0.9s var(--ease-cinematic) 0.18s,
+    transform 0.9s var(--ease-cinematic) 0.18s;
 }
 
 body.is-loaded .profile-tilt-rig {
@@ -1273,8 +1277,8 @@ body.is-loaded .profile-tilt-rig {
 }
 
 body.is-loaded.tilt-ready .profile-tilt-rig {
-  transition: clip-path 1.15s var(--ease-cinematic) 1.2s,
-    opacity 0.95s var(--ease-cinematic) 1.2s;
+  transition: clip-path 1.05s var(--ease-cinematic) 0.18s,
+    opacity 0.9s var(--ease-cinematic) 0.18s;
 }
 
 /* Glassmorphic Profile Frame */
@@ -1372,7 +1376,7 @@ body.is-loaded.tilt-ready .profile-tilt-rig {
   object-fit: cover;
   object-position: 50% 12%;
   transform: scale(1.06);
-  transition: transform 1.3s var(--ease-cinematic) 1.2s,
+  transition: transform 1.15s var(--ease-cinematic) 0.18s,
     filter 0.5s var(--ease-cinematic);
 }
 
@@ -1475,8 +1479,8 @@ body.is-loaded .profile-image {
   box-shadow: 0 14px 32px -10px rgba(0, 0, 0, 0.65);
   opacity: 0;
   transform: translate3d(0, 16px, 0) scale(0.94);
-  transition: opacity 0.85s var(--ease-cinematic) 1.4s,
-    transform 0.85s var(--ease-cinematic) 1.4s,
+  transition: opacity 0.8s var(--ease-cinematic) 0.42s,
+    transform 0.8s var(--ease-cinematic) 0.42s,
     border-color 0.25s var(--ease-cinematic);
   will-change: transform, opacity;
   white-space: nowrap;
@@ -1574,8 +1578,8 @@ body.is-loaded.motion-ready .floating-node--bl .node-body {
   align-items: center;
   gap: 0.55rem;
   opacity: 0;
-  transition: opacity 0.85s var(--ease-cinematic) 1.4s,
-    transform 0.85s var(--ease-cinematic) 1.4s;
+  transition: opacity 0.8s var(--ease-cinematic) 0.48s,
+    transform 0.8s var(--ease-cinematic) 0.48s;
 }
 
 body.is-loaded .scroll-indicator {
@@ -8440,28 +8444,38 @@ html[data-theme="light"] .gsap-image-curtain {
 .dnyl-intro {
   position: fixed;
   inset: 0;
-  z-index: 9500;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 9990;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   perspective: 1200px;
+  background-color: #030408;
   user-select: none;
   pointer-events: auto;
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.45s var(--ease-cinematic),
-    visibility 0.45s var(--ease-cinematic);
+  transition: opacity 0.42s var(--ease-cinematic),
+    visibility 0.42s var(--ease-cinematic),
+    background-color 0.15s ease;
+}
+
+.dnyl-intro.is-exiting {
+  background-color: transparent;
 }
 
 .dnyl-intro.is-complete {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .dnyl-intro.is-removed {
   display: none !important;
+  pointer-events: none !important;
 }
 
 /* Split Curtain Panels for Scene 5 Hero Reveal */
@@ -9301,11 +9315,29 @@ html[data-theme="light"] .intro-curtain {
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .dnyl-intro {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-void-radial,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-geo-line,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-geo-corner,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-geo-coord,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-bg-monolith,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-horizon-line,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-dnyl-glyph,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-dnyl-dot,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-kicker-inner,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-char,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-identity-label,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-identity-sep,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-title-word,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-domains-inner,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-identity-underline {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-svg-frame-path,
+  .dnyl-intro:not(.is-complete):not(.is-removed) .intro-svg-accent-path {
+    stroke-dashoffset: 0 !important;
   }
 
   *,
