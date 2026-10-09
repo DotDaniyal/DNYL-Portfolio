@@ -14,10 +14,74 @@
       content="Full-Stack Developer &amp; Creative Builder architecting high-performance web platforms, native Android apps in Kotlin, and intelligent generative AI systems."
     />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Daniyal Hayat Portfolio" />
+    <meta property="og:image" content="assets/images/profile.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#05060a" />
+    <meta name="twitter:title" content="Daniyal Hayat — Full-Stack Developer &amp; Creative Builder" />
+    <meta
+      name="twitter:description"
+      content="Full-Stack Developer &amp; Creative Builder architecting high-performance web platforms, native Android apps in Kotlin, and intelligent generative AI systems."
+    />
+    <meta name="twitter:image" content="assets/images/profile.jpg" />
+    <meta name="theme-color" content="#05060a" id="meta-theme-color" />
     <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
     <link rel="stylesheet" href="css/style.css" />
+    <!-- Zero-Flash Theme Initialization (localStorage + prefers-color-scheme) -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("daniyal_portfolio_theme");
+          var prefersLight =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: light)").matches;
+          var theme =
+            saved === "light" || saved === "dark"
+              ? saved
+              : prefersLight
+                ? "light"
+                : "dark";
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (_e) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+    <!-- Schema.org Structured Data (100% Real Portfolio Data) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Daniyal Hayat",
+        "alternateName": "Dnyl",
+        "jobTitle": "Full-Stack Developer & Creative Builder",
+        "url": "https://daniyal-hayat-portfolio.vercel.app/",
+        "email": "mailto:mdaniyalhayyat@gmail.com",
+        "telephone": "+923331001904",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "PK"
+        },
+        "sameAs": [
+          "https://github.com/DotDaniyal",
+          "https://daniyal-hayat-portfolio.vercel.app/"
+        ],
+        "knowsAbout": [
+          "React",
+          "Next.js",
+          "TypeScript",
+          "JavaScript",
+          "Node.js",
+          "Kotlin",
+          "Android SDK",
+          "Google Gemini AI",
+          "Google AI Studio",
+          "Tailwind CSS",
+          "HTML5",
+          "CSS3",
+          "UI/UX Engineering"
+        ]
+      }
+    </script>
     <script src="js/script.js" defer></script>
   </head>
   <body class="is-loading">
@@ -41,17 +105,23 @@
       <div class="backdrop-vignette"></div>
     </div>
 
-    <!-- Top Navigation Bar (0.20s Reveal | 3-Zone Contract) -->
+    <!-- Top Navigation Bar (0.20s Reveal | 3-Zone Contract + Scroll Progress) -->
     <header class="site-header" id="site-header">
+      <!-- 60fps Viewport Scroll Progress Bar -->
+      <div class="scroll-progress-track" aria-hidden="true">
+        <div class="scroll-progress-bar" id="scroll-progress-bar"></div>
+      </div>
+
       <div class="header-inner">
         <!-- Zone 1: Single Text Brand Wordmark -->
-        <a href="#hero" class="brand-wordmark" data-magnetic="0.18" aria-label="Daniyal Hayat Home">
+        <a href="#hero" class="brand-wordmark" aria-label="Daniyal Hayat Home">
           DANIYAL HAYAT
         </a>
 
-        <!-- Zone 2: Primary Navigation Links (Placeholder section IDs for upcoming sections) -->
+        <!-- Zone 2: Primary Navigation Links (All 7 Core Portfolio Sections) -->
         <nav class="primary-nav" id="primary-nav" aria-label="Primary Navigation">
           <ul class="nav-list">
+            <li><a href="#hero" class="nav-link is-active" data-section="Home">Home</a></li>
             <li><a href="#about" class="nav-link" data-section="About">About</a></li>
             <li><a href="#skills" class="nav-link" data-section="Skills">Skills</a></li>
             <li><a href="#projects" class="nav-link" data-section="Projects">Projects</a></li>
@@ -61,15 +131,40 @@
           </ul>
         </nav>
 
-        <!-- Zone 3: Primary Action + Mobile Hamburger -->
+        <!-- Zone 3: Theme Toggle + Primary Action + Mobile Hamburger -->
         <div class="header-actions">
+          <button
+            type="button"
+            class="theme-toggle-btn"
+            id="theme-toggle"
+            aria-label="Toggle dark and light theme"
+            aria-pressed="false"
+            title="Switch color theme"
+          >
+            <!-- Sun Icon (Shown in Dark Mode to switch to Light) -->
+            <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2" />
+              <path d="M12 20v2" />
+              <path d="m4.93 4.93 1.41 1.41" />
+              <path d="m17.66 17.66 1.41 1.41" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="m6.34 17.66-1.41 1.41" />
+              <path d="m19.07 4.93-1.41 1.41" />
+            </svg>
+            <!-- Moon Icon (Shown in Light Mode to switch to Dark) -->
+            <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            </svg>
+          </button>
+
           <a
             href="https://github.com/DotDaniyal"
             target="_blank"
             rel="noopener noreferrer"
             class="header-action-link"
-            data-magnetic="0.22"
-            data-cursor-text="GITHUB"
+            data-cursor-text="OPEN"
             aria-label="Daniyal Hayat GitHub (@DotDaniyal)"
           >
             <span>@DotDaniyal</span>
@@ -97,15 +192,17 @@
       <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
         <nav class="mobile-nav" aria-label="Mobile Navigation">
           <ul class="mobile-nav-list">
-            <li><a href="#about" class="mobile-nav-link" data-section="About">01. About</a></li>
-            <li><a href="#skills" class="mobile-nav-link" data-section="Skills">02. Skills</a></li>
-            <li><a href="#projects" class="mobile-nav-link" data-section="Projects">03. Projects</a></li>
-            <li><a href="#experience" class="mobile-nav-link" data-section="Experience">04. Experience</a></li>
-            <li><a href="#services" class="mobile-nav-link" data-section="Services">05. Services</a></li>
-            <li><a href="#contact" class="mobile-nav-link" data-section="Contact">06. Contact</a></li>
+            <li><a href="#hero" class="mobile-nav-link is-active" data-section="Home">01. Home</a></li>
+            <li><a href="#about" class="mobile-nav-link" data-section="About">02. About</a></li>
+            <li><a href="#skills" class="mobile-nav-link" data-section="Skills">03. Skills</a></li>
+            <li><a href="#projects" class="mobile-nav-link" data-section="Projects">04. Projects</a></li>
+            <li><a href="#experience" class="mobile-nav-link" data-section="Experience">05. Experience</a></li>
+            <li><a href="#services" class="mobile-nav-link" data-section="Services">06. Services</a></li>
+            <li><a href="#contact" class="mobile-nav-link" data-section="Contact">07. Contact</a></li>
           </ul>
           <div class="mobile-drawer-footer">
             <a href="mailto:mdaniyalhayyat@gmail.com" class="mobile-mail-link">mdaniyalhayyat@gmail.com</a>
+            <a href="tel:+923331001904" class="mobile-mail-link">+92 333 1001904</a>
             <a href="https://github.com/DotDaniyal" target="_blank" rel="noopener noreferrer" class="mobile-social-link">
               GitHub · @DotDaniyal
             </a>
@@ -171,8 +268,8 @@
                   href="#projects"
                   class="cta-btn cta-btn--primary"
                   id="btn-view-work"
-                  data-magnetic="0.28"
-                  data-cursor-text="EXPLORE"
+                  data-magnetic="0.24"
+                  data-cursor-text="VIEW"
                 >
                   <span class="cta-border-glow" aria-hidden="true"></span>
                   <span class="cta-text">VIEW MY WORK</span>
@@ -185,11 +282,11 @@
                 </a>
 
                 <a
-                  href="mailto:mdaniyalhayyat@gmail.com"
+                  href="#contact"
                   class="cta-btn cta-btn--secondary"
                   id="btn-contact-me"
-                  data-magnetic="0.28"
-                  data-cursor-text="EMAIL"
+                  data-magnetic="0.22"
+                  data-cursor-text="CLICK"
                 >
                   <span class="cta-text">CONTACT ME</span>
                   <span class="cta-icon" aria-hidden="true">
@@ -205,7 +302,6 @@
                   class="cta-copy-email"
                   id="btn-copy-email"
                   data-email="mdaniyalhayyat@gmail.com"
-                  data-magnetic="0.2"
                   aria-label="Copy email address mdaniyalhayyat@gmail.com"
                   title="Copy mdaniyalhayyat@gmail.com"
                 >
@@ -368,10 +464,10 @@
         <div class="about-ambient-glow" id="about-ambient-glow" aria-hidden="true"></div>
 
         <div class="about-container">
-          <!-- Section Header: 01 — ABOUT ME + Monumental Line-by-Line Heading -->
+          <!-- Section Header: 02 — ABOUT ME + Monumental Line-by-Line Heading -->
           <header class="about-header">
             <div class="about-eyebrow" data-scroll-reveal="eyebrow">
-              <span class="about-section-num">01</span>
+              <span class="about-section-num">02</span>
               <span class="about-section-Rule" aria-hidden="true"></span>
               <span class="about-section-label">ABOUT ME</span>
               <span class="about-section-sep" aria-hidden="true">·</span>
@@ -403,7 +499,7 @@
                   <span class="deco-line deco-line--left"></span>
                   <span class="deco-corner deco-corner--tl"></span>
                   <span class="deco-corner deco-corner--br"></span>
-                  <span class="deco-coord">SYS // 01 · DANIYAL.HAYAT</span>
+                  <span class="deco-coord">SYS // 02 · DANIYAL.HAYAT</span>
                 </div>
 
                 <!-- Soft Ambient Gradient Lighting Behind Frame -->

@@ -98,15 +98,144 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 4. NAVIGATION SCROLL STATE & MOBILE HAMBURGER MENU
+  // 4. THEME SYSTEM (DARK / LIGHT MODE + LOCALSTORAGE + PREFERS-COLOR-SCHEME)
+  //    & NAVIGATION SCROLL PROGRESS + MOBILE HAMBURGER MENU
   // ---------------------------------------------------------------------------
-  function updateHeaderScroll() {
-    if (!header) return;
-    if (window.scrollY > 20) {
-      header.classList.add("is-scrolled");
-    } else {
-      header.classList.remove("is-scrolled");
+  const THEME_STORAGE_KEY = "daniyal_portfolio_theme";
+  const themeToggleBtn = document.getElementById("theme-toggle");
+  const metaThemeColor = document.getElementById("meta-theme-color");
+  const scrollProgressBar = document.getElementById("scroll-progress-bar");
+
+  function applyTheme(theme, persistManual) {
+    const validTheme = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", validTheme);
+    if (themeToggleBtn) {
+      themeToggleBtn.setAttribute(
+        "aria-pressed",
+        String(validTheme === "light")
+      );
+      themeToggleBtn.setAttribute(
+        "title",
+        validTheme === "light"
+          ? "Switch to Dark Mode"
+          : "Switch to Light Mode"
+      );
     }
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute(
+        "content",
+        validTheme === "light" ? "#f5f4ee" : "#05060a"
+      );
+    }
+    if (persistManual) {
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, validTheme);
+      } catch {
+        // Ignore storage restrictions
+      }
+    }
+  }
+
+  // Initialize theme state on load
+  (function initThemeState() {
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    } catch {
+      storedTheme = null;
+    }
+
+    if (storedTheme === "light" || storedTheme === "dark") {
+      applyTheme(storedTheme, false);
+    } else {
+      const prefersLight =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: light)").matches;
+      applyTheme(prefersLight ? "light" : "dark", false);
+    }
+
+    // Listen for system prefers-color-scheme changes if no manual override exists
+    if (window.matchMedia) {
+      const colorSchemeQuery = window.matchMedia(
+        "(prefers-color-scheme: light)"
+      );
+      const handleSystemSchemeChange = (e) => {
+        try {
+          const manual = localStorage.getItem(THEME_STORAGE_KEY);
+          if (manual !== "light" && manual !== "dark") {
+            applyTheme(e.matches ? "light" : "dark", false);
+          }
+        } catch {
+          applyTheme(e.matches ? "light" : "dark", false);
+        }
+      };
+      if (colorSchemeQuery.addEventListener) {
+        colorSchemeQuery.addEventListener("change", handleSystemSchemeChange);
+      }
+    }
+  })();
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener("click", () => {
+      const current =
+        document.documentElement.getAttribute("data-theme") === "light"
+          ? "light"
+          : "dark";
+      const next = current === "light" ? "dark" : "light";
+      applyTheme(next, true);
+      showToast(
+        next === "light"
+          ? "Switched to Warm Ivory Light Mode (saved to localStorage)."
+          : "Switched to Obsidian Dark Mode (saved to localStorage)."
+      );
+    });
+  }
+
+  const trackedSections = [
+    "hero",
+    "about",
+    "skills",
+    "projects",
+    "experience",
+    "services",
+    "contact"
+  ];
+
+  function updateHeaderScroll() {
+    const scrollY = window.scrollY;
+    if (header) {
+      if (scrollY > 20) {
+        header.classList.add("is-scrolled");
+      } else {
+        header.classList.remove("is-scrolled");
+      }
+    }
+
+    // Update 60fps transform-based scroll progress bar
+    if (scrollProgressBar) {
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const ratio =
+        docHeight > 0 ? Math.max(0, Math.min(1, scrollY / docHeight)) : 0;
+      scrollProgressBar.style.transform = `scaleX(${ratio.toFixed(4)})`;
+    }
+
+    // Unified ScrollSpy across all 7 navigation sections
+    const viewportMid = scrollY + window.innerHeight * 0.34;
+    let activeId = "hero";
+    for (let i = 0; i < trackedSections.length; i++) {
+      const secEl = document.getElementById(trackedSections[i]);
+      if (secEl && secEl.offsetTop <= viewportMid) {
+        activeId = trackedSections[i];
+      }
+    }
+
+    document
+      .querySelectorAll(".nav-link, .mobile-nav-link")
+      .forEach((navItem) => {
+        const href = navItem.getAttribute("href");
+        navItem.classList.toggle("is-active", href === `#${activeId}`);
+      });
   }
 
   window.addEventListener("scroll", updateHeaderScroll, { passive: true });
@@ -127,7 +256,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 5. WORKING INTERACTIVE HANDLERS FOR PLACEHOLDER SECTIONS & EMAIL COPY
+  // 5. SMOOTH SECTION NAVIGATION & EMAIL COPY
   // ---------------------------------------------------------------------------
   let toastTimer = null;
 
@@ -153,36 +282,23 @@
     toastClose.addEventListener("click", hideToast);
   }
 
-  // Handle placeholder section anchors (#about, #skills, #projects, #experience, #contact)
+  // Handle section anchor links smoothly & close mobile menu
   const sectionLinks = document.querySelectorAll(
     'a[href^="#"]:not(.skip-link)'
   );
   sectionLinks.forEach((link) => {
     link.addEventListener("click", (event) => {
       const targetHref = link.getAttribute("href");
-      if (!targetHref || targetHref === "#hero") {
-        setMobileMenuState(false);
-        return;
-      }
-
-      const targetEl = document.querySelector(targetHref);
       setMobileMenuState(false);
 
-      if (!targetEl) {
+      if (!targetHref || targetHref === "#") return;
+      const targetEl = document.querySelector(targetHref);
+      if (targetEl) {
         event.preventDefault();
-        const label =
-          link.getAttribute("data-section") ||
-          targetHref.replace("#", "").toUpperCase();
-
-        if (targetHref === "#projects") {
-          showToast(
-            "Projects section is queued for Phase 2. Meanwhile, inspect Daniyal Hayat’s 7+ live repositories on GitHub (@DotDaniyal)."
-          );
-        } else {
-          showToast(
-            `${label} section will be built next in the Hero → ${label} progression. Hero section is active.`
-          );
-        }
+        targetEl.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start"
+        });
       }
     });
   });
@@ -288,6 +404,36 @@
       { passive: true }
     );
 
+    // Normalize cursor interactive labels strictly to VIEW, OPEN, CLICK, DRAG
+    function normalizeCursorLabel(raw) {
+      if (!raw) return "";
+      const upper = raw.trim().toUpperCase();
+      if (upper === "VIEW" || upper === "OPEN" || upper === "CLICK" || upper === "DRAG") {
+        return upper;
+      }
+      if (upper === "SIGNAL") return "DRAG";
+      if (
+        upper.includes("LIVE") ||
+        upper.includes("PLAY") ||
+        upper.includes("INSPECT") ||
+        upper.includes("EXPLORE") ||
+        upper.includes("//")
+      ) {
+        return "VIEW";
+      }
+      if (
+        upper.includes("GITHUB") ||
+        upper.includes("WEB") ||
+        upper.includes("EMAIL") ||
+        upper.includes("MAIL") ||
+        upper.includes("CALL") ||
+        upper.includes("DIAL")
+      ) {
+        return "OPEN";
+      }
+      return "CLICK";
+    }
+
     // Interactive cursor hover states
     const interactiveElements = document.querySelectorAll(
       "a, button, .floating-node, .profile-frame, .about-info-card, .about-float-card, .about-glass-frame, .skill-card, .skill-filter-btn, .project-monolith, .project-filter-btn, .archive-card, .timeline-card, .journey-currently-card, .currently-action-btn, .service-card, .srv-stage-tab, .service-action-link, .contact-orb-card, .contact-channel-item, .contact-social-btn, .contact-input, .channel-copy-btn, .footer-back-top-btn, .footer-nav-link, .footer-ext-link, .footer-contact-link, .footer-monument-wrap"
@@ -295,7 +441,8 @@
     interactiveElements.forEach((el) => {
       el.addEventListener("mouseenter", () => {
         body.classList.add("cursor-hover");
-        const labelText = el.getAttribute("data-cursor-text");
+        const rawLabel = el.getAttribute("data-cursor-text");
+        const labelText = normalizeCursorLabel(rawLabel);
         if (labelText && cursorLabel) {
           cursorLabel.textContent = labelText;
           body.classList.add("cursor-labeled");
@@ -310,18 +457,27 @@
       });
     });
 
-    // Magnetic Effect on CTA buttons & brand links
+    // Subtle Magnetic Effect on CTA buttons (Strictly clamped to max 8px so clicking is effortless)
+    const MAX_MAGNETIC_PX = 8;
     const magneticElements = document.querySelectorAll("[data-magnetic]");
     magneticElements.forEach((el) => {
-      const strength = parseFloat(el.getAttribute("data-magnetic") || "0.25");
+      const strength = parseFloat(el.getAttribute("data-magnetic") || "0.22");
 
       el.addEventListener("mousemove", (event) => {
         const rect = el.getBoundingClientRect();
         const offsetX = event.clientX - (rect.left + rect.width / 2);
         const offsetY = event.clientY - (rect.top + rect.height / 2);
-        el.style.transform = `translate3d(${(offsetX * strength).toFixed(
+        const moveX = Math.max(
+          -MAX_MAGNETIC_PX,
+          Math.min(MAX_MAGNETIC_PX, offsetX * strength)
+        );
+        const moveY = Math.max(
+          -MAX_MAGNETIC_PX,
+          Math.min(MAX_MAGNETIC_PX, offsetY * strength)
+        );
+        el.style.transform = `translate3d(${moveX.toFixed(2)}px, ${moveY.toFixed(
           2
-        )}px, ${(offsetY * strength).toFixed(2)}px, 0)`;
+        )}px, 0)`;
       });
 
       el.addEventListener("mouseleave", () => {
@@ -505,8 +661,6 @@
     const statNumbers = Array.from(
       document.querySelectorAll(".about-stat-number[data-count-to]")
     );
-    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
-    const aboutSection = document.getElementById("about");
 
     if (prefersReducedMotion) {
       revealNodes.forEach((el) => el.classList.add("is-inview"));
@@ -539,23 +693,6 @@
       );
 
       revealNodes.forEach((el) => revealObserver.observe(el));
-
-      // Active navigation link state on scroll
-      if (aboutSection) {
-        const navObserver = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              navLinks.forEach((link) => {
-                if (link.getAttribute("href") === "#about") {
-                  link.classList.toggle("is-active", entry.isIntersecting);
-                }
-              });
-            });
-          },
-          { threshold: 0.28 }
-        );
-        navObserver.observe(aboutSection);
-      }
     } else {
       revealNodes.forEach((el) => el.classList.add("is-inview"));
       statNumbers.forEach((numEl) => animateStatCounter(numEl));
@@ -670,7 +807,6 @@
     const filterBtns = Array.from(
       skillsSection.querySelectorAll(".skill-filter-btn[data-filter]")
     );
-    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
 
     if (prefersReducedMotion) {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
@@ -711,24 +847,6 @@
       );
 
       skillCards.forEach((card) => cardObserver.observe(card));
-
-      // 3. Active Navigation Highlight for #skills
-      const skillsNavObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              navLinks.forEach((link) => {
-                link.classList.toggle(
-                  "is-active",
-                  link.getAttribute("href") === "#skills"
-                );
-              });
-            }
-          });
-        },
-        { threshold: 0.22 }
-      );
-      skillsNavObserver.observe(skillsSection);
     } else {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
       skillCards.forEach((card) => card.classList.add("is-inview"));
@@ -1347,7 +1465,6 @@
         ".project-filter-btn[data-project-filter]"
       )
     );
-    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
 
     // 1. Scroll Reveal Observers
     if (prefersReducedMotion) {
@@ -1384,24 +1501,6 @@
         { threshold: 0.12, rootMargin: "0px 0px -4% 0px" }
       );
       allProjectItems.forEach((el) => projectObs.observe(el));
-
-      // Active navigation highlight for #projects
-      const projectsNavObs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              navLinks.forEach((link) => {
-                link.classList.toggle(
-                  "is-active",
-                  link.getAttribute("href") === "#projects"
-                );
-              });
-            }
-          });
-        },
-        { threshold: 0.15 }
-      );
-      projectsNavObs.observe(projectsSection);
     } else {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
       allProjectItems.forEach((el) => el.classList.add("is-inview"));
@@ -1676,7 +1775,6 @@
     const currentlyCard = journeySection.querySelector(
       ".journey-currently-card"
     );
-    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
 
     // 1. Scroll Reveal Observers
     if (prefersReducedMotion) {
@@ -1728,24 +1826,6 @@
         );
         currentlyObs.observe(currentlyWrap);
       }
-
-      // Active navigation highlight for #experience (05 — Experience / Journey)
-      const journeyNavObs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              navLinks.forEach((link) => {
-                link.classList.toggle(
-                  "is-active",
-                  link.getAttribute("href") === "#experience"
-                );
-              });
-            }
-          });
-        },
-        { threshold: 0.16 }
-      );
-      journeyNavObs.observe(journeySection);
     } else {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
       milestoneItems.forEach((el) => {
@@ -1898,7 +1978,6 @@
     const filterTriggerLinks = Array.from(
       servicesSection.querySelectorAll("[data-service-filter-trigger]")
     );
-    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
 
     // 1. Scroll Reveal Choreography
     if (prefersReducedMotion) {
@@ -1951,24 +2030,6 @@
         );
         stageObs.observe(visualCol);
       }
-
-      // Active navigation highlight for #services
-      const servicesNavObs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              navLinks.forEach((link) => {
-                link.classList.toggle(
-                  "is-active",
-                  link.getAttribute("href") === "#services"
-                );
-              });
-            }
-          });
-        },
-        { threshold: 0.16 }
-      );
-      servicesNavObs.observe(servicesSection);
     } else {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
       serviceCards.forEach((el) => el.classList.add("is-inview"));
@@ -2202,7 +2263,6 @@
     const startConversationBtn = document.getElementById(
       "btn-start-conversation"
     );
-    const navLinks = Array.from(document.querySelectorAll(".nav-link"));
 
     // 1. Scroll Reveal Choreography
     if (prefersReducedMotion) {
@@ -2252,24 +2312,6 @@
         { threshold: 0.14, rootMargin: "0px 0px -4% 0px" }
       );
       infoNodes.forEach((el) => infoObs.observe(el));
-
-      // Active navigation highlight for #contact
-      const contactNavObs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              navLinks.forEach((link) => {
-                link.classList.toggle(
-                  "is-active",
-                  link.getAttribute("href") === "#contact"
-                );
-              });
-            }
-          });
-        },
-        { threshold: 0.16 }
-      );
-      contactNavObs.observe(contactSection);
     } else {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
       if (orbCard) orbCard.classList.add("is-inview");
@@ -2479,6 +2521,57 @@
       return !hasErr;
     }
 
+    const CONTACT_DRAFT_KEY = "daniyal_portfolio_contact_draft";
+
+    function saveDraftToStorage() {
+      try {
+        const draft = {
+          name: nameInput ? nameInput.value : "",
+          email: emailInput ? emailInput.value : "",
+          subject: subjectInput ? subjectInput.value : "",
+          message: messageInput ? messageInput.value : ""
+        };
+        localStorage.setItem(CONTACT_DRAFT_KEY, JSON.stringify(draft));
+      } catch {
+        // Ignore storage quota errors
+      }
+    }
+
+    function clearDraftFromStorage() {
+      try {
+        localStorage.removeItem(CONTACT_DRAFT_KEY);
+      } catch {
+        // Ignore storage errors
+      }
+    }
+
+    // Restore any saved contact draft safely on load
+    (function restoreSavedDraft() {
+      try {
+        const raw = localStorage.getItem(CONTACT_DRAFT_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return;
+        if (nameInput && typeof parsed.name === "string" && parsed.name) {
+          nameInput.value = parsed.name;
+        }
+        if (emailInput && typeof parsed.email === "string" && parsed.email) {
+          emailInput.value = parsed.email;
+        }
+        if (subjectInput && typeof parsed.subject === "string" && parsed.subject) {
+          subjectInput.value = parsed.subject;
+        }
+        if (messageInput && typeof parsed.message === "string" && parsed.message) {
+          messageInput.value = parsed.message;
+          if (charCount) {
+            charCount.textContent = `${parsed.message.length} / 5000`;
+          }
+        }
+      } catch {
+        // Safe fallback if corrupted
+      }
+    })();
+
     fieldsConfig.forEach((cfg) => {
       if (!cfg.input || !cfg.wrap) return;
       syncFloatingState(cfg);
@@ -2497,6 +2590,7 @@
 
       cfg.input.addEventListener("input", () => {
         syncFloatingState(cfg);
+        saveDraftToStorage();
         if (cfg.key === "message" && charCount) {
           charCount.textContent = `${cfg.input.value.length} / 5000`;
         }
@@ -2563,6 +2657,7 @@
         }
 
         updateStorageBadge();
+        clearDraftFromStorage();
 
         lastFormattedMessage = [
           `To: Daniyal Hayat (mdaniyalhayyat@gmail.com)`,
@@ -2631,6 +2726,7 @@
         contactForm.reset();
         contactForm.classList.remove("is-hidden");
       }
+      clearDraftFromStorage();
       if (charCount) {
         charCount.textContent = "0 / 5000";
       }
