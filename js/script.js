@@ -683,6 +683,32 @@
         finalizeIntroOverlay();
       }
     }, 3000);
+
+    // Expose on-demand Replay Intro capability for Command Palette (⌘K) & Footer button
+    window.replayDnylIntro = function () {
+      if (!introEl) return;
+      clearAllIntroTimers();
+      if (masterIntroTl) {
+        masterIntroTl.kill();
+        masterIntroTl = null;
+      }
+      window.scrollTo({ top: 0, behavior: "auto" });
+      introFinished = false;
+      heroRevealed = false;
+      body.classList.remove("is-loaded", "tilt-ready", "motion-ready");
+      body.classList.add("is-loading");
+      introEl.classList.remove(
+        "is-complete",
+        "is-removed",
+        "is-exiting",
+        "scene-void",
+        "scene-signature",
+        "scene-name",
+        "scene-identity"
+      );
+      introEl.setAttribute("aria-hidden", "false");
+      initPageLoadSequence();
+    };
   }
 
   // ---------------------------------------------------------------------------
@@ -1177,7 +1203,8 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 7. SUBTLE FLOATING PARTICLES CANVAS (INTERSECTION OBSERVER PAUSE SUPPORT)
+  // 7. INTERACTIVE SPATIAL CONSTELLATION & NEURAL FILAMENT CANVAS
+  //    (3D Depth-Sorted Nodes, Mouse Proximity Filaments & Intersection Pause)
   // ---------------------------------------------------------------------------
   function initParticlesCanvas() {
     if (!particlesCanvas || prefersReducedMotion) return;
@@ -1187,6 +1214,8 @@
     let width = 0;
     let height = 0;
     let isHeroVisible = true;
+    let pointerX = -9999;
+    let pointerY = -9999;
 
     function resizeCanvas() {
       width = window.innerWidth;
@@ -1198,15 +1227,31 @@
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas, { passive: true });
 
-    const particleCount = Math.min(28, Math.floor(window.innerWidth / 48));
-    const particles = Array.from({ length: particleCount }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 1.35 + 0.45,
-      vx: (Math.random() - 0.5) * 0.18,
-      vy: -Math.random() * 0.22 - 0.05,
-      alpha: Math.random() * 0.38 + 0.12
-    }));
+    if (isFinePointer) {
+      window.addEventListener(
+        "mousemove",
+        (e) => {
+          pointerX = e.clientX;
+          pointerY = e.clientY;
+        },
+        { passive: true }
+      );
+    }
+
+    const particleCount = Math.min(36, Math.max(18, Math.floor(window.innerWidth / 42)));
+    const particles = Array.from({ length: particleCount }, (_, idx) => {
+      const depth = Math.random() * 0.75 + 0.25; // 0.25 (far) to 1.0 (near)
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        z: depth,
+        radius: (Math.random() * 1.35 + 0.55) * depth,
+        vx: (Math.random() - 0.5) * 0.24 * depth,
+        vy: (-Math.random() * 0.22 - 0.04) * depth,
+        alpha: (Math.random() * 0.36 + 0.14) * depth,
+        isAccent: idx % 4 === 0
+      };
+    });
 
     // Pause particle rendering when hero is scrolled out of view
     const heroSection = document.getElementById("hero");
@@ -1225,18 +1270,63 @@
     function drawParticles() {
       if (isHeroVisible && !document.hidden) {
         ctx.clearRect(0, 0, width, height);
+        const isLight =
+          document.documentElement.getAttribute("data-theme") === "light";
+        const linkDist = Math.min(145, width * 0.12);
+
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
           p.x += p.vx;
           p.y += p.vy;
 
-          if (p.y < -10) p.y = height + 10;
-          if (p.x < -10) p.x = width + 10;
-          if (p.x > width + 10) p.x = -10;
+          // Subtle mouse repulsion / orbital drift on desktop
+          if (isFinePointer && pointerX > 0) {
+            const dxMouse = p.x - pointerX;
+            const dyMouse = p.y - pointerY;
+            const distSq = dxMouse * dxMouse + dyMouse * dyMouse;
+            if (distSq < 22500 && distSq > 1) {
+              const dist = Math.sqrt(distSq);
+              const force = ((150 - dist) / 150) * 0.32 * p.z;
+              p.x += (dxMouse / dist) * force;
+              p.y += (dyMouse / dist) * force;
+            }
+          }
+
+          if (p.y < -12) p.y = height + 12;
+          if (p.y > height + 12) p.y = -12;
+          if (p.x < -12) p.x = width + 12;
+          if (p.x > width + 12) p.x = -12;
+
+          // Connect nearby constellation nodes with delicate filaments
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < linkDist) {
+              const lineAlpha = (1 - dist / linkDist) * 0.11 * ((p.z + p2.z) * 0.5);
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = isLight
+                ? `rgba(2, 132, 199, ${lineAlpha.toFixed(3)})`
+                : `rgba(56, 189, 248, ${lineAlpha.toFixed(3)})`;
+              ctx.lineWidth = 0.65;
+              ctx.stroke();
+            }
+          }
 
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(226, 232, 240, ${p.alpha})`;
+          if (p.isAccent) {
+            ctx.fillStyle = isLight
+              ? `rgba(2, 132, 199, ${p.alpha})`
+              : `rgba(56, 189, 248, ${p.alpha})`;
+          } else {
+            ctx.fillStyle = isLight
+              ? `rgba(30, 41, 59, ${p.alpha * 0.75})`
+              : `rgba(226, 232, 240, ${p.alpha})`;
+          }
           ctx.fill();
         }
       }
@@ -2132,31 +2222,86 @@
       allProjectItems.forEach((el) => el.classList.add("is-inview"));
     }
 
-    // 2. Domain Category Filter System
+    // 2. Domain Category Filter + Real-Time Search & Stack Telemetry System
     let activeProjectFilter = "all";
+    let activeSearchQuery = "";
     let projFilterTimer = null;
 
-    function applyProjectFilter(category) {
-      if (category === activeProjectFilter) return;
-      activeProjectFilter = category;
+    const searchInput = document.getElementById("project-search-input");
+    const searchClearBtn = document.getElementById("project-search-clear");
+    const matchCountEl = document.getElementById("project-match-count");
+    const emptyStateEl = document.getElementById("projects-empty-state");
+    const resetFiltersBtn = document.getElementById("projects-reset-filters-btn");
+    const archiveHeadEl = projectsSection.querySelector(".projects-archive-head");
 
+    function doesProjectMatch(item, category, rawQuery) {
+      const tags = (item.getAttribute("data-project-tags") || "").split(" ");
+      const catMatch = category === "all" || tags.includes(category);
+      if (!catMatch) return false;
+
+      const q = rawQuery.trim().toLowerCase();
+      if (!q) return true;
+
+      const projId = item.getAttribute("data-project-id") || "";
+      const projData = REAL_PROJECTS_DATA[projId];
+      const textCorpus = [
+        item.textContent || "",
+        projData ? projData.title : "",
+        projData ? projData.category : "",
+        projData ? projData.language : "",
+        projData ? (projData.technologies || []).join(" ") : "",
+        projData ? projData.overview : ""
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return textCorpus.includes(q);
+    }
+
+    function updateSearchTelemetry(visibleCount, archiveVisibleCount) {
+      if (matchCountEl) {
+        const padded = String(visibleCount).padStart(2, "0");
+        matchCountEl.textContent = `SHOWING ${padded} / 12 VERIFIED BUILDS`;
+      }
+      if (emptyStateEl) {
+        emptyStateEl.hidden = visibleCount > 0;
+      }
+      if (archiveHeadEl) {
+        archiveHeadEl.style.display = archiveVisibleCount > 0 ? "" : "none";
+      }
+      if (searchClearBtn) {
+        searchClearBtn.hidden = activeSearchQuery.trim().length === 0;
+      }
+    }
+
+    function runCombinedProjectFilter(animateTransition) {
       filterBtns.forEach((btn) => {
         const isMatch =
-          btn.getAttribute("data-project-filter") === category;
+          btn.getAttribute("data-project-filter") === activeProjectFilter;
         btn.classList.toggle("is-active", isMatch);
         btn.setAttribute("aria-pressed", String(isMatch));
       });
 
-      if (prefersReducedMotion) {
+      if (prefersReducedMotion || !animateTransition) {
+        let visibleCount = 0;
+        let archiveVisibleCount = 0;
         allProjectItems.forEach((item) => {
-          const tags = (item.getAttribute("data-project-tags") || "").split(
-            " "
+          const show = doesProjectMatch(
+            item,
+            activeProjectFilter,
+            activeSearchQuery
           );
-          const show = category === "all" || tags.includes(category);
           item.classList.toggle("is-hidden-project", !show);
           item.classList.remove("is-filtering-out");
-          if (show) item.classList.add("is-inview");
+          if (show) {
+            item.classList.add("is-inview");
+            visibleCount++;
+            if (item.classList.contains("archive-card")) {
+              archiveVisibleCount++;
+            }
+          }
         });
+        updateSearchTelemetry(visibleCount, archiveVisibleCount);
         return;
       }
 
@@ -2169,15 +2314,20 @@
 
       projFilterTimer = window.setTimeout(() => {
         let visIdx = 0;
+        let archiveVisibleCount = 0;
         allProjectItems.forEach((item) => {
-          const tags = (item.getAttribute("data-project-tags") || "").split(
-            " "
+          const show = doesProjectMatch(
+            item,
+            activeProjectFilter,
+            activeSearchQuery
           );
-          const show = category === "all" || tags.includes(category);
           if (show) {
             item.classList.remove("is-hidden-project");
             item.style.transitionDelay = `${Math.min(visIdx * 55, 280)}ms`;
             visIdx++;
+            if (item.classList.contains("archive-card")) {
+              archiveVisibleCount++;
+            }
             requestAnimationFrame(() => {
               requestAnimationFrame(() => {
                 item.classList.remove("is-filtering-out");
@@ -2188,7 +2338,41 @@
             item.classList.add("is-hidden-project");
           }
         });
-      }, 210);
+        updateSearchTelemetry(visIdx, archiveVisibleCount);
+      }, 190);
+    }
+
+    function applyProjectFilter(category) {
+      if (category === activeProjectFilter && !activeSearchQuery) return;
+      activeProjectFilter = category;
+      runCombinedProjectFilter(true);
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        activeSearchQuery = searchInput.value || "";
+        runCombinedProjectFilter(false);
+      });
+    }
+
+    if (searchClearBtn) {
+      searchClearBtn.addEventListener("click", () => {
+        activeSearchQuery = "";
+        if (searchInput) {
+          searchInput.value = "";
+          searchInput.focus();
+        }
+        runCombinedProjectFilter(false);
+      });
+    }
+
+    if (resetFiltersBtn) {
+      resetFiltersBtn.addEventListener("click", () => {
+        activeProjectFilter = "all";
+        activeSearchQuery = "";
+        if (searchInput) searchInput.value = "";
+        runCombinedProjectFilter(true);
+      });
     }
 
     filterBtns.forEach((btn, idx) => {
@@ -2393,6 +2577,9 @@
         closeCaseStudyModal();
       }
     });
+
+    // Expose Case Study launcher for DNYL Command Palette (⌘K)
+    window.openDnylCaseStudy = openCaseStudyModal;
   }
 
   // ---------------------------------------------------------------------------
@@ -4490,6 +4677,396 @@
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // 17. DNYL INFINITY COMMAND PALETTE (⌘K / Ctrl+K) & REPLAY INTRO CONTROLLER
+  // ---------------------------------------------------------------------------
+  function initDnylCommandPalette() {
+    const paletteBackdrop = document.getElementById("dnyl-command-palette");
+    const triggerBtn = document.getElementById("cmd-palette-trigger");
+    const closeBtn = document.getElementById("cmd-palette-close");
+    const searchInput = document.getElementById("cmd-palette-input");
+    const resultsContainer = document.getElementById("cmd-palette-results");
+    const countLabel = document.getElementById("cmd-palette-count");
+    const replayFooterBtn = document.getElementById("footer-replay-intro-btn");
+
+    if (replayFooterBtn) {
+      replayFooterBtn.addEventListener("click", () => {
+        if (typeof window.replayDnylIntro === "function") {
+          window.replayDnylIntro();
+        }
+      });
+    }
+
+    if (!paletteBackdrop || !searchInput || !resultsContainer) return;
+
+    // Build real command registry from verified portfolio sections, system actions & 12 projects
+    const baseCommands = [
+      {
+        group: "NAVIGATION // PORTFOLIO SECTIONS",
+        tag: "01",
+        title: "Home & Hero Stage",
+        subtitle: "Daniyal Hayat — Full-Stack Developer & Creative Builder",
+        actionLabel: "JUMP →",
+        keywords: "home hero top intro daniyal hayat dnyl",
+        run: () => scrollToSection("#hero")
+      },
+      {
+        group: "NAVIGATION // PORTFOLIO SECTIONS",
+        tag: "02",
+        title: "About Me & Engineering Philosophy",
+        subtitle: "Architecture discipline, personal bio, and verified metrics",
+        actionLabel: "JUMP →",
+        keywords: "about bio philosophy stats metrics",
+        run: () => scrollToSection("#about")
+      },
+      {
+        group: "NAVIGATION // PORTFOLIO SECTIONS",
+        tag: "03",
+        title: "Skills & Technology Ecosystem Matrix",
+        subtitle: "20 verified technologies across Frontend, Mobile, AI & Tooling",
+        actionLabel: "JUMP →",
+        keywords: "skills stack react nextjs typescript kotlin android gemini tailwind",
+        run: () => scrollToSection("#skills")
+      },
+      {
+        group: "NAVIGATION // PORTFOLIO SECTIONS",
+        tag: "04",
+        title: "Selected Work & Production Archive",
+        subtitle: "12 flagship monoliths, mobile apps, and AI suites",
+        actionLabel: "JUMP →",
+        keywords: "projects work portfolio repositories github",
+        run: () => scrollToSection("#projects")
+      },
+      {
+        group: "NAVIGATION // PORTFOLIO SECTIONS",
+        tag: "05",
+        title: "Experience & Engineering Journey",
+        subtitle: "Chronological development milestones (2023 — 2026)",
+        actionLabel: "JUMP →",
+        keywords: "experience journey timeline milestones career",
+        run: () => scrollToSection("#experience")
+      },
+      {
+        group: "NAVIGATION // PORTFOLIO SECTIONS",
+        tag: "06",
+        title: "Services & Specialized Capabilities",
+        subtitle: "Web Platforms, Kotlin Android, Gemini AI & UI/UX Craft",
+        actionLabel: "JUMP →",
+        keywords: "services capabilities what i do hire",
+        run: () => scrollToSection("#services")
+      },
+      {
+        group: "NAVIGATION // PORTFOLIO SECTIONS",
+        tag: "07",
+        title: "Contact & Local Transmission Composer",
+        subtitle: "Direct email, phone (+92 333 1001904) & offline-first composer",
+        actionLabel: "JUMP →",
+        keywords: "contact email phone message hire collaborate",
+        run: () => scrollToSection("#contact")
+      },
+      {
+        group: "SYSTEM // INTERACTIVE CONTROLS",
+        tag: "PLAY",
+        title: "Replay Cinematic Intro (“Enter the World of DNYL”)",
+        subtitle: "Re-launch the 7-step GSAP opening title sequence",
+        actionLabel: "LAUNCH ↺",
+        keywords: "replay intro animation opening sequence dnyl",
+        run: () => {
+          if (typeof window.replayDnylIntro === "function") {
+            window.replayDnylIntro();
+          }
+        }
+      },
+      {
+        group: "SYSTEM // INTERACTIVE CONTROLS",
+        tag: "THEME",
+        title: "Toggle Dark / Light Color Theme",
+        subtitle: "Switch between Obsidian Dark and Warm Ivory Light mode",
+        actionLabel: "SWITCH ◐",
+        keywords: "theme dark light mode color appearance",
+        run: () => {
+          if (themeToggleBtn) themeToggleBtn.click();
+        }
+      },
+      {
+        group: "SYSTEM // INTERACTIVE CONTROLS",
+        tag: "MAIL",
+        title: "Copy Email Address (mdaniyalhayyat@gmail.com)",
+        subtitle: "Copy verified inbox address to clipboard",
+        actionLabel: "COPY ⎘",
+        keywords: "copy email mdaniyalhayyat gmail",
+        run: async () => {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText("mdaniyalhayyat@gmail.com");
+            }
+          } catch {
+            // Ignore clipboard errors
+          }
+          showToast("Copied mdaniyalhayyat@gmail.com to your clipboard.");
+        }
+      },
+      {
+        group: "SYSTEM // INTERACTIVE CONTROLS",
+        tag: "DIAL",
+        title: "Copy Phone Number (+92 333 1001904)",
+        subtitle: "Copy verified direct line to clipboard",
+        actionLabel: "COPY ⎘",
+        keywords: "copy phone call number +923331001904",
+        run: async () => {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText("+92 333 1001904");
+            }
+          } catch {
+            // Ignore clipboard errors
+          }
+          showToast("Copied +92 333 1001904 to your clipboard.");
+        }
+      },
+      {
+        group: "SYSTEM // INTERACTIVE CONTROLS",
+        tag: "CODE",
+        title: "Open GitHub Profile (@DotDaniyal)",
+        subtitle: "https://github.com/DotDaniyal",
+        actionLabel: "GITHUB ↗",
+        keywords: "github source code repositories dotdaniyal",
+        run: () => {
+          window.location.href = "https://github.com/DotDaniyal";
+        }
+      }
+    ];
+
+    const projectCommands = Object.keys(REAL_PROJECTS_DATA).map((projId) => {
+      const p = REAL_PROJECTS_DATA[projId];
+      return {
+        group: "DEEP-DIVE CASE STUDIES // 12 VERIFIED PROJECTS",
+        tag: `P·${p.index}`,
+        title: p.title,
+        subtitle: `${p.category} · ${(p.technologies || []).slice(0, 4).join(" · ")}`,
+        actionLabel: "INSPECT +",
+        keywords: `${p.title} ${p.category} ${p.language} ${(p.technologies || []).join(" ")}`.toLowerCase(),
+        run: () => {
+          scrollToSection("#projects");
+          if (typeof window.openDnylCaseStudy === "function") {
+            window.openDnylCaseStudy(projId, triggerBtn);
+          }
+        }
+      };
+    });
+
+    const allCommands = [...baseCommands, ...projectCommands];
+    let filteredCommands = [...allCommands];
+    let selectedIndex = 0;
+    let lastFocusBeforePalette = null;
+
+    function scrollToSection(selector) {
+      const el = document.querySelector(selector);
+      if (el) {
+        el.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start"
+        });
+      }
+    }
+
+    function renderCommandList(query) {
+      const q = (query || "").trim().toLowerCase();
+      filteredCommands = allCommands.filter((cmd) => {
+        if (!q) return true;
+        return (
+          cmd.title.toLowerCase().includes(q) ||
+          cmd.subtitle.toLowerCase().includes(q) ||
+          cmd.keywords.includes(q)
+        );
+      });
+
+      selectedIndex = 0;
+      resultsContainer.replaceChildren();
+
+      if (countLabel) {
+        countLabel.textContent = `${filteredCommands.length} COMMAND${
+          filteredCommands.length === 1 ? "" : "S"
+        } READY`;
+      }
+
+      if (filteredCommands.length === 0) {
+        const emptyEl = document.createElement("div");
+        emptyEl.className = "cmd-group-heading";
+        emptyEl.textContent = "NO MATCHING COMMANDS OR PROJECTS FOUND";
+        resultsContainer.appendChild(emptyEl);
+        return;
+      }
+
+      let currentGroup = "";
+      filteredCommands.forEach((cmd, idx) => {
+        if (cmd.group !== currentGroup) {
+          currentGroup = cmd.group;
+          const groupHeader = document.createElement("div");
+          groupHeader.className = "cmd-group-heading";
+          groupHeader.textContent = currentGroup;
+          resultsContainer.appendChild(groupHeader);
+        }
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `cmd-item${idx === selectedIndex ? " is-selected" : ""}`;
+        btn.setAttribute("role", "option");
+        btn.setAttribute("aria-selected", String(idx === selectedIndex));
+        btn.setAttribute("data-cmd-idx", String(idx));
+
+        const left = document.createElement("div");
+        left.className = "cmd-item-left";
+
+        const tag = document.createElement("span");
+        tag.className = "cmd-item-tag";
+        tag.textContent = cmd.tag;
+
+        const titles = document.createElement("div");
+        titles.className = "cmd-item-titles";
+
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "cmd-item-title";
+        titleSpan.textContent = cmd.title;
+
+        const subSpan = document.createElement("span");
+        subSpan.className = "cmd-item-sub";
+        subSpan.textContent = cmd.subtitle;
+
+        titles.appendChild(titleSpan);
+        titles.appendChild(subSpan);
+        left.appendChild(tag);
+        left.appendChild(titles);
+
+        const actionSpan = document.createElement("span");
+        actionSpan.className = "cmd-item-action";
+        actionSpan.textContent = cmd.actionLabel;
+
+        btn.appendChild(left);
+        btn.appendChild(actionSpan);
+
+        btn.addEventListener("mouseenter", () => {
+          selectedIndex = idx;
+          updateSelectedHighlight();
+        });
+
+        btn.addEventListener("click", () => {
+          executeCommand(idx);
+        });
+
+        resultsContainer.appendChild(btn);
+      });
+    }
+
+    function updateSelectedHighlight() {
+      const items = resultsContainer.querySelectorAll(".cmd-item");
+      items.forEach((el, idx) => {
+        const isSel = idx === selectedIndex;
+        el.classList.toggle("is-selected", isSel);
+        el.setAttribute("aria-selected", String(isSel));
+        if (isSel) {
+          el.scrollIntoView({ block: "nearest" });
+        }
+      });
+    }
+
+    function executeCommand(idx) {
+      const cmd = filteredCommands[idx];
+      if (!cmd) return;
+      closeCommandPalette();
+      cmd.run();
+    }
+
+    function openCommandPalette() {
+      if (paletteBackdrop.classList.contains("is-open")) return;
+      lastFocusBeforePalette = document.activeElement;
+      paletteBackdrop.classList.add("is-open");
+      paletteBackdrop.setAttribute("aria-hidden", "false");
+      if (triggerBtn) triggerBtn.setAttribute("aria-expanded", "true");
+      searchInput.value = "";
+      renderCommandList("");
+      window.setTimeout(() => {
+        searchInput.focus();
+      }, 20);
+    }
+
+    function closeCommandPalette() {
+      if (!paletteBackdrop.classList.contains("is-open")) return;
+      paletteBackdrop.classList.remove("is-open");
+      paletteBackdrop.setAttribute("aria-hidden", "true");
+      if (triggerBtn) triggerBtn.setAttribute("aria-expanded", "false");
+      if (
+        lastFocusBeforePalette &&
+        typeof lastFocusBeforePalette.focus === "function"
+      ) {
+        lastFocusBeforePalette.focus();
+      }
+    }
+
+    if (triggerBtn) {
+      triggerBtn.addEventListener("click", () => {
+        if (paletteBackdrop.classList.contains("is-open")) {
+          closeCommandPalette();
+        } else {
+          openCommandPalette();
+        }
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", closeCommandPalette);
+    }
+
+    paletteBackdrop.addEventListener("click", (event) => {
+      if (event.target === paletteBackdrop) {
+        closeCommandPalette();
+      }
+    });
+
+    searchInput.addEventListener("input", () => {
+      renderCommandList(searchInput.value);
+    });
+
+    window.addEventListener("keydown", (event) => {
+      // Toggle Command Palette on Cmd+K or Ctrl+K
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        if (paletteBackdrop.classList.contains("is-open")) {
+          closeCommandPalette();
+        } else {
+          openCommandPalette();
+        }
+        return;
+      }
+
+      if (!paletteBackdrop.classList.contains("is-open")) return;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeCommandPalette();
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        if (filteredCommands.length > 0) {
+          selectedIndex = (selectedIndex + 1) % filteredCommands.length;
+          updateSelectedHighlight();
+        }
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        if (filteredCommands.length > 0) {
+          selectedIndex =
+            (selectedIndex - 1 + filteredCommands.length) %
+            filteredCommands.length;
+          updateSelectedHighlight();
+        }
+      } else if (event.key === "Enter") {
+        if (filteredCommands.length > 0) {
+          event.preventDefault();
+          executeCommand(selectedIndex);
+        }
+      }
+    });
+  }
+
   // Initialize on DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
@@ -4504,6 +5081,7 @@
       initServicesSection();
       initContactSection();
       initFooterSection();
+      initDnylCommandPalette();
     });
   } else {
     initCinematicTypographyAndMotion();
@@ -4517,5 +5095,6 @@
     initServicesSection();
     initContactSection();
     initFooterSection();
+    initDnylCommandPalette();
   }
 })();

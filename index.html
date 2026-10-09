@@ -276,8 +276,10 @@
 
       <div class="header-inner">
         <!-- Zone 1: Single Text Brand Wordmark -->
-        <a href="#hero" class="brand-wordmark" aria-label="Daniyal Hayat Home">
-          DANIYAL HAYAT
+        <a href="#hero" class="brand-wordmark" aria-label="DNYL — Daniyal Hayat Home">
+          <span class="brand-dnyl-mark">DNYL</span>
+          <span class="brand-sep" aria-hidden="true">//</span>
+          <span>DANIYAL HAYAT</span>
         </a>
 
         <!-- Zone 2: Primary Navigation Links (All 7 Core Portfolio Sections) -->
@@ -293,8 +295,26 @@
           </ul>
         </nav>
 
-        <!-- Zone 3: Theme Toggle + Primary Action + Mobile Hamburger -->
+        <!-- Zone 3: Command Palette + Theme Toggle + Primary Action + Mobile Hamburger -->
         <div class="header-actions">
+          <button
+            type="button"
+            class="cmd-palette-trigger"
+            id="cmd-palette-trigger"
+            aria-label="Open DNYL Command Palette (Command+K or Control+K)"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            aria-controls="dnyl-command-palette"
+            title="Command Palette (⌘K / Ctrl+K)"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <span class="cmd-trigger-label">COMMAND</span>
+            <kbd class="cmd-trigger-kbd" aria-hidden="true">⌘K</kbd>
+          </button>
+
           <button
             type="button"
             class="theme-toggle-btn"
@@ -1879,6 +1899,37 @@
             </div>
           </div>
 
+          <!-- Real-Time Project Search & Stack Telemetry Bar -->
+          <div class="projects-search-toolbar" data-projects-reveal="filters">
+            <div class="projects-search-input-wrap">
+              <svg class="projects-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                type="search"
+                id="project-search-input"
+                class="projects-search-input"
+                placeholder="Filter 12 projects by title, stack, or domain (e.g. Kotlin, Gemini, TypeScript, Weather)..."
+                aria-label="Filter projects by title, technology stack, or domain"
+                autocomplete="off"
+              />
+              <button
+                type="button"
+                id="project-search-clear"
+                class="projects-search-clear"
+                aria-label="Clear project search query"
+                hidden
+              >
+                CLEAR ✕
+              </button>
+            </div>
+            <div class="projects-search-telemetry" aria-live="polite">
+              <span class="projects-match-dot" aria-hidden="true"></span>
+              <span id="project-match-count">SHOWING 12 / 12 VERIFIED BUILDS</span>
+            </div>
+          </div>
+
           <!-- =================================================================
                TIER 1: FLAGSHIP PRODUCTION MONOLITHS (01 — 06)
                Asymmetric Alternating Split-Screen Editorial Showcases
@@ -3224,6 +3275,15 @@
                 </div>
               </div>
             </article>
+          </div>
+
+          <!-- Zero-Results Search / Filter Empty State -->
+          <div class="projects-empty-state" id="projects-empty-state" hidden aria-live="polite">
+            <p class="projects-empty-title">No projects matched your current filter or search query.</p>
+            <p class="projects-empty-sub">Try searching for <code>React</code>, <code>TypeScript</code>, <code>Kotlin</code>, <code>Gemini</code>, or reset all filters below.</p>
+            <button type="button" class="project-btn project-btn--secondary" id="projects-reset-filters-btn">
+              <span>RESET ALL FILTERS</span>
+            </button>
           </div>
         </div>
       </section>
@@ -4892,6 +4952,20 @@
               <span>LOCAL TIME (PKT): <strong id="footer-local-time">SYNCING...</strong></span>
             </div>
 
+            <button
+              type="button"
+              class="footer-back-top-btn"
+              id="footer-replay-intro-btn"
+              data-magnetic="0.18"
+              data-cursor-text="PLAY"
+              aria-label="Replay DNYL opening cinematic intro sequence"
+            >
+              <span>REPLAY INTRO</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </button>
+
             <a
               href="#hero"
               class="footer-back-top-btn"
@@ -5223,6 +5297,60 @@
             </a>
           </div>
         </footer>
+      </div>
+    </div>
+
+    <!-- =======================================================================
+         DNYL INFINITY COMMAND PALETTE MODAL (⌘K / Ctrl+K)
+         Instant Navigation, All 12 Project Deep-Dives, Theme & Intro Controls
+         ======================================================================= -->
+    <div
+      class="cmd-palette-backdrop"
+      id="dnyl-command-palette"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cmd-palette-title"
+      aria-hidden="true"
+    >
+      <div class="cmd-palette-dialog" role="document">
+        <div class="cmd-palette-header">
+          <div class="cmd-search-row">
+            <svg class="cmd-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="text"
+              id="cmd-palette-input"
+              class="cmd-palette-input"
+              placeholder="Type a command, section, technology, or project name..."
+              aria-label="Search commands, portfolio sections, and projects"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button
+              type="button"
+              class="cmd-palette-close"
+              id="cmd-palette-close"
+              aria-label="Close Command Palette"
+            >
+              <span>ESC</span>
+            </button>
+          </div>
+          <div class="cmd-palette-subbar">
+            <span id="cmd-palette-title" class="cmd-subbar-label">DNYL // INFINITY COMMAND CENTER</span>
+            <span class="cmd-subbar-hint" aria-hidden="true">↑↓ Navigate · ↵ Execute · ESC Close</span>
+          </div>
+        </div>
+
+        <div class="cmd-palette-body" id="cmd-palette-results" role="listbox" aria-label="Available commands and destinations">
+          <!-- Populated dynamically from verified portfolio sections, actions, and 12 real projects -->
+        </div>
+
+        <div class="cmd-palette-footer">
+          <span class="cmd-footer-brand">DANIYAL HAYAT · FULL-STACK, KOTLIN ANDROID &amp; GEMINI AI</span>
+          <span class="cmd-footer-count" id="cmd-palette-count">24 COMMANDS READY</span>
+        </div>
       </div>
     </div>
 
