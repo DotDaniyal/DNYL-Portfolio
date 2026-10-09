@@ -3876,6 +3876,7 @@
           const wordWrap = document.createElement("span");
           wordWrap.style.display = "inline-block";
           wordWrap.style.whiteSpace = "nowrap";
+          wordWrap.style.maxWidth = "100%";
           wordWrap.setAttribute("aria-hidden", "true");
 
           for (let c = 0; c < word.length; c++) {
@@ -4302,11 +4303,13 @@
           tl.fromTo(
             wordUnits,
             {
+              y: 0,
               yPercent: 110,
               opacity: 0,
               filter: "blur(4px)"
             },
             {
+              y: 0,
               yPercent: 0,
               opacity: 1,
               filter: "blur(0px)",
@@ -4691,6 +4694,7 @@
               start: "top 84%",
               once: true,
               onEnter: () => {
+                servicesStageCard.classList.add("is-inview");
                 const col = servicesStageCard.closest(".services-visual-col");
                 if (col) col.classList.add("is-inview");
               }

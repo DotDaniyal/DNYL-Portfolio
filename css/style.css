@@ -942,18 +942,21 @@ body.is-loaded .char-unit {
 
 .word-unit {
   display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+.word-unit:not([data-gsap-controlled="true"]) {
   transform: translate3d(0, 108%, 0);
   opacity: 0;
   filter: blur(3px);
-  will-change: transform, opacity, filter;
   transition: transform var(--motion-slow) var(--ease-emphasized),
     opacity var(--motion-slow) var(--ease-emphasized),
     filter var(--motion-medium) var(--ease-standard);
   transition-delay: calc(var(--word-index, 0) * var(--stagger-word));
 }
 
-.about-reveal-line.is-inview .word-unit,
-body.is-loaded .reveal-line .word-unit {
+.about-reveal-line.is-inview .word-unit:not([data-gsap-controlled="true"]),
+body.is-loaded .reveal-line .word-unit:not([data-gsap-controlled="true"]) {
   transform: translate3d(0, 0, 0);
   opacity: 1;
   filter: blur(0px);
@@ -9876,5 +9879,534 @@ html[data-theme="light"] .cmd-palette-close {
   .cursor-ring,
   .backdrop-cursor-glow {
     display: none !important;
+  }
+}
+
+/* ==========================================================================
+   22. UNIVERSAL MULTI-DISPLAY LAYOUT ARCHITECTURE
+       (320px Small Phone • Mobile • Tablet • Laptop • Desktop • 2K/4K Ultra-Wide • Short Landscape)
+   ========================================================================== */
+
+/* 22.1 Global Overflow Guard, Safe-Area Insets & Grid Track Stability */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+.site-main,
+.section-shell,
+.site-footer {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+.section-container,
+.hero-container,
+.about-container,
+.skills-container,
+.projects-container,
+.journey-container,
+.services-container,
+.contact-container,
+.footer-container {
+  width: 100%;
+  max-width: var(--container-max, 1360px);
+  margin-inline: auto;
+  padding-left: max(clamp(1rem, 4vw, 3rem), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(1rem, 4vw, 3rem), env(safe-area-inset-right, 0px));
+  min-width: 0;
+}
+
+.hero-grid > *,
+.about-grid > *,
+.about-header-grid > *,
+.skills-bento-grid > *,
+.monolith-grid > *,
+.projects-archive-grid > *,
+.journey-header-grid > *,
+.currently-grid > *,
+.services-header-grid > *,
+.services-main-grid > *,
+.contact-header-grid > *,
+.contact-main-grid > *,
+.footer-main-grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Prevent long headings, URLs, or code tokens from forcing horizontal scroll */
+.hero-heading,
+.about-heading,
+.skills-heading,
+.projects-heading,
+.journey-heading,
+.services-heading,
+.contact-heading,
+.footer-closing-heading,
+.monolith-title,
+.archive-title,
+.timeline-title,
+.service-title {
+  overflow-wrap: break-word;
+  word-break: normal;
+  max-width: 100%;
+}
+
+/* 22.2 Ultra-Wide 2K / QHD (1680px+) & 4K UHD (2200px+) Display Scaling */
+@media (min-width: 1680px) {
+  :root {
+    --container-max: 1480px;
+  }
+
+  .hero-grid {
+    gap: 5rem;
+  }
+
+  .about-grid {
+    gap: 5rem;
+  }
+
+  .profile-stage {
+    max-width: 470px;
+  }
+}
+
+@media (min-width: 2200px) {
+  :root {
+    --container-max: 1680px;
+  }
+
+  html {
+    font-size: 17.5px;
+  }
+
+  .profile-stage {
+    max-width: 520px;
+  }
+}
+
+/* 22.3 Compact Laptop & Tablet Landscape Header Optimization (961px – 1240px) */
+@media (max-width: 1240px) and (min-width: 961px) {
+  .header-inner {
+    padding-inline: 1.25rem;
+    gap: 0.65rem;
+  }
+
+  .brand-meta {
+    display: none;
+  }
+
+  .nav-list {
+    gap: 0.1rem;
+  }
+
+  .nav-link {
+    padding: 0.42rem 0.58rem;
+    font-size: 0.78rem;
+  }
+
+  .cmd-trigger-label {
+    display: none;
+  }
+
+  .cmd-palette-trigger {
+    padding: 0 0.55rem;
+  }
+
+  .header-cta {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* 22.4 Unified Tablet & Mobile Navigation Breakpoint (<= 960px) */
+@media (max-width: 960px) {
+  .primary-nav {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background: rgba(6, 7, 10, 0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border-light);
+    padding: 1.25rem 1.5rem 1.75rem;
+    transform: translateY(-12px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform var(--duration-base) var(--ease-out-expo),
+      opacity var(--duration-base) var(--ease-out-expo),
+      visibility var(--duration-base);
+    max-height: calc(100dvh - var(--header-height));
+    overflow-y: auto;
+  }
+
+  .primary-nav.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .nav-link {
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    border-radius: var(--radius-sm);
+    justify-content: space-between;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
+  .header-cta {
+    display: none;
+  }
+}
+
+/* 22.5 Tablet & Small Laptop Multi-Column Layout Refinements (<= 1080px) */
+@media (max-width: 1080px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 3.25rem;
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .hero-visual {
+    order: -1;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .profile-stage {
+    max-width: min(100%, 400px);
+    margin-inline: auto;
+  }
+
+  /* Keep floating nodes within viewport bounds on tablets */
+  .node-stack {
+    left: -6px;
+  }
+
+  .node-ai {
+    right: -6px;
+  }
+
+  .node-mobile {
+    left: 0;
+  }
+
+  .node-status {
+    right: 0;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .about-visual-stage {
+    max-width: min(100%, 460px);
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .about-card-experience,
+  .about-card-location {
+    left: 0;
+  }
+
+  .about-card-focus {
+    right: 0;
+  }
+
+  .monolith-grid,
+  .project-monolith:nth-child(even) .monolith-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-monolith:nth-child(even) .monolith-stage,
+  .project-monolith:nth-child(even) .monolith-details {
+    order: initial;
+  }
+
+  .services-main-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .services-stage-card {
+    position: relative;
+    top: 0;
+  }
+
+  .contact-main-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* 22.6 Mobile & Large Phone Layout (<= 640px) */
+@media (max-width: 640px) {
+  .hero-section {
+    padding-top: calc(var(--header-height) + 1.5rem);
+    padding-bottom: 3.5rem;
+    min-height: auto;
+  }
+
+  /* Convert hero floating nodes into a clean 2x2 telemetry dock below portrait on mobile
+     so badges never overlap the portrait or clip off narrow screen edges */
+  .profile-stage {
+    max-width: min(100%, 330px);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    align-items: stretch;
+  }
+
+  .profile-aura {
+    grid-column: 1 / -1;
+  }
+
+  .profile-tilt-rig {
+    grid-column: 1 / -1;
+    margin-bottom: 0.35rem;
+  }
+
+  .floating-node,
+  .node-stack,
+  .node-ai,
+  .node-mobile,
+  .node-status {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    gap: 0.5rem;
+    animation: none !important;
+    transform: none !important;
+    justify-content: flex-start;
+  }
+
+  .node-label {
+    font-size: 0.58rem;
+  }
+
+  .node-value {
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Convert About floating cards into a clean stacked grid below the About image on mobile */
+  .about-visual-stage {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    padding-bottom: 0;
+  }
+
+  .about-float-card,
+  .about-card-experience,
+  .about-card-focus,
+  .about-card-location {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100%;
+    max-width: 100%;
+    transform: none !important;
+  }
+
+  .about-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-stats-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  /* Filter bars scroll smoothly horizontally without wrapping awkwardly */
+  .skills-filter-bar,
+  .projects-filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    padding-bottom: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .skills-filter-bar::-webkit-scrollbar,
+  .projects-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .skill-filter-btn,
+  .project-filter-btn {
+    flex-shrink: 0;
+  }
+
+  /* Project Monolith internal preview responsiveness */
+  .monolith-details {
+    padding: 1.35rem 1.15rem;
+  }
+
+  .monolith-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .monolith-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .monolith-actions .project-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Contact & Climax CTA mobile fit */
+  .contact-channel-item {
+    padding: 0.95rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .channel-value {
+    font-size: 0.86rem;
+    word-break: break-all;
+  }
+
+  .climax-cta-inner {
+    padding: 1.5rem 1.15rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .climax-cta-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .climax-cta-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Case study modal mobile ergonomics */
+  .case-study-modal {
+    padding: 0.75rem;
+  }
+
+  .case-study-modal-dialog {
+    max-height: 92dvh;
+    border-radius: 18px;
+  }
+}
+
+/* 22.7 Ultra-Small Mobile Displays (320px – 380px, e.g. iPhone SE / Galaxy Fold Cover) */
+@media (max-width: 380px) {
+  .header-inner {
+    padding-inline: 0.85rem;
+  }
+
+  .brand-meta {
+    display: none;
+  }
+
+  .hero-name {
+    font-size: clamp(2.1rem, 10.5vw, 2.6rem);
+  }
+
+  .profile-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-proof-strip {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .about-stats-bar {
+    grid-template-columns: 1fr;
+  }
+
+  /* Intro sequence fit on 320px screens */
+  .intro-stage {
+    padding: 1rem;
+    gap: 1.1rem;
+  }
+
+  .intro-dnyl-mark {
+    font-size: clamp(2.6rem, 15vw, 3.6rem);
+  }
+
+  .intro-name-heading {
+    font-size: clamp(1.25rem, 6.8vw, 1.65rem);
+    letter-spacing: 0.14em;
+  }
+
+  .intro-title-row {
+    font-size: 0.68rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* 22.8 Short Landscape Displays (Mobile Landscape / Compact Nest Hub, max-height: 580px) */
+@media (max-height: 580px) {
+  .dnyl-intro .intro-stage {
+    gap: 0.75rem;
+    padding-block: 0.75rem;
+  }
+
+  .dnyl-intro .intro-signature-wrap {
+    padding-block: 0.35rem;
+  }
+
+  .dnyl-intro .intro-dnyl-mark {
+    font-size: clamp(2.4rem, 9vh, 3.8rem);
+  }
+
+  .dnyl-intro .intro-name-heading {
+    font-size: clamp(1.25rem, 4.5vh, 1.85rem);
+  }
+
+  .dnyl-intro .intro-domains-mask {
+    display: none;
+  }
+
+  .hero-section {
+    min-height: auto;
+    padding-top: calc(var(--header-height) + 1.25rem);
+    padding-bottom: 2.5rem;
+  }
+
+  .scroll-indicator {
+    display: none;
   }
 }
