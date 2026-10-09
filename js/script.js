@@ -833,9 +833,176 @@
   });
 
   // ---------------------------------------------------------------------------
-  // 3. REAL SPECIALTY ROTATOR (Cinematic Split-Character 3D Typography Engine)
+  // 3. REAL SPECIALTY ROTATOR & SUBTITLE (.hero-title) GSAP TYPEWRITER ENGINE
+  //    Runs strictly AFTER the intro sequence completes (via "dnyl:hero-reveal")
   // ---------------------------------------------------------------------------
+  const heroTitleEl = document.querySelector(".hero-title");
+  const heroSubtitleEl = document.querySelector(".hero-title .title-primary");
+  let heroSubtitleTl = null;
+  let heroSubtitleFallbackTimer = null;
+
+  function initHeroSubtitleTypewriter() {
+    if (!heroTitleEl && !heroSubtitleEl) return;
+    const targetContainer = heroSubtitleEl || heroTitleEl;
+
+    const rawText =
+      targetContainer.getAttribute("data-typewriter-text") ||
+      (heroTitleEl && heroTitleEl.getAttribute("data-typewriter-text")) ||
+      targetContainer.textContent.trim() ||
+      "Full-Stack Developer & Creative Builder";
+
+    targetContainer.setAttribute("data-typewriter-text", rawText);
+    targetContainer.setAttribute("aria-label", rawText);
+    if (heroTitleEl) {
+      heroTitleEl.setAttribute("data-typewriter-text", rawText);
+      heroTitleEl.setAttribute("aria-label", rawText);
+    }
+
+    if (prefersReducedMotion) {
+      if (heroTitleEl) {
+        heroTitleEl.removeAttribute("data-gsap-typewriter");
+      }
+      targetContainer.textContent = rawText;
+      return;
+    }
+
+    if (heroTitleEl) {
+      heroTitleEl.setAttribute("data-gsap-typewriter", "true");
+    }
+
+    targetContainer.replaceChildren();
+    const words = rawText.split(" ");
+    const charSpans = [];
+    const gsapRef = window.gsap;
+
+    words.forEach((word) => {
+      if (!word) return;
+      const wordWrap = document.createElement("span");
+      wordWrap.className = "typewriter-word";
+      wordWrap.setAttribute("aria-hidden", "true");
+
+      for (let i = 0; i < word.length; i++) {
+        const chSpan = document.createElement("span");
+        chSpan.className = "typewriter-char is-typed-hidden";
+        if (gsapRef) {
+          chSpan.setAttribute("data-gsap-controlled", "true");
+        }
+        chSpan.textContent = word[i];
+        wordWrap.appendChild(chSpan);
+        charSpans.push(chSpan);
+      }
+
+      targetContainer.appendChild(wordWrap);
+    });
+
+    const caretEl = document.createElement("span");
+    caretEl.className = "typewriter-caret";
+    caretEl.setAttribute("aria-hidden", "true");
+    targetContainer.appendChild(caretEl);
+
+    if (gsapRef && charSpans.length > 0) {
+      gsapRef.set(charSpans, {
+        opacity: 0,
+        y: 6,
+        filter: "blur(3px)"
+      });
+    }
+
+    function playHeroSubtitleTypewriter() {
+      if (prefersReducedMotion || charSpans.length === 0) return;
+
+      if (heroSubtitleTl) {
+        heroSubtitleTl.kill();
+        heroSubtitleTl = null;
+      }
+      if (heroSubtitleFallbackTimer) {
+        window.clearTimeout(heroSubtitleFallbackTimer);
+        heroSubtitleFallbackTimer = null;
+      }
+
+      caretEl.classList.remove("is-caret-settled");
+      caretEl.classList.add("is-caret-typing");
+
+      const activeGsap = window.gsap;
+      if (activeGsap) {
+        charSpans.forEach((ch) => {
+          ch.setAttribute("data-gsap-controlled", "true");
+          ch.classList.remove("is-typed-visible");
+          ch.classList.add("is-typed-hidden");
+        });
+
+        activeGsap.set(charSpans, {
+          opacity: 0,
+          y: 6,
+          filter: "blur(3px)"
+        });
+
+        heroSubtitleTl = activeGsap.timeline({
+          delay: 0.22,
+          onComplete: () => {
+            charSpans.forEach((ch) => {
+              ch.classList.remove("is-typed-hidden");
+              ch.classList.add("is-typed-visible");
+            });
+            caretEl.classList.remove("is-caret-typing");
+            caretEl.classList.add("is-caret-settled");
+          }
+        });
+
+        heroSubtitleTl.to(charSpans, {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.16,
+          ease: "power2.out",
+          stagger: {
+            each: 0.025,
+            from: "start"
+          }
+        });
+      } else {
+        // Fallback if GSAP is unavailable: sequential character reveal after intro
+        charSpans.forEach((ch) => {
+          ch.removeAttribute("data-gsap-controlled");
+          ch.classList.remove("is-typed-visible");
+          ch.classList.add("is-typed-hidden");
+        });
+
+        let charIdx = 0;
+        const typeNextChar = () => {
+          if (charIdx < charSpans.length) {
+            charSpans[charIdx].classList.remove("is-typed-hidden");
+            charSpans[charIdx].classList.add("is-typed-visible");
+            const currentChar = charSpans[charIdx].textContent;
+            charIdx++;
+            const cadence =
+              currentChar === "&" || currentChar === "-" ? 40 : 25;
+            heroSubtitleFallbackTimer = window.setTimeout(
+              typeNextChar,
+              cadence
+            );
+          } else {
+            caretEl.classList.remove("is-caret-typing");
+            caretEl.classList.add("is-caret-settled");
+          }
+        };
+        heroSubtitleFallbackTimer = window.setTimeout(typeNextChar, 220);
+      }
+    }
+
+    // Run strictly after the intro sequence dispatches "dnyl:hero-reveal"
+    window.addEventListener("dnyl:hero-reveal", playHeroSubtitleTypewriter);
+
+    // If the intro was already completed or bypassed before listener attachment, run now
+    if (document.body.classList.contains("is-loaded")) {
+      playHeroSubtitleTypewriter();
+    }
+  }
+
+  initHeroSubtitleTypewriter();
+
   const realSpecialties = [
+    "Full-Stack Developer & Creative Builder",
     "Full-Stack Web Platforms (React & TypeScript)",
     "Native Android Applications (Kotlin & Android SDK)",
     "Generative AI Systems (Google Gemini & AI Studio)",
@@ -891,6 +1058,11 @@
 
       specialtyRotator.appendChild(wordSpan);
     });
+
+    const caretSpan = document.createElement("span");
+    caretSpan.className = "specialty-caret";
+    caretSpan.setAttribute("aria-hidden", "true");
+    specialtyRotator.appendChild(caretSpan);
 
     return createdChars;
   }
@@ -988,35 +1160,60 @@
 
   if (specialtyRotator) {
     if (!prefersReducedMotion) {
+      let specialtyInterval = null;
       const initialChars = buildSpecialtyChars(realSpecialties[0]);
       if (window.gsap && initialChars.length > 0) {
-        window.gsap.fromTo(
-          initialChars,
-          {
-            yPercent: 110,
-            rotateX: -50,
-            opacity: 0,
-            filter: "blur(4px)"
-          },
-          {
-            yPercent: 0,
-            rotateX: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.6,
-            stagger: 0.014,
-            delay: 0.35,
-            ease: "power4.out",
-            onStart: triggerSpecialtySweep
-          }
-        );
+        window.gsap.set(initialChars, {
+          yPercent: 110,
+          rotateX: -50,
+          opacity: 0,
+          filter: "blur(4px)"
+        });
       }
 
-      let specialtyInterval = window.setInterval(() => {
-        if (document.hidden) return;
-        const next = (specialtyIndex + 1) % realSpecialties.length;
-        transitionToSpecialty(next);
-      }, 3600);
+      const startSpecialtyRotatorAfterIntro = () => {
+        specialtyIndex = 0;
+        const openingChars = buildSpecialtyChars(realSpecialties[0]);
+        if (window.gsap && openingChars.length > 0) {
+          window.gsap.fromTo(
+            openingChars,
+            {
+              yPercent: 110,
+              rotateX: -50,
+              opacity: 0,
+              filter: "blur(4px)"
+            },
+            {
+              yPercent: 0,
+              rotateX: 0,
+              opacity: 1,
+              filter: "blur(0px)",
+              duration: 0.6,
+              stagger: 0.014,
+              delay: 0.42,
+              ease: "power4.out",
+              onStart: triggerSpecialtySweep
+            }
+          );
+        }
+
+        if (specialtyInterval) {
+          window.clearInterval(specialtyInterval);
+        }
+        specialtyInterval = window.setInterval(() => {
+          if (document.hidden) return;
+          const next = (specialtyIndex + 1) % realSpecialties.length;
+          transitionToSpecialty(next);
+        }, 3600);
+      };
+
+      window.addEventListener(
+        "dnyl:hero-reveal",
+        startSpecialtyRotatorAfterIntro
+      );
+      if (document.body.classList.contains("is-loaded")) {
+        startSpecialtyRotatorAfterIntro();
+      }
 
       if (heroSpecialtyLine) {
         heroSpecialtyLine.setAttribute(
@@ -1024,7 +1221,7 @@
           "Click to cycle focus area"
         );
         heroSpecialtyLine.addEventListener("click", () => {
-          window.clearInterval(specialtyInterval);
+          if (specialtyInterval) window.clearInterval(specialtyInterval);
           const next = (specialtyIndex + 1) % realSpecialties.length;
           transitionToSpecialty(next);
           specialtyInterval = window.setInterval(() => {

@@ -983,7 +983,24 @@ body.is-loaded .reveal-line .word-unit:not([data-gsap-controlled="true"]) {
   transition-delay: 0.24s;
 }
 
+.hero-title[data-gsap-typewriter="true"] {
+  clip-path: none;
+  transform: translate3d(0, 0, 0);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-standard);
+}
+
+body.is-loaded .hero-title[data-gsap-typewriter="true"] {
+  clip-path: none;
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
+
 .title-primary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.28em;
   background: linear-gradient(
     90deg,
     var(--accent-ice) 0%,
@@ -995,6 +1012,79 @@ body.is-loaded .reveal-line .word-unit:not([data-gsap-controlled="true"]) {
   background-clip: text;
   color: transparent;
   animation: gradientTextFlow 11s ease-in-out infinite alternate;
+}
+
+.typewriter-word {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.typewriter-char {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    var(--accent-ice) 0%,
+    var(--accent-indigo) 50%,
+    var(--accent-gold) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  will-change: opacity, transform, filter;
+}
+
+.typewriter-char:not([data-gsap-controlled="true"]) {
+  transition: opacity 0.14s var(--ease-standard),
+    transform 0.16s var(--ease-cinematic),
+    filter 0.14s var(--ease-standard);
+}
+
+.typewriter-char.is-typed-hidden {
+  opacity: 0;
+  transform: translate3d(0, 4px, 0);
+  filter: blur(2.5px);
+}
+
+.typewriter-char.is-typed-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0px);
+}
+
+.typewriter-caret,
+.specialty-caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.92em;
+  margin-left: 0.16em;
+  vertical-align: -0.08em;
+  border-radius: 1px;
+  background: var(--accent-ice);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.75);
+  animation: typewriterCaretBlink 1.05s steps(2, jump-none) infinite;
+}
+
+.typewriter-caret.is-caret-typing {
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.95);
+  animation: none;
+}
+
+.typewriter-caret.is-caret-settled {
+  opacity: 0.45;
+  animation-duration: 1.4s;
+}
+
+@keyframes typewriterCaretBlink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.12;
+  }
 }
 
 .hero-specialty-line {
