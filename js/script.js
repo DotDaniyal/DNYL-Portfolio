@@ -833,7 +833,7 @@
   });
 
   // ---------------------------------------------------------------------------
-  // 3. REAL SPECIALTY ROTATOR (From Daniyal Hayat's Existing Portfolio)
+  // 3. REAL SPECIALTY ROTATOR (Cinematic Split-Character 3D Typography Engine)
   // ---------------------------------------------------------------------------
   const realSpecialties = [
     "Full-Stack Web Platforms (React & TypeScript)",
@@ -843,16 +843,225 @@
   ];
 
   let specialtyIndex = 0;
-  if (specialtyRotator && !prefersReducedMotion) {
-    window.setInterval(() => {
-      if (document.hidden) return;
+  let isSpecialtyAnimating = false;
+  const heroSpecialtyLine = specialtyRotator
+    ? specialtyRotator.closest(".hero-specialty-line")
+    : null;
+  const specialtyPrefixEl = heroSpecialtyLine
+    ? heroSpecialtyLine.querySelector(".specialty-prefix")
+    : null;
+  const specialtyDividerEl = heroSpecialtyLine
+    ? heroSpecialtyLine.querySelector(".specialty-divider")
+    : null;
+
+  function buildSpecialtyChars(phrase) {
+    if (!specialtyRotator) return [];
+    specialtyRotator.setAttribute("aria-label", phrase);
+    specialtyRotator.replaceChildren();
+
+    const words = phrase.split(" ");
+    const createdChars = [];
+    let inParens = false;
+
+    words.forEach((word) => {
+      if (!word) return;
+      const wordSpan = document.createElement("span");
+      wordSpan.className = "specialty-word";
+      wordSpan.setAttribute("aria-hidden", "true");
+
+      for (let i = 0; i < word.length; i++) {
+        const ch = word[i];
+        if (ch === "(") inParens = true;
+
+        const maskSpan = document.createElement("span");
+        maskSpan.className = "specialty-char-mask";
+
+        const charSpan = document.createElement("span");
+        charSpan.className = inParens
+          ? "specialty-char specialty-char--accent"
+          : "specialty-char";
+        charSpan.textContent = ch;
+
+        maskSpan.appendChild(charSpan);
+        wordSpan.appendChild(maskSpan);
+        createdChars.push(charSpan);
+
+        if (ch === ")") inParens = false;
+      }
+
+      specialtyRotator.appendChild(wordSpan);
+    });
+
+    return createdChars;
+  }
+
+  function triggerSpecialtySweep() {
+    if (!specialtyRotator || prefersReducedMotion) return;
+    specialtyRotator.classList.remove("is-sweeping");
+    void specialtyRotator.offsetWidth;
+    specialtyRotator.classList.add("is-sweeping");
+  }
+
+  function transitionToSpecialty(nextIdx) {
+    if (!specialtyRotator || isSpecialtyAnimating) return;
+    const targetPhrase = realSpecialties[nextIdx];
+    const gsapRef = window.gsap;
+
+    if (prefersReducedMotion) {
+      specialtyIndex = nextIdx;
+      specialtyRotator.textContent = targetPhrase;
+      return;
+    }
+
+    if (gsapRef) {
+      isSpecialtyAnimating = true;
+      const currentChars = specialtyRotator.querySelectorAll(".specialty-char");
+
+      const revealIncoming = () => {
+        specialtyIndex = nextIdx;
+        const incomingChars = buildSpecialtyChars(targetPhrase);
+        triggerSpecialtySweep();
+
+        if (specialtyDividerEl) {
+          gsapRef.fromTo(
+            specialtyDividerEl,
+            { rotateZ: -25, scale: 0.85, opacity: 0.4 },
+            {
+              rotateZ: 0,
+              scale: 1,
+              opacity: 0.85,
+              duration: 0.45,
+              ease: "back.out(2)"
+            }
+          );
+        }
+
+        gsapRef.fromTo(
+          incomingChars,
+          {
+            yPercent: 115,
+            rotateX: -60,
+            opacity: 0,
+            filter: "blur(4px)"
+          },
+          {
+            yPercent: 0,
+            rotateX: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.52,
+            stagger: 0.013,
+            ease: "power4.out",
+            onComplete: () => {
+              isSpecialtyAnimating = false;
+            }
+          }
+        );
+      };
+
+      if (currentChars.length > 0) {
+        gsapRef.to(currentChars, {
+          yPercent: -110,
+          rotateX: 55,
+          opacity: 0,
+          filter: "blur(3px)",
+          duration: 0.24,
+          stagger: 0.006,
+          ease: "power3.in",
+          onComplete: revealIncoming
+        });
+      } else {
+        revealIncoming();
+      }
+    } else {
+      isSpecialtyAnimating = true;
       specialtyRotator.classList.add("is-switching");
       window.setTimeout(() => {
-        specialtyIndex = (specialtyIndex + 1) % realSpecialties.length;
-        specialtyRotator.textContent = realSpecialties[specialtyIndex];
+        specialtyIndex = nextIdx;
+        buildSpecialtyChars(targetPhrase);
         specialtyRotator.classList.remove("is-switching");
+        triggerSpecialtySweep();
+        isSpecialtyAnimating = false;
       }, 280);
-    }, 3400);
+    }
+  }
+
+  if (specialtyRotator) {
+    if (!prefersReducedMotion) {
+      const initialChars = buildSpecialtyChars(realSpecialties[0]);
+      if (window.gsap && initialChars.length > 0) {
+        window.gsap.fromTo(
+          initialChars,
+          {
+            yPercent: 110,
+            rotateX: -50,
+            opacity: 0,
+            filter: "blur(4px)"
+          },
+          {
+            yPercent: 0,
+            rotateX: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.6,
+            stagger: 0.014,
+            delay: 0.35,
+            ease: "power4.out",
+            onStart: triggerSpecialtySweep
+          }
+        );
+      }
+
+      let specialtyInterval = window.setInterval(() => {
+        if (document.hidden) return;
+        const next = (specialtyIndex + 1) % realSpecialties.length;
+        transitionToSpecialty(next);
+      }, 3600);
+
+      if (heroSpecialtyLine) {
+        heroSpecialtyLine.setAttribute(
+          "title",
+          "Click to cycle focus area"
+        );
+        heroSpecialtyLine.addEventListener("click", () => {
+          window.clearInterval(specialtyInterval);
+          const next = (specialtyIndex + 1) % realSpecialties.length;
+          transitionToSpecialty(next);
+          specialtyInterval = window.setInterval(() => {
+            if (document.hidden) return;
+            const n = (specialtyIndex + 1) % realSpecialties.length;
+            transitionToSpecialty(n);
+          }, 3600);
+        });
+
+        heroSpecialtyLine.addEventListener("mouseenter", () => {
+          if (isSpecialtyAnimating || !window.gsap) return;
+          const chars = specialtyRotator.querySelectorAll(".specialty-char");
+          if (chars.length > 0) {
+            window.gsap.fromTo(
+              chars,
+              { yPercent: 0 },
+              {
+                yPercent: -18,
+                duration: 0.22,
+                stagger: {
+                  each: 0.01,
+                  yoyo: true,
+                  repeat: 1
+                },
+                ease: "sine.inOut",
+                overwrite: "auto"
+              }
+            );
+          }
+          if (specialtyPrefixEl) {
+            triggerSpecialtySweep();
+          }
+        });
+      }
+    } else {
+      specialtyRotator.textContent = realSpecialties[0];
+    }
   }
 
   // ---------------------------------------------------------------------------

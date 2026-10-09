@@ -998,19 +998,35 @@ body.is-loaded .reveal-line .word-unit:not([data-gsap-controlled="true"]) {
 }
 
 .hero-specialty-line {
-  display: flex;
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
-  margin-top: 0.55rem;
-  min-height: 1.65rem;
-  perspective: 420px;
+  gap: 0.65rem;
+  margin-top: 0.6rem;
+  min-height: 1.85rem;
+  padding: 0.28rem 0.75rem 0.28rem 0.6rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.06) 0%,
+    rgba(129, 140, 248, 0.03) 60%,
+    transparent 100%
+  );
+  border: 1px solid rgba(56, 189, 248, 0.14);
+  perspective: 600px;
   font-family: var(--font-mono);
   font-size: 0.82rem;
   color: var(--text-secondary);
   opacity: 0;
-  transform: translate3d(0, 10px, 0);
+  transform: translate3d(0, 12px, 0);
   transition: opacity 0.75s var(--ease-cinematic) 0.3s,
-    transform 0.75s var(--ease-cinematic) 0.3s;
+    transform 0.75s var(--ease-cinematic) 0.3s,
+    border-color 0.35s var(--ease-cinematic),
+    background-color 0.35s var(--ease-cinematic),
+    box-shadow 0.35s var(--ease-cinematic);
+  cursor: pointer;
+  user-select: none;
 }
 
 body.is-loaded .hero-specialty-line {
@@ -1018,27 +1034,163 @@ body.is-loaded .hero-specialty-line {
   transform: translate3d(0, 0, 0);
 }
 
+.hero-specialty-line:hover {
+  border-color: rgba(56, 189, 248, 0.38);
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.11) 0%,
+    rgba(226, 194, 144, 0.06) 65%,
+    transparent 100%
+  );
+  box-shadow: 0 8px 24px -10px rgba(56, 189, 248, 0.28);
+}
+
 .specialty-prefix {
-  color: var(--text-muted);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: var(--accent-ice);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: transform 0.3s var(--ease-cinematic),
+    color 0.3s var(--ease-cinematic);
+}
+
+.specialty-prefix::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-ice);
+  box-shadow: 0 0 10px var(--accent-ice);
+  animation: specialtyPrefixPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes specialtyPrefixPulse {
+  0%,
+  100% {
+    transform: scale(0.88);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+}
+
+.hero-specialty-line:hover .specialty-prefix {
+  color: var(--accent-gold);
+  transform: translateX(1px);
 }
 
 .specialty-divider {
-  color: var(--border-highlight);
+  color: var(--accent-ice);
+  opacity: 0.55;
+  font-weight: 600;
+  transition: transform 0.35s var(--ease-cinematic),
+    opacity 0.35s var(--ease-cinematic);
+}
+
+.hero-specialty-line:hover .specialty-divider {
+  transform: rotate(14deg) scale(1.12);
+  opacity: 0.95;
 }
 
 .specialty-dynamic {
-  display: inline-block;
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.34em;
+  row-gap: 0.1em;
   color: var(--text-primary);
   font-weight: 500;
+  letter-spacing: 0.01em;
   transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  perspective: 520px;
+  overflow: hidden;
+  padding-block: 0.08em;
   transition: opacity 0.28s var(--ease-emphasized),
     transform 0.28s var(--ease-emphasized),
     filter 0.28s var(--ease-standard);
 }
 
+/* Luminous Shimmer Sweep Across Active Specialty Typography */
+.specialty-dynamic::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -35%;
+  width: 28%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(56, 189, 248, 0.28) 50%,
+    transparent 100%
+  );
+  transform: skewX(-22deg) translate3d(-140%, 0, 0);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.specialty-dynamic.is-sweeping::after {
+  animation: specialtyLightSweep 0.85s var(--ease-cinematic) forwards;
+}
+
+@keyframes specialtyLightSweep {
+  0% {
+    transform: skewX(-22deg) translate3d(-120%, 0, 0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: skewX(-22deg) translate3d(520%, 0, 0);
+    opacity: 0;
+  }
+}
+
+.specialty-word {
+  display: inline-flex;
+  white-space: nowrap;
+  transform-style: preserve-3d;
+}
+
+.specialty-char-mask {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: bottom;
+  padding-bottom: 0.04em;
+  margin-bottom: -0.04em;
+}
+
+.specialty-char {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+  transform-origin: 50% 100%;
+  backface-visibility: hidden;
+}
+
+/* Highlight parenthetical stack tags with subtle gradient typography */
+.specialty-char--accent {
+  background: linear-gradient(
+    90deg,
+    var(--accent-ice) 0%,
+    var(--accent-gold) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+}
+
+/* CSS Fallback when GSAP is unavailable */
 .specialty-dynamic.is-switching {
   opacity: 0;
   transform: translate3d(0, 55%, 0) rotateX(-32deg);
