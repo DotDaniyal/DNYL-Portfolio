@@ -1,0 +1,28 @@
+{
+  "name": "DNYL — Daniyal Hayat Official Portfolio",
+  "short_name": "DNYL",
+  "description": "Official portfolio and digital experience of DNYL (Daniyal Hayat) — Full-Stack Developer & Creative Builder specializing in React, TypeScript, Kotlin Android, and Google Gemini AI.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#05060a",
+  "theme_color": "#05060a",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["technology", "developer", "portfolio", "software"],
+  "icons": [
+    {
+      "src": "/assets/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/profile.jpg",
+      "sizes": "800x1000",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

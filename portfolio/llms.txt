@@ -1,0 +1,61 @@
+# DNYL — Official Portfolio, Projects & Digital Experience
+
+> DNYL (https://dnyl.vercel.app/) is the official personal developer brand and interactive portfolio of Daniyal Hayat — Full-Stack Developer & Creative Builder specializing in high-performance React & TypeScript web platforms, native Android mobile applications in Kotlin, and Google Gemini AI systems.
+
+## Brand & Identity
+- **Official Brand Name:** DNYL
+- **Founder & Developer:** Daniyal Hayat (`@DotDaniyal`)
+- **Role:** Full-Stack Developer & Creative Builder
+- **Official Website:** https://dnyl.vercel.app/
+- **GitHub Profile:** https://github.com/DotDaniyal
+- **Direct Email:** mailto:mdaniyalhayyat@gmail.com
+- **Direct Phone:** tel:+923331001904
+- **Location & Availability:** Pakistan · Available Globally & Remote
+
+## Core Technical Stack
+- **Frontend & Web Architecture:** React, Next.js, TypeScript, JavaScript (ES6+), HTML5, CSS3, Tailwind CSS, GSAP, Vite
+- **Mobile Engineering:** Kotlin, Android SDK, Android Studio, Offline SQLite/Room Caching, Material UI, XML Layouts
+- **AI & Backend Systems:** Google Gemini AI (`@google/genai`), Google AI Studio, Prompt Engineering, Grounded AI Pipelines, Node.js, Express, REST APIs
+
+## Flagship DNYL Projects & Live Deployments
+1. **Official Darul Ifta Irshad us Saileen**
+   - Category: Production Web Platform (JavaScript, Tailwind CSS, Bilingual UR/AR/EN Typography)
+   - Live URL: https://darulifta-bkfbzf6u.manus.space/
+   - Source Code: https://github.com/DotDaniyal/Offical-Darul-ifta-Irshad-us-saileen-
+2. **CortexIQ by DNYL (AI Suite)**
+   - Category: AI & Computational Intelligence Suite (TypeScript, React, Google Gemini AI, Tailwind CSS)
+   - Source Code: https://github.com/DotDaniyal/cortexiq-by-dnyl
+3. **Hamara Weather**
+   - Category: Real-Time Meteorological Telemetry Web App (JavaScript, Weather API, CSS3)
+   - Live URL: https://hamara-weather.vercel.app/
+   - Source Code: https://github.com/DotDaniyal/Hamara-Weather
+4. **Mystic Match by DNYL**
+   - Category: Algorithmic Match-3 Mobile & Web Puzzle Game (Kotlin, Android, Deterministic State Machine)
+   - Live URL: https://mystic-match-rho.vercel.app/
+   - Source Code: https://github.com/DotDaniyal/mystic-match-by-dnyl
+5. **Islamic AI / Mujeeb us Saileen**
+   - Category: Grounded AI Consultation & Citation Platform (TypeScript, React, Google Gemini AI)
+   - Live URL: https://darulifta-bkfbzf6u.manus.space/
+   - Source Code: https://github.com/DotDaniyal/Offical-Darul-ifta-Irshad-us-saileen-
+6. **AI Prompt Studio & Workspace**
+   - Category: Full-Stack Prompt Engineering Workspace (React, Node.js, Express, Google Gemini SDK)
+   - Live URL: https://ais-pre-c2gas5bmz4riptqglg7i75-935024525749.asia-east1.run.app
+   - Source Code: https://github.com/DotDaniyal/cortexiq-by-dnyl
+7. **Darul Ifta Android App v2**
+   - Category: Native Android Mobile Application (Kotlin, Android SDK, Offline Fatwa Caching)
+   - Source Code: https://github.com/DotDaniyal/Darul-Ifta-Irshad-us-Saileen-app2
+
+## Core Engineering Services
+- **01 // Full-Stack Web Development:** Custom responsive web platforms, React/Next.js/TypeScript applications, and Vercel/Cloud deployments.
+- **02 // Native Android Mobile Apps:** 100% Kotlin Android apps with offline database persistence and smooth touch ergonomics.
+- **03 // Google AI Studio & AI App Engineering:** Custom Gemini AI applications, prompt engineering, structured JSON grounding, and secure Express API proxies.
+- **04 // UI/UX Craft & Performance Audits:** High-contrast editorial interfaces, GPU-accelerated GSAP/Canvas motion, WCAG accessibility, and technical SEO.
+
+## Primary Navigation Anchors
+- Home: https://dnyl.vercel.app/#hero
+- About DNYL: https://dnyl.vercel.app/#about
+- Skills & Ecosystem: https://dnyl.vercel.app/#skills
+- Selected Projects: https://dnyl.vercel.app/#projects
+- Engineering Journey: https://dnyl.vercel.app/#experience
+- Services & Capabilities: https://dnyl.vercel.app/#services
+- Direct Contact: https://dnyl.vercel.app/#contact

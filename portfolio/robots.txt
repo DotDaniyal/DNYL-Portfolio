@@ -1,0 +1,51 @@
+# =============================================================================
+# DNYL Official Website — Search Engine & AI Discovery Robots Policy
+# Canonical Domain: https://dnyl.vercel.app
+# =============================================================================
+
+User-agent: *
+Allow: /
+Allow: /assets/
+Allow: /css/
+Allow: /js/
+Disallow: /api/
+
+# Google Search & Image Crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /assets/
+
+# Microsoft Bing & IndexNow Crawlers
+User-agent: Bingbot
+Allow: /
+
+# Major Search Engines
+User-agent: Applebot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# AI Search & Answer Engines (ChatGPT Search, Perplexity, Claude, Gemini)
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Host: https://dnyl.vercel.app
+Sitemap: https://dnyl.vercel.app/sitemap.xml

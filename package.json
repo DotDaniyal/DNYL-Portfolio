@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build",
+    "build": "node scripts/generate-seo.mjs && vite build",
+    "seo:generate": "node scripts/generate-seo.mjs",
+    "seo:indexnow": "node scripts/generate-seo.mjs --ping-indexnow",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"

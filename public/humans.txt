@@ -1,0 +1,16 @@
+/* TEAM */
+Brand: DNYL
+Developer & Architect: Daniyal Hayat
+Role: Full-Stack Developer & Creative Builder
+GitHub: https://github.com/DotDaniyal
+Email: mdaniyalhayyat@gmail.com
+Phone: +92 333 1001904
+Location: Pakistan (Available Globally & Remote)
+
+/* SITE */
+Canonical URL: https://dnyl.vercel.app/
+Last update: 2026-10-11
+Language: English
+Doctype: HTML5
+Standards: HTML5, CSS3, ES2024, TypeScript, WCAG 2.1 AA, Schema.org JSON-LD
+Technologies: React, TypeScript, Kotlin, Google Gemini AI, GSAP, Tailwind CSS, Vite, Vercel

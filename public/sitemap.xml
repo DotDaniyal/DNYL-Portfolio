@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+>
+  <url>
+    <loc>https://dnyl.vercel.app/</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dnyl.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dnyl.vercel.app/" />
+    <image:image>
+      <image:loc>https://dnyl.vercel.app/assets/images/profile.jpg</image:loc>
+      <image:title>DNYL — Daniyal Hayat Official Portfolio Portrait</image:title>
+      <image:caption>Daniyal Hayat (DNYL), Full-Stack Developer &amp; Creative Builder specializing in React, TypeScript, Kotlin Android, and Google Gemini AI.</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://dnyl.vercel.app/assets/images/dnyl-og-card.svg</image:loc>
+      <image:title>DNYL | Official Portfolio, Projects &amp; Digital Experience</image:title>
+      <image:caption>Official brand card for DNYL (https://dnyl.vercel.app/) by Daniyal Hayat.</image:caption>
+    </image:image>
+  </url>
+</urlset>
