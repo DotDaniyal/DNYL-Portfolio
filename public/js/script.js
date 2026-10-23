@@ -5003,6 +5003,27 @@
       });
 
       // 5. STAGGERED BATCH REVEALS FOR SKILLS, ARCHIVE PROJECTS, TIMELINE & SERVICES
+      ScrollTriggerPlugin.batch(".project-monolith", {
+        start: "top 86%",
+        once: true,
+        onEnter: (batch) => {
+          batch.forEach((card) => card.classList.add("is-inview"));
+          gsapInstance.fromTo(
+            batch,
+            { y: 40, opacity: 0, scale: 0.98 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.85,
+              stagger: 0.12,
+              ease: "power3.out",
+              overwrite: "auto"
+            }
+          );
+        }
+      });
+
       ScrollTriggerPlugin.batch(".skill-card", {
         start: "top 88%",
         once: true,
