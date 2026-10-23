@@ -10740,3 +10740,525 @@ body {
   }
 }
 
+/* ==========================================================================
+   OFFICIAL SOCIAL PROFILES: LINKEDIN & INSTAGRAM DESIGN SYSTEM
+   Header Nav + Hero CTA Cluster + Contact "Connect With Me" + Footer Strip
+   ========================================================================== */
+
+/* 1. Header Navigation Social Actions */
+.header-social-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.header-social-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(245, 245, 240, 0.03);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: border-color 0.22s var(--ease-cinematic),
+    background-color 0.22s var(--ease-cinematic),
+    transform 0.22s var(--ease-cinematic),
+    color 0.22s var(--ease-cinematic),
+    box-shadow 0.22s var(--ease-cinematic);
+}
+
+.header-social-icon-btn:hover {
+  border-color: var(--accent-ice);
+  background: rgba(56, 189, 248, 0.09);
+  color: var(--accent-ice);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px -3px rgba(56, 189, 248, 0.35);
+}
+
+.header-social-icon-btn:focus-visible {
+  outline: 2px solid var(--accent-ice);
+  outline-offset: 2px;
+}
+
+/* Mobile Drawer Socials */
+.mobile-drawer-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(245, 245, 240, 0.08);
+}
+
+.mobile-social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 44px;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s var(--ease-cinematic),
+    transform 0.2s var(--ease-cinematic);
+}
+
+.mobile-social-link svg {
+  color: var(--accent-ice);
+  flex-shrink: 0;
+}
+
+.mobile-social-link:hover {
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+/* 2. Hero Section: Polished Social Connection Cluster */
+.hero-social-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition: opacity 0.8s var(--ease-cinematic) 0.35s,
+    transform 0.8s var(--ease-cinematic) 0.35s;
+}
+
+body.is-loaded .hero-social-row {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.hero-social-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--accent-ice);
+  user-select: none;
+}
+
+.hero-social-links-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.hero-social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.55rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(245, 245, 240, 0.026);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: border-color 0.22s var(--ease-cinematic),
+    background-color 0.22s var(--ease-cinematic),
+    transform 0.22s var(--ease-cinematic),
+    box-shadow 0.22s var(--ease-cinematic),
+    color 0.22s var(--ease-cinematic);
+}
+
+.hero-social-pill-icon {
+  flex-shrink: 0;
+  color: var(--accent-ice);
+  transition: transform 0.22s var(--ease-cinematic);
+}
+
+.hero-social-pill--instagram .hero-social-pill-icon {
+  color: var(--accent-gold);
+}
+
+.hero-social-pill-arrow {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  transition: transform 0.22s var(--ease-cinematic),
+    color 0.22s var(--ease-cinematic);
+}
+
+.hero-social-pill:hover {
+  transform: translateY(-2px);
+}
+
+.hero-social-pill--linkedin:hover {
+  border-color: rgba(56, 189, 248, 0.52);
+  background: rgba(56, 189, 248, 0.09);
+  color: var(--accent-ice);
+  box-shadow: 0 10px 26px -8px rgba(56, 189, 248, 0.28);
+}
+
+.hero-social-pill--instagram:hover {
+  border-color: rgba(226, 194, 144, 0.55);
+  background: rgba(226, 194, 144, 0.09);
+  color: var(--accent-gold);
+  box-shadow: 0 10px 26px -8px rgba(226, 194, 144, 0.28);
+}
+
+.hero-social-pill:hover .hero-social-pill-arrow {
+  transform: translate(2px, -2px);
+  color: currentColor;
+}
+
+.hero-social-pill:hover .hero-social-pill-icon {
+  transform: scale(1.1);
+}
+
+.hero-social-pill:active {
+  transform: translateY(0);
+}
+
+.hero-social-pill:focus-visible {
+  outline: 2px solid var(--accent-ice);
+  outline-offset: 2px;
+}
+
+/* 3. Contact Section: Dedicated "Connect With Me" Cards */
+.contact-connect-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 0.65rem;
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 0.75s var(--ease-cinematic),
+    transform 0.75s var(--ease-cinematic);
+}
+
+.contact-connect-block.is-inview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.contact-connect-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.contact-connect-badge {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  color: var(--accent-ice);
+}
+
+.contact-connect-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.contact-connect-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: 18px;
+  background: linear-gradient(
+    155deg,
+    rgba(245, 245, 240, 0.04) 0%,
+    rgba(245, 245, 240, 0.012) 100%
+  );
+  border: 1px solid var(--border-subtle);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform 0.28s var(--ease-cinematic),
+    border-color 0.28s var(--ease-cinematic),
+    background-color 0.28s var(--ease-cinematic),
+    box-shadow 0.28s var(--ease-cinematic);
+}
+
+.contact-connect-card .connect-card-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 20% 20%,
+    rgba(56, 189, 248, 0.15) 0%,
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-cinematic);
+  pointer-events: none;
+}
+
+.contact-connect-card--instagram .connect-card-glow {
+  background: radial-gradient(
+    circle at 20% 20%,
+    rgba(226, 194, 144, 0.16) 0%,
+    transparent 65%
+  );
+}
+
+.contact-connect-card:hover {
+  transform: translate3d(0, -3px, 0);
+}
+
+.contact-connect-card:hover .connect-card-glow {
+  opacity: 1;
+}
+
+.contact-connect-card--linkedin:hover {
+  border-color: rgba(56, 189, 248, 0.52);
+  box-shadow: 0 20px 48px -16px rgba(56, 189, 248, 0.26);
+}
+
+.contact-connect-card--instagram:hover {
+  border-color: rgba(226, 194, 144, 0.52);
+  box-shadow: 0 20px 48px -16px rgba(226, 194, 144, 0.26);
+}
+
+.connect-card-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 245, 240, 0.04);
+  border: 1px solid rgba(245, 245, 240, 0.1);
+  color: var(--accent-ice);
+  flex-shrink: 0;
+  transition: transform 0.28s var(--ease-cinematic),
+    background-color 0.28s var(--ease-cinematic),
+    border-color 0.28s var(--ease-cinematic);
+}
+
+.contact-connect-card--instagram .connect-card-icon-wrap {
+  color: var(--accent-gold);
+}
+
+.contact-connect-card:hover .connect-card-icon-wrap {
+  transform: scale(1.08);
+}
+
+.contact-connect-card--linkedin:hover .connect-card-icon-wrap {
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.42);
+}
+
+.contact-connect-card--instagram:hover .connect-card-icon-wrap {
+  background: rgba(226, 194, 144, 0.14);
+  border-color: rgba(226, 194, 144, 0.42);
+}
+
+.connect-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.connect-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.connect-platform-name {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.connect-platform-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.connect-card-handle {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--accent-ice);
+}
+
+.contact-connect-card--instagram .connect-card-handle {
+  color: var(--accent-gold);
+}
+
+.connect-card-desc {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: 0.25rem 0 0.5rem 0;
+}
+
+.connect-card-action {
+  margin-top: auto;
+  padding-top: 0.45rem;
+}
+
+.connect-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  transition: color 0.22s var(--ease-cinematic),
+    transform 0.22s var(--ease-cinematic);
+}
+
+.connect-action-link svg {
+  transition: transform 0.22s var(--ease-cinematic);
+}
+
+.contact-connect-card:hover .connect-action-link svg {
+  transform: translate(2px, -2px);
+}
+
+.contact-connect-card--linkedin:hover .connect-action-link {
+  color: var(--accent-ice);
+}
+
+.contact-connect-card--instagram:hover .connect-action-link {
+  color: var(--accent-gold);
+}
+
+.contact-connect-card:focus-visible {
+  outline: 2px solid var(--accent-ice);
+  outline-offset: 3px;
+}
+
+/* 4. Footer Social Icon Strip */
+.footer-social-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+}
+
+.footer-social-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(245, 245, 240, 0.03);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: border-color 0.22s var(--ease-cinematic),
+    background-color 0.22s var(--ease-cinematic),
+    transform 0.22s var(--ease-cinematic),
+    color 0.22s var(--ease-cinematic),
+    box-shadow 0.22s var(--ease-cinematic);
+}
+
+.footer-social-icon-btn:hover {
+  border-color: var(--accent-ice);
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--accent-ice);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px -3px rgba(56, 189, 248, 0.35);
+}
+
+.footer-social-icon-btn:focus-visible {
+  outline: 2px solid var(--accent-ice);
+  outline-offset: 2px;
+}
+
+/* 5. Responsive Adaptations */
+@media (max-width: 768px) {
+  .contact-connect-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-social-links-wrap {
+    width: 100%;
+  }
+
+  .hero-social-pill {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-social-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-social-links-wrap {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-social-pill {
+    width: 100%;
+  }
+}
+
+/* 6. Light Mode Surface Adaptations */
+html[data-theme="light"] .header-social-icon-btn,
+html[data-theme="light"] .hero-social-pill,
+html[data-theme="light"] .contact-connect-card,
+html[data-theme="light"] .footer-social-icon-btn {
+  background: rgba(255, 255, 252, 0.88);
+  border-color: rgba(11, 14, 23, 0.12);
+  color: #0b0e17;
+}
+
+html[data-theme="light"] .header-social-icon-btn:hover,
+html[data-theme="light"] .footer-social-icon-btn:hover {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: var(--accent-sky);
+  color: var(--accent-sky);
+}
+
+html[data-theme="light"] .hero-social-pill--linkedin:hover,
+html[data-theme="light"] .contact-connect-card--linkedin:hover {
+  background: rgba(2, 132, 199, 0.06);
+  border-color: var(--accent-sky);
+}
+
+html[data-theme="light"] .hero-social-pill--instagram:hover,
+html[data-theme="light"] .contact-connect-card--instagram:hover {
+  background: rgba(180, 83, 9, 0.06);
+  border-color: var(--accent-gold);
+}
+
+html[data-theme="light"] .contact-connect-badge {
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.25);
+  color: #0284c7;
+}
+
+html[data-theme="light"] .connect-card-icon-wrap {
+  background: rgba(11, 14, 23, 0.04);
+  border-color: rgba(11, 14, 23, 0.1);
+}
+
+

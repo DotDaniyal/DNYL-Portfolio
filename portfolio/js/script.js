@@ -5373,7 +5373,29 @@
         actionLabel: "GITHUB ↗",
         keywords: "github source code repositories dotdaniyal",
         run: () => {
-          window.location.href = "https://github.com/DotDaniyal";
+          window.open("https://github.com/DotDaniyal", "_blank", "noopener,noreferrer");
+        }
+      },
+      {
+        group: "SYSTEM // INTERACTIVE CONTROLS",
+        tag: "SOCIAL",
+        title: "Connect on LinkedIn (in/dotdaniyal)",
+        subtitle: "https://www.linkedin.com/in/dotdaniyal",
+        actionLabel: "LINKEDIN ↗",
+        keywords: "linkedin connect social professional dotdaniyal network in/dotdaniyal career",
+        run: () => {
+          window.open("https://www.linkedin.com/in/dotdaniyal", "_blank", "noopener,noreferrer");
+        }
+      },
+      {
+        group: "SYSTEM // INTERACTIVE CONTROLS",
+        tag: "SOCIAL",
+        title: "Follow on Instagram (@dnyl_hayat)",
+        subtitle: "https://www.instagram.com/dnyl_hayat?dlrf=MTRxeGRqaWQyN2plbA==",
+        actionLabel: "INSTAGRAM ↗",
+        keywords: "instagram follow dnyl hayat creative photo social visual design feed",
+        run: () => {
+          window.open("https://www.instagram.com/dnyl_hayat?dlrf=MTRxeGRqaWQyN2plbA==", "_blank", "noopener,noreferrer");
         }
       }
     ];
