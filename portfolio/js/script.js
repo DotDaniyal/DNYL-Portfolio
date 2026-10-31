@@ -895,11 +895,6 @@
       targetContainer.appendChild(wordWrap);
     });
 
-    const caretEl = document.createElement("span");
-    caretEl.className = "typewriter-caret";
-    caretEl.setAttribute("aria-hidden", "true");
-    targetContainer.appendChild(caretEl);
-
     if (gsapRef && charSpans.length > 0) {
       gsapRef.set(charSpans, {
         opacity: 0,
@@ -919,9 +914,6 @@
         window.clearTimeout(heroSubtitleFallbackTimer);
         heroSubtitleFallbackTimer = null;
       }
-
-      caretEl.classList.remove("is-caret-settled");
-      caretEl.classList.add("is-caret-typing");
 
       const activeGsap = window.gsap;
       if (activeGsap) {
@@ -944,8 +936,6 @@
               ch.classList.remove("is-typed-hidden");
               ch.classList.add("is-typed-visible");
             });
-            caretEl.classList.remove("is-caret-typing");
-            caretEl.classList.add("is-caret-settled");
           }
         });
 
@@ -981,9 +971,6 @@
               typeNextChar,
               cadence
             );
-          } else {
-            caretEl.classList.remove("is-caret-typing");
-            caretEl.classList.add("is-caret-settled");
           }
         };
         heroSubtitleFallbackTimer = window.setTimeout(typeNextChar, 220);
@@ -1058,11 +1045,6 @@
 
       specialtyRotator.appendChild(wordSpan);
     });
-
-    const caretSpan = document.createElement("span");
-    caretSpan.className = "specialty-caret";
-    caretSpan.setAttribute("aria-hidden", "true");
-    specialtyRotator.appendChild(caretSpan);
 
     return createdChars;
   }
@@ -4591,7 +4573,7 @@
     // -------------------------------------------------------------------------
     mm.add("(prefers-reduced-motion: reduce)", () => {
       const allTargets = document.querySelectorAll(
-        ".reveal-line, .char-unit, .about-reveal-line, .word-unit, .about-eyebrow, .skills-eyebrow, .projects-eyebrow, .journey-eyebrow, .services-eyebrow-wrap, .contact-eyebrow-wrap, .footer-closing-eyebrow, .skills-intro, .projects-intro, .journey-intro, .services-intro-wrap, .contact-intro-wrap, .footer-closing-subtext, #profile-frame, #profile-image, #about-image-rig, #about-image, .about-float-card, .project-monolith, .monolith-stage, .archive-card, .skill-card, .timeline-card, .service-card, .services-stage-card, .contact-orb-card, .contact-channel-item, .footer-avatar-link, .footer-avatar-img, .footer-brand-col, .footer-nav-col, .footer-deployments-col, .footer-contact-col, .footer-monument-wrap"
+        ".reveal-line, .char-unit, .about-reveal-line, .word-unit, .about-eyebrow, .skills-eyebrow, .projects-eyebrow, .journey-eyebrow, .services-eyebrow-wrap, .contact-eyebrow-wrap, .footer-closing-eyebrow, .skills-intro, .projects-intro, .journey-intro, .services-intro-wrap, .contact-intro-wrap, .footer-closing-subtext, #profile-frame, #profile-image, #about-image-rig, #about-image, .about-float-card, .project-monolith, .monolith-stage, .archive-card, .skill-card, .timeline-card, .service-card, .services-stage-card, .contact-orb-card, .contact-channel-item, .footer-avatar-link, .footer-avatar-img, .footer-brand-col, .footer-nav-col, .footer-deployments-col, .footer-contact-col, .footer-monument-wrap, .footer-monument-text, .section-transition-bridge, .bridge-line, .bridge-glow, .about-stat-item, .skills-filter-bar, .projects-toolbar, .projects-archive-head, .journey-story-arc, .story-arc-step, .timeline-spine-progress, .currently-card, .contact-form-shell, .contact-climax-cta, .footer-status-bar, .signal-bar"
       );
 
       gsapInstance.set(allTargets, {
@@ -4626,11 +4608,105 @@
         return curtain;
       }
 
-      // 1. HERO SECTION: Scroll-scrubbed subtle depth parallax on Hero portrait
-      //    (Hero entrance animations are cleanly driven by body.is-loaded CSS transitions
-      //     with zero competing GSAP entrance tweens on the same elements)
-      const profileImage = document.getElementById("profile-image");
+      // 1. SECTION TRANSITION BRIDGES: ScrollTrigger line drawing & specular glow sweep
+      const transitionBridges = document.querySelectorAll(".section-transition-bridge");
+      transitionBridges.forEach((bridge) => {
+        const line = bridge.querySelector(".bridge-line");
+        const glow = bridge.querySelector(".bridge-glow");
+        const spine = bridge.querySelector(".bridge-vertical-spine");
+        const tag = bridge.querySelector(".bridge-index-tag");
 
+        if (line) line.setAttribute("data-gsap-controlled", "true");
+        if (glow) glow.setAttribute("data-gsap-controlled", "true");
+        if (spine) spine.setAttribute("data-gsap-controlled", "true");
+        if (tag) tag.setAttribute("data-gsap-controlled", "true");
+
+        const bridgeTl = gsapInstance.timeline({
+          scrollTrigger: {
+            trigger: bridge,
+            start: "top 92%",
+            toggleActions: "play none none none",
+            once: true,
+            onEnter: () => {
+              bridge.classList.add("is-drawn");
+            }
+          }
+        });
+
+        if (line) {
+          bridgeTl.fromTo(
+            line,
+            { scaleX: 0, opacity: 0.15 },
+            {
+              scaleX: 1,
+              opacity: 1,
+              duration: 0.95,
+              ease: "power2.out"
+            },
+            0
+          );
+        }
+
+        if (glow) {
+          bridgeTl.fromTo(
+            glow,
+            { scaleX: 0.2, xPercent: -140, opacity: 0 },
+            {
+              scaleX: 1.1,
+              xPercent: 140,
+              opacity: 0.85,
+              duration: 1.25,
+              ease: "power2.inOut"
+            },
+            0.08
+          );
+        }
+
+        if (spine) {
+          bridgeTl.fromTo(
+            spine,
+            { scaleY: 0, opacity: 0 },
+            { scaleY: 1, opacity: 1, duration: 0.7, ease: "power2.out" },
+            0.18
+          );
+        }
+
+        if (tag) {
+          bridgeTl.fromTo(
+            tag,
+            { y: 12, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
+            0.26
+          );
+        }
+      });
+
+      // 2. AMBIENT GLOWS: Scroll-linked spatial depth scrub
+      const ambientGlows = document.querySelectorAll(
+        ".about-ambient-glow, .skills-ambient-glow, .journey-ambient-glow, .contact-ambient-glow, .footer-ambient-glow"
+      );
+      ambientGlows.forEach((glow) => {
+        const parentSec = glow.closest("section, footer");
+        if (!parentSec) return;
+        gsapInstance.fromTo(
+          glow,
+          { yPercent: -12, opacity: 0.5 },
+          {
+            yPercent: 12,
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: parentSec,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.8
+            }
+          }
+        );
+      });
+
+      // 3. HERO SECTION: Scroll-scrubbed subtle depth parallax on Hero portrait
+      const profileImage = document.getElementById("profile-image");
       if (profileImage) {
         gsapInstance.to(profileImage, {
           yPercent: 7,
@@ -4644,7 +4720,7 @@
         });
       }
 
-      // 2. UNIVERSAL SECTION HEADINGS MASK-REVEAL & STAGGER SYSTEM
+      // 4. UNIVERSAL SECTION HEADINGS MASK-REVEAL & STAGGER SYSTEM
       //    Covers 02 About, 03 Skills, 04 Projects, 05 Experience, 06 Services, 07 Contact, 08 Footer
       const sectionHeaderConfigs = [
         {
@@ -4794,13 +4870,15 @@
         }
       });
 
-      // 3. ABOUT PORTRAIT IMAGE MASK-REVEAL, CURTAIN WIPE & STAGGERED FLOAT CARDS
+      // 5. ABOUT SECTION: Portrait, Float Cards, Prose, Info Cards & Stat Counters
       const aboutImageRig = document.getElementById("about-image-rig");
       const aboutImage = document.getElementById("about-image");
       const aboutImageInner = document.querySelector(".about-image-inner");
       const aboutFloatCards = document.querySelectorAll(".about-float-card");
       const aboutParagraphs = document.querySelectorAll(".about-paragraph");
       const aboutInfoCards = document.querySelectorAll(".about-info-card");
+      const aboutStatMatrix = document.querySelector(".about-stats-matrix");
+      const aboutStatItems = document.querySelectorAll(".about-stat-item");
 
       if (aboutImageRig && aboutImage) {
         aboutImageRig.setAttribute("data-gsap-controlled", "true");
@@ -4914,6 +4992,7 @@
       }
 
       if (aboutParagraphs.length > 0) {
+        aboutParagraphs.forEach((p) => p.setAttribute("data-gsap-controlled", "true"));
         gsapInstance.fromTo(
           aboutParagraphs,
           { y: 22, opacity: 0 },
@@ -4936,13 +5015,15 @@
       }
 
       if (aboutInfoCards.length > 0) {
+        aboutInfoCards.forEach((c) => c.setAttribute("data-gsap-controlled", "true"));
         gsapInstance.fromTo(
           aboutInfoCards,
-          { y: 24, opacity: 0 },
+          { y: 24, opacity: 0, scale: 0.97 },
           {
             y: 0,
             opacity: 1,
-            duration: 0.72,
+            scale: 1,
+            duration: 0.76,
             stagger: 0.08,
             ease: "power3.out",
             scrollTrigger: {
@@ -4957,16 +5038,131 @@
         );
       }
 
-      // 4. SELECTED PROJECTS: MONOLITH VISUAL STAGE MASK-REVEAL & STAGGERED DETAILS
+      if (aboutStatMatrix && aboutStatItems.length > 0) {
+        aboutStatItems.forEach((item) => item.setAttribute("data-gsap-controlled", "true"));
+        gsapInstance.fromTo(
+          aboutStatItems,
+          { y: 28, opacity: 0, scale: 0.93 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.09,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: aboutStatMatrix,
+              start: "top 86%",
+              once: true,
+              onEnter: () => {
+                aboutStatItems.forEach((item) => {
+                  item.classList.add("is-inview");
+                  const numEl = item.querySelector(".about-stat-number[data-count-to]");
+                  if (numEl) animateStatCounter(numEl);
+                });
+              }
+            }
+          }
+        );
+      }
+
+      // 6. SKILLS SECTION: Filter Bar, Cards & Proficiency Signal Wave
+      const skillsFilterBar = document.getElementById("skills-filter-bar");
+      if (skillsFilterBar) {
+        skillsFilterBar.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          skillsFilterBar,
+          { y: 24, opacity: 0, scale: 0.98 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.75,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: skillsFilterBar,
+              start: "top 88%",
+              once: true,
+              onEnter: () => {
+                skillsFilterBar.classList.add("is-inview");
+              }
+            }
+          }
+        );
+      }
+
+      ScrollTriggerPlugin.batch(".skill-card", {
+        start: "top 88%",
+        once: true,
+        onEnter: (batch) => {
+          batch.forEach((card) => {
+            card.classList.add("is-inview");
+            card.setAttribute("data-gsap-controlled", "true");
+          });
+          gsapInstance.fromTo(
+            batch,
+            { y: 30, opacity: 0, scale: 0.96 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.78,
+              stagger: 0.05,
+              ease: "power3.out",
+              overwrite: "auto",
+              onComplete: () => {
+                batch.forEach((card) => {
+                  const signals = card.querySelectorAll(".signal-bar.is-filled");
+                  if (signals.length > 0) {
+                    gsapInstance.fromTo(
+                      signals,
+                      { scaleY: 0, transformOrigin: "bottom center" },
+                      {
+                        scaleY: 1,
+                        duration: 0.45,
+                        stagger: 0.05,
+                        ease: "power2.out"
+                      }
+                    );
+                  }
+                });
+              }
+            }
+          );
+        }
+      });
+
+      // 7. PROJECTS SECTION: Search/Filter Toolbar, Monoliths & Archive Matrix
+      const projectsToolbar = document.querySelector(".projects-toolbar");
+      if (projectsToolbar) {
+        projectsToolbar.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          projectsToolbar,
+          { y: 22, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.72,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: projectsToolbar,
+              start: "top 88%",
+              once: true
+            }
+          }
+        );
+      }
+
       const projectMonoliths = document.querySelectorAll(".project-monolith");
       projectMonoliths.forEach((monolith) => {
+        monolith.setAttribute("data-gsap-controlled", "true");
         const stageEl = monolith.querySelector(".monolith-stage");
         const screenEl = monolith.querySelector(".monolith-screen");
         const previewItems = monolith.querySelectorAll(
           ".ui-preview-topbar, .ui-preview-hero-block, .ui-mini-card, .ui-telemetry-box, .ui-weather-primary, .ui-weather-stat, .ui-hud-item, .ui-studio-card"
         );
         const contentItems = monolith.querySelectorAll(
-          ".monolith-meta-top, .monolith-title, .monolith-tagline, .monolith-desc, .monolith-metric-item, .monolith-tech-tag, .monolith-actions .project-btn"
+          ".monolith-meta-top, .monolith-title, .monolith-tagline, .monolith-desc, .monolith-metric-item, .monolith-stack, .monolith-actions .project-btn"
         );
 
         if (stageEl) stageEl.setAttribute("data-gsap-controlled", "true");
@@ -4981,7 +5177,7 @@
         const projTl = gsapInstance.timeline({
           scrollTrigger: {
             trigger: monolith,
-            start: "top 82%",
+            start: "top 84%",
             toggleActions: "play none none none",
             once: true,
             onEnter: () => {
@@ -4990,14 +5186,28 @@
           }
         });
 
+        // Whole-card elevation and scale
+        projTl.fromTo(
+          monolith,
+          { y: 38, opacity: 0, scale: 0.98 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.9,
+            ease: "power3.out"
+          },
+          0
+        );
+
         if (stageEl) {
           projTl.fromTo(
             stageEl,
             {
               clipPath: "inset(14% 8% 14% 8% round 18px)",
               opacity: 0,
-              y: 28,
-              scale: 0.95
+              y: 20,
+              scale: 0.96
             },
             {
               clipPath: "inset(0% 0% 0% 0% round 18px)",
@@ -5007,7 +5217,7 @@
               duration: 1.15,
               ease: "expo.out"
             },
-            0
+            0.08
           );
         }
 
@@ -5019,7 +5229,7 @@
               duration: 0.95,
               ease: "expo.inOut"
             },
-            0.06
+            0.14
           );
         }
 
@@ -5031,10 +5241,10 @@
               y: 0,
               opacity: 1,
               duration: 0.65,
-              stagger: 0.055,
+              stagger: 0.05,
               ease: "power3.out"
             },
-            0.22
+            0.24
           );
         }
 
@@ -5046,62 +5256,42 @@
               y: 0,
               opacity: 1,
               duration: 0.68,
-              stagger: 0.045,
+              stagger: 0.04,
               ease: "power3.out"
             },
-            0.14
+            0.18
           );
         }
       });
 
-      // 5. STAGGERED BATCH REVEALS FOR SKILLS, ARCHIVE PROJECTS, TIMELINE & SERVICES
-      ScrollTriggerPlugin.batch(".project-monolith", {
-        start: "top 86%",
-        once: true,
-        onEnter: (batch) => {
-          batch.forEach((card) => card.classList.add("is-inview"));
-          gsapInstance.fromTo(
-            batch,
-            { y: 40, opacity: 0, scale: 0.98 },
-            {
-              y: 0,
-              opacity: 1,
-              scale: 1,
-              duration: 0.85,
-              stagger: 0.12,
-              ease: "power3.out",
-              overwrite: "auto"
+      const archiveHeadEl = document.querySelector(".projects-archive-head");
+      if (archiveHeadEl) {
+        archiveHeadEl.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          archiveHeadEl,
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.78,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: archiveHeadEl,
+              start: "top 88%",
+              once: true
             }
-          );
-        }
-      });
-
-      ScrollTriggerPlugin.batch(".skill-card", {
-        start: "top 88%",
-        once: true,
-        onEnter: (batch) => {
-          batch.forEach((card) => card.classList.add("is-inview"));
-          gsapInstance.fromTo(
-            batch,
-            { y: 26, opacity: 0, scale: 0.97 },
-            {
-              y: 0,
-              opacity: 1,
-              scale: 1,
-              duration: 0.75,
-              stagger: 0.06,
-              ease: "power3.out",
-              overwrite: "auto"
-            }
-          );
-        }
-      });
+          }
+        );
+      }
 
       ScrollTriggerPlugin.batch(".archive-card", {
         start: "top 88%",
         once: true,
         onEnter: (batch) => {
-          batch.forEach((card) => card.classList.add("is-inview"));
+          batch.forEach((card) => {
+            card.classList.add("is-inview");
+            card.setAttribute("data-gsap-controlled", "true");
+          });
           gsapInstance.fromTo(
             batch,
             {
@@ -5114,7 +5304,7 @@
               y: 0,
               opacity: 1,
               duration: 0.85,
-              stagger: 0.08,
+              stagger: 0.07,
               ease: "expo.out",
               overwrite: "auto"
             }
@@ -5122,36 +5312,168 @@
         }
       });
 
-      ScrollTriggerPlugin.batch(".timeline-card", {
-        start: "top 86%",
-        once: true,
-        onEnter: (batch) => {
-          batch.forEach((card) => {
-            card.classList.add("is-inview");
-            const parentItem = card.closest(".timeline-item");
-            if (parentItem) parentItem.classList.add("is-inview");
-          });
-          gsapInstance.fromTo(
-            batch,
+      // 8. JOURNEY / EXPERIENCE SECTION: Story Arc, Timeline Spine Scrub & Alternating Milestones
+      const storyArc = document.querySelector(".journey-story-arc");
+      const storySteps = document.querySelectorAll(".story-arc-step");
+      if (storyArc) {
+        storyArc.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          storyArc,
+          { y: 20, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.75,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: storyArc,
+              start: "top 88%",
+              once: true,
+              onEnter: () => {
+                storyArc.classList.add("is-inview");
+              }
+            }
+          }
+        );
+      }
+
+      if (storySteps.length > 0) {
+        storySteps.forEach((s) => s.setAttribute("data-gsap-controlled", "true"));
+        gsapInstance.fromTo(
+          storySteps,
+          { y: 14, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            stagger: 0.05,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: storyArc || ".journey-timeline",
+              start: "top 88%",
+              once: true
+            }
+          }
+        );
+      }
+
+      const timelineContainer = document.getElementById("journey-timeline");
+      const timelineFill = document.getElementById("timeline-spine-progress");
+      const milestoneItems = document.querySelectorAll(".timeline-item");
+
+      if (timelineContainer && timelineFill) {
+        timelineFill.setAttribute("data-gsap-controlled", "true");
+        ScrollTriggerPlugin.create({
+          trigger: timelineContainer,
+          start: "top 78%",
+          end: "bottom 78%",
+          scrub: 0.35,
+          onUpdate: (self) => {
+            const scaleVal = self.progress.toFixed(4);
+            timelineFill.style.transform = `scaleY(${scaleVal})`;
+            const rect = timelineContainer.getBoundingClientRect();
+            const fillBottomY = rect.top + rect.height * self.progress;
+            let currentIdx = 0;
+
+            milestoneItems.forEach((item, idx) => {
+              const markerEl = item.querySelector(".timeline-marker");
+              if (!markerEl) return;
+              const markerRect = markerEl.getBoundingClientRect();
+              const markerCenterY = markerRect.top + markerRect.height * 0.5;
+              const isReached = fillBottomY >= markerCenterY;
+              item.classList.toggle("is-reached", isReached);
+              if (isReached) currentIdx = idx;
+            });
+
+            milestoneItems.forEach((item, idx) => {
+              item.classList.toggle("is-current", idx === currentIdx);
+            });
+
+            storySteps.forEach((step, idx) => {
+              step.classList.toggle("is-active", idx === currentIdx);
+            });
+          }
+        });
+      }
+
+      // Alternating Timeline Entries Entrance Reveal
+      milestoneItems.forEach((item, idx) => {
+        item.setAttribute("data-gsap-controlled", "true");
+        const card = item.querySelector(".timeline-card");
+        const marker = item.querySelector(".timeline-marker");
+        const isOdd = idx % 2 === 0;
+
+        const itemTl = gsapInstance.timeline({
+          scrollTrigger: {
+            trigger: item,
+            start: "top 85%",
+            toggleActions: "play none none none",
+            once: true,
+            onEnter: () => {
+              item.classList.add("is-inview");
+              if (card) card.classList.add("is-inview");
+            }
+          }
+        });
+
+        if (marker) {
+          itemTl.fromTo(
+            marker,
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(2)" },
+            0
+          );
+        }
+
+        if (card) {
+          card.setAttribute("data-gsap-controlled", "true");
+          itemTl.fromTo(
+            card,
             {
               clipPath: "inset(8% 4% 8% 4% round 22px)",
-              y: 26,
+              x: isOdd ? -26 : 26,
+              y: 16,
               opacity: 0
             },
             {
               clipPath: "inset(0% 0% 0% 0% round 22px)",
+              x: 0,
               y: 0,
               opacity: 1,
               duration: 0.88,
-              stagger: 0.1,
-              ease: "expo.out",
-              overwrite: "auto"
-            }
+              ease: "expo.out"
+            },
+            0.08
           );
         }
       });
 
-      // 6. SERVICES VISUAL STAGE, CONTACT ORB & FOOTER AVATAR MASK-REVEALS
+      const currentlyCard = document.querySelector(".currently-card");
+      if (currentlyCard) {
+        currentlyCard.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          currentlyCard,
+          { y: 28, opacity: 0, scale: 0.98 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.88,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: currentlyCard,
+              start: "top 86%",
+              once: true,
+              onEnter: () => {
+                const wrap = currentlyCard.closest('[data-journey-reveal="currently"]');
+                if (wrap) wrap.classList.add("is-inview");
+              }
+            }
+          }
+        );
+      }
+
+      // 9. SERVICES SECTION: Visual Stage & Staggered Capability Cards
       const servicesStageCard = document.querySelector(".services-stage-card");
       if (servicesStageCard) {
         servicesStageCard.setAttribute("data-gsap-controlled", "true");
@@ -5182,6 +5504,43 @@
         );
       }
 
+      ScrollTriggerPlugin.batch(".service-card", {
+        start: "top 88%",
+        once: true,
+        onEnter: (batch) => {
+          batch.forEach((card) => {
+            card.classList.add("is-inview");
+            card.setAttribute("data-gsap-controlled", "true");
+          });
+          gsapInstance.fromTo(
+            batch,
+            { y: 32, opacity: 0, scale: 0.97 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.82,
+              stagger: 0.08,
+              ease: "power3.out",
+              overwrite: "auto",
+              onComplete: () => {
+                batch.forEach((card) => {
+                  const items = card.querySelectorAll(".service-deliverables li");
+                  if (items.length > 0) {
+                    gsapInstance.fromTo(
+                      items,
+                      { x: -8, opacity: 0 },
+                      { x: 0, opacity: 1, duration: 0.4, stagger: 0.03, ease: "power2.out" }
+                    );
+                  }
+                });
+              }
+            }
+          );
+        }
+      });
+
+      // 10. CONTACT SECTION: Signal Orb, Channel Cards, Form Shell & Climax CTA
       const contactOrbCard = document.querySelector(".contact-orb-card");
       if (contactOrbCard) {
         contactOrbCard.setAttribute("data-gsap-controlled", "true");
@@ -5189,14 +5548,16 @@
           contactOrbCard,
           {
             clipPath: "inset(12% 8% 12% 8% round 24px)",
+            scale: 0.94,
             y: 26,
             opacity: 0
           },
           {
             clipPath: "inset(0% 0% 0% 0% round 24px)",
+            scale: 1,
             y: 0,
             opacity: 1,
-            duration: 1.1,
+            duration: 1.15,
             ease: "expo.out",
             scrollTrigger: {
               trigger: contactOrbCard,
@@ -5210,13 +5571,158 @@
         );
       }
 
-      const footerAvatarLink = document.querySelector(".footer-avatar-link");
-      const footerAvatarImg = document.querySelector(".footer-avatar-img");
+      const contactChannels = document.querySelectorAll(".contact-channel-item");
+      if (contactChannels.length > 0) {
+        contactChannels.forEach((c) => c.setAttribute("data-gsap-controlled", "true"));
+        gsapInstance.fromTo(
+          contactChannels,
+          { x: -24, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.74,
+            stagger: 0.08,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".contact-channels",
+              start: "top 86%",
+              once: true,
+              onEnter: () => {
+                contactChannels.forEach((c) => c.classList.add("is-inview"));
+              }
+            }
+          }
+        );
+      }
+
+      const contactSocialBox = document.querySelector(".contact-connect-cards");
+      if (contactSocialBox) {
+        const socialCards = contactSocialBox.querySelectorAll(".contact-connect-card");
+        socialCards.forEach((c) => c.setAttribute("data-gsap-controlled", "true"));
+        gsapInstance.fromTo(
+          socialCards,
+          { y: 18, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            stagger: 0.08,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: contactSocialBox,
+              start: "top 88%",
+              once: true
+            }
+          }
+        );
+      }
+
+      const contactFormShell = document.querySelector(".contact-form-shell");
+      if (contactFormShell) {
+        contactFormShell.setAttribute("data-gsap-controlled", "true");
+        const formFields = contactFormShell.querySelectorAll(".contact-field-wrap");
+        const formFooter = contactFormShell.querySelector(".contact-form-footer");
+
+        const formTl = gsapInstance.timeline({
+          scrollTrigger: {
+            trigger: contactFormShell,
+            start: "top 86%",
+            toggleActions: "play none none none",
+            once: true
+          }
+        });
+
+        formTl.fromTo(
+          contactFormShell,
+          { y: 30, opacity: 0, scale: 0.98 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.9,
+            ease: "power3.out"
+          },
+          0
+        );
+
+        if (formFields.length > 0) {
+          formTl.fromTo(
+            formFields,
+            { y: 14, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.62,
+              stagger: 0.06,
+              ease: "power3.out"
+            },
+            0.18
+          );
+        }
+
+        if (formFooter) {
+          formTl.fromTo(
+            formFooter,
+            { y: 14, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
+            0.36
+          );
+        }
+      }
+
+      const contactClimaxCta = document.querySelector(".contact-climax-cta");
+      if (contactClimaxCta) {
+        contactClimaxCta.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          contactClimaxCta,
+          { scale: 0.95, y: 32, opacity: 0 },
+          {
+            scale: 1,
+            y: 0,
+            opacity: 1,
+            duration: 1.05,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: contactClimaxCta,
+              start: "top 85%",
+              once: true,
+              onEnter: () => {
+                contactClimaxCta.classList.add("is-inview");
+              }
+            }
+          }
+        );
+      }
+
+      // 11. FOOTER SECTION: Status Bar, 4 Columns, Monument Typography & Avatar
+      const footerStatusBar = document.querySelector(".footer-status-bar");
+      if (footerStatusBar) {
+        footerStatusBar.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          footerStatusBar,
+          { y: 18, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.75,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: footerStatusBar,
+              start: "top 90%",
+              once: true,
+              onEnter: () => {
+                footerStatusBar.classList.add("is-inview");
+              }
+            }
+          }
+        );
+      }
+
       const footerCols = document.querySelectorAll(
         ".footer-brand-col, .footer-nav-col, .footer-deployments-col, .footer-contact-col"
       );
-
       if (footerCols.length > 0) {
+        footerCols.forEach((c) => c.setAttribute("data-gsap-controlled", "true"));
         gsapInstance.fromTo(
           footerCols,
           { y: 24, opacity: 0 },
@@ -5224,11 +5730,11 @@
             y: 0,
             opacity: 1,
             duration: 0.82,
-            stagger: 0.09,
+            stagger: 0.08,
             ease: "power3.out",
             scrollTrigger: {
               trigger: ".footer-main-grid",
-              start: "top 86%",
+              start: "top 88%",
               once: true,
               onEnter: () => {
                 footerCols.forEach((c) => c.classList.add("is-inview"));
@@ -5238,7 +5744,9 @@
         );
       }
 
-      if (footerAvatarLink && footerAvatarImg) {
+      const footerAvatarLink = document.querySelector(".footer-avatar-link");
+      if (footerAvatarLink) {
+        footerAvatarLink.setAttribute("data-gsap-controlled", "true");
         gsapInstance.fromTo(
           footerAvatarLink,
           {
@@ -5252,14 +5760,37 @@
             ease: "expo.out",
             scrollTrigger: {
               trigger: ".footer-main-grid",
-              start: "top 86%",
+              start: "top 88%",
               once: true
             }
           }
         );
       }
 
-      // Refresh ScrollTrigger once images and layout settle
+      const footerMonumentWrap = document.querySelector(".footer-monument-wrap");
+      const footerMonumentText = document.querySelector(".footer-monument-text");
+      if (footerMonumentWrap && footerMonumentText) {
+        footerMonumentWrap.setAttribute("data-gsap-controlled", "true");
+        footerMonumentText.setAttribute("data-gsap-controlled", "true");
+        gsapInstance.fromTo(
+          footerMonumentText,
+          { letterSpacing: "0.14em", y: 26, opacity: 0.25 },
+          {
+            letterSpacing: "0.02em",
+            y: 0,
+            opacity: 1,
+            duration: 1.25,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: footerMonumentWrap,
+              start: "top 92%",
+              once: true
+            }
+          }
+        );
+      }
+
+      // Refresh ScrollTrigger once images, layout, and hero reveal settle
       window.addEventListener(
         "load",
         () => {
@@ -5267,6 +5798,12 @@
         },
         { once: true }
       );
+
+      window.addEventListener("dnyl:hero-reveal", () => {
+        window.setTimeout(() => {
+          ScrollTriggerPlugin.refresh();
+        }, 120);
+      });
     });
   }
 
