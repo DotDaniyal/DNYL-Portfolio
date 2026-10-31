@@ -2681,17 +2681,16 @@
         '[data-projects-reveal]:not([data-projects-reveal="monolith"]):not([data-projects-reveal="archive-card"])'
       )
     );
-    const monolithCards = Array.from(
-      projectsSection.querySelectorAll(
-        '.project-monolith[data-projects-reveal="monolith"]'
-      )
-    );
-    const archiveCards = Array.from(
-      projectsSection.querySelectorAll(
-        '.archive-card[data-projects-reveal="archive-card"]'
-      )
-    );
-    const allProjectItems = [...monolithCards, ...archiveCards];
+    function getProjectCards() {
+      const monoliths = Array.from(
+        projectsSection.querySelectorAll('.project-monolith')
+      );
+      const archives = Array.from(
+        projectsSection.querySelectorAll('.archive-card')
+      );
+      return [...monoliths, ...archives];
+    }
+
     const filterBtns = Array.from(
       projectsSection.querySelectorAll(
         ".project-filter-btn[data-project-filter]"
@@ -2699,9 +2698,10 @@
     );
 
     // 1. Scroll Reveal Observers
+    const initialProjectItems = getProjectCards();
     if (prefersReducedMotion) {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
-      allProjectItems.forEach((el) => el.classList.add("is-inview"));
+      initialProjectItems.forEach((el) => el.classList.add("is-inview"));
     } else if ("IntersectionObserver" in window) {
       const headerObs = new IntersectionObserver(
         (entries, obs) => {
@@ -2732,10 +2732,10 @@
         },
         { threshold: 0.12, rootMargin: "0px 0px -4% 0px" }
       );
-      allProjectItems.forEach((el) => projectObs.observe(el));
+      initialProjectItems.forEach((el) => projectObs.observe(el));
     } else {
       headerRevealNodes.forEach((el) => el.classList.add("is-inview"));
-      allProjectItems.forEach((el) => el.classList.add("is-inview"));
+      initialProjectItems.forEach((el) => el.classList.add("is-inview"));
     }
 
     // 2. Domain Category Filter + Real-Time Search & Stack Telemetry System
@@ -2749,6 +2749,39 @@
     const emptyStateEl = document.getElementById("projects-empty-state");
     const resetFiltersBtn = document.getElementById("projects-reset-filters-btn");
     const archiveHeadEl = projectsSection.querySelector(".projects-archive-head");
+
+    function updateFilterButtonCounts() {
+      const items = getProjectCards();
+      const allCount = items.length;
+      let featuredCount = 0;
+      let webCount = 0;
+      let aiCount = 0;
+      let mobileCount = 0;
+
+      items.forEach((item) => {
+        const tags = (item.getAttribute("data-project-tags") || "").toLowerCase().split(" ");
+        if (tags.includes("featured")) featuredCount++;
+        if (tags.includes("web")) webCount++;
+        if (tags.includes("ai")) aiCount++;
+        if (tags.includes("mobile")) mobileCount++;
+      });
+
+      const counts = {
+        all: allCount,
+        featured: featuredCount,
+        web: webCount,
+        ai: aiCount,
+        mobile: mobileCount
+      };
+
+      filterBtns.forEach((btn) => {
+        const cat = btn.getAttribute("data-project-filter");
+        const countSpan = btn.querySelector(".filter-btn-count");
+        if (countSpan && cat && counts[cat] !== undefined) {
+          countSpan.textContent = String(counts[cat]).padStart(2, "0");
+        }
+      });
+    }
 
     function doesProjectMatch(item, category, rawQuery) {
       const tags = (item.getAttribute("data-project-tags") || "").split(" ");
@@ -2774,10 +2807,13 @@
       return textCorpus.includes(q);
     }
 
-    function updateSearchTelemetry(visibleCount, archiveVisibleCount) {
+    function updateSearchTelemetry(visibleCount, archiveVisibleCount, totalCount) {
+      const items = getProjectCards();
+      const total = totalCount || items.length;
       if (matchCountEl) {
         const padded = String(visibleCount).padStart(2, "0");
-        matchCountEl.textContent = `SHOWING ${padded} / 12 VERIFIED BUILDS`;
+        const paddedTotal = String(total).padStart(2, "0");
+        matchCountEl.textContent = `SHOWING ${padded} / ${paddedTotal} VERIFIED BUILDS`;
       }
       if (emptyStateEl) {
         emptyStateEl.hidden = visibleCount > 0;
@@ -2791,6 +2827,7 @@
     }
 
     function runCombinedProjectFilter(animateTransition) {
+      const currentItems = getProjectCards();
       filterBtns.forEach((btn) => {
         const isMatch =
           btn.getAttribute("data-project-filter") === activeProjectFilter;
@@ -2801,7 +2838,7 @@
       if (prefersReducedMotion || !animateTransition) {
         let visibleCount = 0;
         let archiveVisibleCount = 0;
-        allProjectItems.forEach((item) => {
+        currentItems.forEach((item) => {
           const show = doesProjectMatch(
             item,
             activeProjectFilter,
@@ -2817,13 +2854,14 @@
             }
           }
         });
-        updateSearchTelemetry(visibleCount, archiveVisibleCount);
+        updateSearchTelemetry(visibleCount, archiveVisibleCount, currentItems.length);
+        updateFilterButtonCounts();
         return;
       }
 
       if (projFilterTimer) window.clearTimeout(projFilterTimer);
 
-      allProjectItems.forEach((item) => {
+      currentItems.forEach((item) => {
         item.style.transitionDelay = "0ms";
         item.classList.add("is-filtering-out");
       });
@@ -2831,7 +2869,7 @@
       projFilterTimer = window.setTimeout(() => {
         let visIdx = 0;
         let archiveVisibleCount = 0;
-        allProjectItems.forEach((item) => {
+        currentItems.forEach((item) => {
           const show = doesProjectMatch(
             item,
             activeProjectFilter,
@@ -2839,7 +2877,7 @@
           );
           if (show) {
             item.classList.remove("is-hidden-project");
-            item.style.transitionDelay = `${Math.min(visIdx * 55, 280)}ms`;
+            item.style.transitionDelay = `${Math.min(visIdx * 45, 240)}ms`;
             visIdx++;
             if (item.classList.contains("archive-card")) {
               archiveVisibleCount++;
@@ -2854,9 +2892,15 @@
             item.classList.add("is-hidden-project");
           }
         });
-        updateSearchTelemetry(visIdx, archiveVisibleCount);
-      }, 190);
+        updateSearchTelemetry(visIdx, archiveVisibleCount, currentItems.length);
+        updateFilterButtonCounts();
+      }, 160);
     }
+
+    window.refreshProjectsFilter = function(animate) {
+      runCombinedProjectFilter(Boolean(animate));
+    };
+    window.updateFilterButtonCounts = updateFilterButtonCounts;
 
     function applyProjectFilter(category) {
       if (category === activeProjectFilter && !activeSearchQuery) return;
@@ -5403,7 +5447,7 @@
     const projectCommands = Object.keys(REAL_PROJECTS_DATA).map((projId) => {
       const p = REAL_PROJECTS_DATA[projId];
       return {
-        group: "DEEP-DIVE CASE STUDIES // 12 VERIFIED PROJECTS",
+        group: "DEEP-DIVE CASE STUDIES // VERIFIED PROJECTS",
         tag: `P·${p.index}`,
         title: p.title,
         subtitle: `${p.category} · ${(p.technologies || []).slice(0, 4).join(" · ")}`,

@@ -4277,8 +4277,8 @@ body.is-loaded .scroll-indicator {
 }
 
 .archive-card.is-inview {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
 }
 
 .archive-card:hover {
@@ -4406,18 +4406,50 @@ body.is-loaded .scroll-indicator {
   color: var(--text-muted);
 }
 
+.archive-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .archive-case-btn {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 600;
   color: var(--accent-gold);
   white-space: nowrap;
-  transition: color 0.2s var(--ease-cinematic);
+  padding: 0.22rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  transition: all 0.2s var(--ease-cinematic);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .archive-case-btn:hover {
+  color: #ffffff;
+  background: rgba(212, 175, 55, 0.25);
+  border-color: rgba(212, 175, 55, 0.5);
+  text-decoration: none;
+}
+
+.archive-action-group .archive-repo-btn {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.archive-action-group .archive-repo-btn:hover {
   color: var(--text-primary);
-  text-decoration: underline;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.archive-stats-badge {
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
 }
 
 /* ==========================================================================
