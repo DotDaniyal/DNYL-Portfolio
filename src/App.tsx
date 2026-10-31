@@ -1,8 +1,7 @@
 /**
- * @license
- * SPDX-License-Identifier: Apache-2.0
+ * Legacy starter app retained only to avoid broken imports.
+ * The portfolio is served as static HTML and does not use this React entry.
  */
-
 export default function App() {
-  return <div></div>;
+  return null;
 }
