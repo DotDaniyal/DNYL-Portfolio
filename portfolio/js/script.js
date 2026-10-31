@@ -1783,67 +1783,75 @@
       observer.observe(heroSection);
     }
 
-    function drawParticles() {
+    let lastParticleTime = performance.now();
+
+    function drawParticles(now) {
       if (isHeroVisible && !document.hidden) {
-        ctx.clearRect(0, 0, width, height);
-        const isLight =
-          document.documentElement.getAttribute("data-theme") === "light";
-        const linkDist = Math.min(145, width * 0.12);
+        const currentTime = typeof now === "number" ? now : performance.now();
+        const delta = currentTime - lastParticleTime;
 
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i];
-          p.x += p.vx;
-          p.y += p.vy;
+        if (delta >= 14) {
+          lastParticleTime = currentTime - (delta % 14);
+          ctx.clearRect(0, 0, width, height);
+          const isLight =
+            document.documentElement.getAttribute("data-theme") === "light";
+          const linkDist = Math.min(145, width * 0.12);
 
-          // Subtle mouse repulsion / orbital drift on desktop
-          if (isFinePointer && pointerX > 0) {
-            const dxMouse = p.x - pointerX;
-            const dyMouse = p.y - pointerY;
-            const distSq = dxMouse * dxMouse + dyMouse * dyMouse;
-            if (distSq < 22500 && distSq > 1) {
-              const dist = Math.sqrt(distSq);
-              const force = ((150 - dist) / 150) * 0.32 * p.z;
-              p.x += (dxMouse / dist) * force;
-              p.y += (dyMouse / dist) * force;
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // Subtle mouse repulsion / orbital drift on desktop
+            if (isFinePointer && pointerX > 0) {
+              const dxMouse = p.x - pointerX;
+              const dyMouse = p.y - pointerY;
+              const distSq = dxMouse * dxMouse + dyMouse * dyMouse;
+              if (distSq < 22500 && distSq > 1) {
+                const dist = Math.sqrt(distSq);
+                const force = ((150 - dist) / 150) * 0.32 * p.z;
+                p.x += (dxMouse / dist) * force;
+                p.y += (dyMouse / dist) * force;
+              }
             }
-          }
 
-          if (p.y < -12) p.y = height + 12;
-          if (p.y > height + 12) p.y = -12;
-          if (p.x < -12) p.x = width + 12;
-          if (p.x > width + 12) p.x = -12;
+            if (p.y < -12) p.y = height + 12;
+            if (p.y > height + 12) p.y = -12;
+            if (p.x < -12) p.x = width + 12;
+            if (p.x > width + 12) p.x = -12;
 
-          // Connect nearby constellation nodes with delicate filaments
-          for (let j = i + 1; j < particles.length; j++) {
-            const p2 = particles[j];
-            const dx = p.x - p2.x;
-            const dy = p.y - p2.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < linkDist) {
-              const lineAlpha = (1 - dist / linkDist) * 0.11 * ((p.z + p2.z) * 0.5);
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = isLight
-                ? `rgba(2, 132, 199, ${lineAlpha.toFixed(3)})`
-                : `rgba(56, 189, 248, ${lineAlpha.toFixed(3)})`;
-              ctx.lineWidth = 0.65;
-              ctx.stroke();
+            // Connect nearby constellation nodes with delicate filaments
+            for (let j = i + 1; j < particles.length; j++) {
+              const p2 = particles[j];
+              const dx = p.x - p2.x;
+              const dy = p.y - p2.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < linkDist) {
+                const lineAlpha = (1 - dist / linkDist) * 0.11 * ((p.z + p2.z) * 0.5);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = isLight
+                  ? `rgba(2, 132, 199, ${lineAlpha.toFixed(3)})`
+                  : `rgba(56, 189, 248, ${lineAlpha.toFixed(3)})`;
+                ctx.lineWidth = 0.65;
+                ctx.stroke();
+              }
             }
-          }
 
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          if (p.isAccent) {
-            ctx.fillStyle = isLight
-              ? `rgba(2, 132, 199, ${p.alpha})`
-              : `rgba(56, 189, 248, ${p.alpha})`;
-          } else {
-            ctx.fillStyle = isLight
-              ? `rgba(30, 41, 59, ${p.alpha * 0.75})`
-              : `rgba(226, 232, 240, ${p.alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            if (p.isAccent) {
+              ctx.fillStyle = isLight
+                ? `rgba(2, 132, 199, ${p.alpha})`
+                : `rgba(56, 189, 248, ${p.alpha})`;
+            } else {
+              ctx.fillStyle = isLight
+                ? `rgba(30, 41, 59, ${p.alpha * 0.75})`
+                : `rgba(226, 232, 240, ${p.alpha})`;
+            }
+            ctx.fill();
           }
-          ctx.fill();
         }
       }
       requestAnimationFrame(drawParticles);
