@@ -6,6 +6,8 @@
 (function () {
   "use strict";
 
+  window.__pageLoadedTimestamp = Date.now();
+
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
@@ -3644,13 +3646,24 @@
 
     const copyEmailBtn = document.getElementById("contact-copy-email-btn");
     const copyEmailText = document.getElementById("contact-copy-email-text");
+    const copyWhatsAppBtn = document.getElementById("contact-copy-whatsapp-btn");
+    const copyWhatsAppText = document.getElementById("contact-copy-whatsapp-text");
     const copyPhoneBtn = document.getElementById("contact-copy-phone-btn");
     const copyPhoneText = document.getElementById("contact-copy-phone-text");
+
+    const hpBotInput = document.getElementById("contact-hp-bot");
+    const formAlert = document.getElementById("contact-form-alert");
+    const formAlertIcon = document.getElementById("contact-form-alert-icon");
+    const formAlertBody = document.getElementById("contact-form-alert-body");
+    const submitBtn = document.getElementById("contact-submit-btn");
+    const submitText = document.getElementById("contact-submit-text");
+    const submitIcon = document.getElementById("contact-submit-icon");
 
     const savedSenderEl = document.getElementById("saved-msg-sender");
     const savedTimeEl = document.getElementById("saved-msg-time");
     const savedSubjectEl = document.getElementById("saved-msg-subject");
     const savedBodyEl = document.getElementById("saved-msg-body");
+    const btnContinueWhatsApp = document.getElementById("btn-continue-whatsapp");
     const copySavedBtn = document.getElementById("btn-copy-saved-msg");
     const copySavedLabel = document.getElementById("copy-saved-msg-label");
     const openEmailAppBtn = document.getElementById("btn-open-email-app");
@@ -3814,6 +3827,17 @@
           copyEmailBtn,
           copyEmailText,
           "Copied mdaniyalhayyat@gmail.com to your clipboard."
+        );
+      });
+    }
+
+    if (copyWhatsAppBtn) {
+      copyWhatsAppBtn.addEventListener("click", () => {
+        copyTextWithFeedback(
+          "+92 333 1001904",
+          copyWhatsAppBtn,
+          copyWhatsAppText,
+          "Copied WhatsApp number +92 333 1001904 to your clipboard."
         );
       });
     }
@@ -3995,12 +4019,28 @@
       });
     });
 
-    // 6. Form Submission -> Save to LocalStorage & Transition to Success State
+    // 6. Direct Email Sending Engine & WhatsApp Handoff
     let lastFormattedMessage = "";
 
+    function showFormAlert(type, message) {
+      if (!formAlert || !formAlertBody) return;
+      formAlert.className = `contact-form-alert contact-form-alert--${type} is-visible`;
+      if (formAlertIcon) {
+        formAlertIcon.textContent = type === "error" ? "⚠️" : "✓";
+      }
+      formAlertBody.textContent = message;
+    }
+
+    function hideFormAlert() {
+      if (!formAlert) return;
+      formAlert.className = "contact-form-alert";
+      if (formAlertBody) formAlertBody.textContent = "";
+    }
+
     if (contactForm) {
-      contactForm.addEventListener("submit", (event) => {
+      contactForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        hideFormAlert();
 
         let firstInvalidInput = null;
         let allValid = true;
@@ -4023,76 +4063,137 @@
         const emailVal = emailInput ? emailInput.value.trim() : "";
         const subjectVal = subjectInput ? subjectInput.value.trim() : "";
         const messageVal = messageInput ? messageInput.value.trim() : "";
-        const timestamp = new Date().toLocaleString([], {
-          year: "numeric",
-          month: "short",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit"
-        });
+        const hpVal = hpBotInput ? hpBotInput.value.trim() : "";
 
-        const submissionRecord = {
-          id: `msg_${Date.now()}`,
+        // UI Loading State
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add("is-submitting");
+        }
+        if (submitText) {
+          submitText.textContent = "TRANSMITTING TO INBOX...";
+        }
+        if (submitIcon) {
+          submitIcon.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>';
+        }
+
+        const payload = {
           name: nameVal,
           email: emailVal,
           subject: subjectVal,
           message: messageVal,
-          savedAt: timestamp
+          _hp_bot: hpVal,
+          clientTimestamp: window.__pageLoadedTimestamp || Date.now()
         };
 
         try {
-          const existing = getSavedMessages();
-          existing.unshift(submissionRecord);
-          localStorage.setItem(
-            CONTACT_STORAGE_KEY,
-            JSON.stringify(existing.slice(0, 25))
-          );
-        } catch {
-          // Fallback if storage quota is restricted
-        }
+          const response = await fetch("/api/contact", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
 
-        updateStorageBadge();
-        clearDraftFromStorage();
+          const data = await response.json();
 
-        lastFormattedMessage = [
-          `To: Daniyal Hayat (mdaniyalhayyat@gmail.com)`,
-          `From: ${nameVal} <${emailVal}>`,
-          `Subject: ${subjectVal}`,
-          `Saved Locally: ${timestamp}`,
-          `---`,
-          messageVal
-        ].join("\n");
+          if (!response.ok || !data.success) {
+            const errorMsg = data.error || "Unable to deliver message at this moment. Please connect directly via WhatsApp or phone.";
+            showFormAlert("error", errorMsg);
+            showToast("Transmission error. Please try again or use direct WhatsApp.");
+            return;
+          }
 
-        if (savedSenderEl) {
-          savedSenderEl.textContent = `From: ${nameVal} (${emailVal})`;
-        }
-        if (savedTimeEl) {
-          savedTimeEl.textContent = `Saved locally · ${timestamp}`;
-        }
-        if (savedSubjectEl) {
-          savedSubjectEl.textContent = `Subject: ${subjectVal}`;
-        }
-        if (savedBodyEl) {
-          savedBodyEl.textContent = messageVal;
-        }
+          // Successful transmission
+          const timestamp = new Date().toLocaleString([], {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
 
-        if (openEmailAppBtn) {
-          const mailSubject = encodeURIComponent(subjectVal);
-          const mailBody = encodeURIComponent(
-            `Hi Daniyal,\n\n${messageVal}\n\n—\n${nameVal}\n${emailVal}`
-          );
-          openEmailAppBtn.setAttribute(
-            "href",
-            `mailto:mdaniyalhayyat@gmail.com?subject=${mailSubject}&body=${mailBody}`
-          );
-        }
+          const submissionRecord = {
+            id: data.id || `msg_${Date.now()}`,
+            name: nameVal,
+            email: emailVal,
+            subject: subjectVal,
+            message: messageVal,
+            deliveredAt: timestamp
+          };
 
-        contactForm.classList.add("is-hidden");
-        if (successState) {
-          successState.classList.add("is-visible");
-          successState.setAttribute("aria-hidden", "false");
+          try {
+            const existing = getSavedMessages();
+            existing.unshift(submissionRecord);
+            localStorage.setItem(
+              CONTACT_STORAGE_KEY,
+              JSON.stringify(existing.slice(0, 25))
+            );
+          } catch {
+            // Quota fallback
+          }
+
+          updateStorageBadge();
+          clearDraftFromStorage();
+
+          lastFormattedMessage = [
+            `To: Daniyal Hayat (mdaniyalhayyat@gmail.com)`,
+            `From: ${nameVal} <${emailVal}>`,
+            `Subject: ${subjectVal}`,
+            `Delivered to Inbox: ${timestamp}`,
+            `---`,
+            messageVal
+          ].join("\n");
+
+          if (savedSenderEl) {
+            savedSenderEl.textContent = `From: ${nameVal} (${emailVal})`;
+          }
+          if (savedTimeEl) {
+            savedTimeEl.textContent = `Delivered to Inbox · ${timestamp}`;
+          }
+          if (savedSubjectEl) {
+            savedSubjectEl.textContent = `Subject: ${subjectVal}`;
+          }
+          if (savedBodyEl) {
+            savedBodyEl.textContent = messageVal;
+          }
+
+          // Dynamically configure instant WhatsApp follow-up link
+          if (btnContinueWhatsApp) {
+            const waFollowUp = `Hi Daniyal,\n\nI just sent an inquiry to your inbox (dnyl.vercel.app):\n\n• Subject: ${subjectVal}\n• From: ${nameVal} (${emailVal})\n\nMessage Excerpt:\n"${messageVal.slice(0, 240)}${messageVal.length > 240 ? "..." : ""}"\n\nLooking forward to speaking with you!`;
+            if (window.DNYL_COMMUNICATION_CONFIG && typeof window.DNYL_COMMUNICATION_CONFIG.buildWhatsAppUrl === "function") {
+              btnContinueWhatsApp.href = window.DNYL_COMMUNICATION_CONFIG.buildWhatsAppUrl(waFollowUp, subjectVal);
+            } else {
+              btnContinueWhatsApp.href = `https://wa.me/923331001904?text=${encodeURIComponent(waFollowUp)}`;
+            }
+          }
+
+          contactForm.classList.add("is-hidden");
+          if (successState) {
+            successState.classList.add("is-visible");
+            successState.setAttribute("aria-hidden", "false");
+          }
+
+          showToast("Your message has been delivered directly to Daniyal Hayat's inbox!");
+          if (copySavedBtn) copySavedBtn.focus();
+
+        } catch (fetchErr) {
+          console.error("[CONTACT TRANSMISSION ERROR]", fetchErr);
+          showFormAlert("error", "Network connection error while transmitting. Please verify your connection or click 'Continue in WhatsApp'.");
+          showToast("Network error. Please try again or connect on WhatsApp.");
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove("is-submitting");
+          }
+          if (submitText) {
+            submitText.textContent = "SEND MESSAGE";
+          }
+          if (submitIcon) {
+            submitIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+          }
         }
-        if (copySavedBtn) copySavedBtn.focus();
       });
     }
 
@@ -4117,6 +4218,7 @@
 
     // Send Another Message (Reset Form)
     function resetToContactForm(focusFirstField) {
+      hideFormAlert();
       if (contactForm) {
         contactForm.reset();
         contactForm.classList.remove("is-hidden");
@@ -5979,12 +6081,12 @@
       {
         group: "SYSTEM // INTERACTIVE CONTROLS",
         tag: "SOCIAL",
-        title: "Follow on Instagram (@dnyl_hayat)",
-        subtitle: "https://www.instagram.com/dnyl_hayat?dlrf=MTRxeGRqaWQyN2plbA==",
+        title: "Follow on Instagram (@dot_daniyal)",
+        subtitle: "https://www.instagram.com/dot_daniyal",
         actionLabel: "INSTAGRAM ↗",
-        keywords: "instagram follow dnyl hayat creative photo social visual design feed",
+        keywords: "instagram follow dot_daniyal creative photo social visual design feed",
         run: () => {
-          window.open("https://www.instagram.com/dnyl_hayat?dlrf=MTRxeGRqaWQyN2plbA==", "_blank", "noopener,noreferrer");
+          window.open("https://www.instagram.com/dot_daniyal", "_blank", "noopener,noreferrer");
         }
       }
     ];
@@ -6219,6 +6321,106 @@
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // 18. DNYL FLOATING WHATSAPP DIRECT MESSAGING SYSTEM
+  // ---------------------------------------------------------------------------
+  function initWhatsAppWidget() {
+    const widget = document.getElementById("dnyl-whatsapp-widget");
+    if (!widget) return;
+
+    const fabTrigger = document.getElementById("whatsapp-fab-trigger");
+    const popover = document.getElementById("whatsapp-quick-popover");
+    const closeBtn = document.getElementById("whatsapp-popover-close");
+    const composerInput = document.getElementById("whatsapp-composer-input");
+    const charCount = document.getElementById("whatsapp-char-count");
+    const sendBtn = document.getElementById("whatsapp-popover-send-btn");
+    const chipBtns = widget.querySelectorAll(".whatsapp-chip-btn");
+
+    const commConfig = window.DNYL_COMMUNICATION_CONFIG || {
+      buildWhatsAppUrl: function (text) {
+        return "https://wa.me/923331001904?text=" + encodeURIComponent(text);
+      }
+    };
+
+    function updateComposerUrl() {
+      if (!composerInput || !sendBtn) return;
+      const text = composerInput.value.trim();
+      if (charCount) {
+        charCount.textContent = `${composerInput.value.length} chars`;
+      }
+      sendBtn.href = commConfig.buildWhatsAppUrl(text);
+    }
+
+    function openPopover() {
+      if (!popover || !fabTrigger) return;
+      popover.classList.add("is-open");
+      popover.setAttribute("aria-hidden", "false");
+      fabTrigger.setAttribute("aria-expanded", "true");
+      if (composerInput) {
+        composerInput.focus();
+      }
+    }
+
+    function closePopover() {
+      if (!popover || !fabTrigger) return;
+      popover.classList.remove("is-open");
+      popover.setAttribute("aria-hidden", "true");
+      fabTrigger.setAttribute("aria-expanded", "false");
+    }
+
+    if (fabTrigger) {
+      fabTrigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (popover && popover.classList.contains("is-open")) {
+          closePopover();
+        } else {
+          openPopover();
+        }
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closePopover();
+      });
+    }
+
+    chipBtns.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        chipBtns.forEach((c) => c.classList.remove("is-active"));
+        chip.classList.add("is-active");
+
+        const topic = chip.dataset.topic || "Project Collaboration";
+        if (composerInput) {
+          composerInput.value = `Hi Daniyal,\n\nI came across your DNYL portfolio (dnyl.vercel.app) and would like to discuss: ${topic}.\n\nLooking forward to speaking with you!`;
+          updateComposerUrl();
+          composerInput.focus();
+        }
+      });
+    });
+
+    if (composerInput) {
+      composerInput.addEventListener("input", updateComposerUrl);
+    }
+
+    document.addEventListener("click", (e) => {
+      if (popover && popover.classList.contains("is-open")) {
+        if (!widget.contains(e.target)) {
+          closePopover();
+        }
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && popover && popover.classList.contains("is-open")) {
+        closePopover();
+      }
+    });
+
+    updateComposerUrl();
+  }
+
   // Fault-isolated initializer runner so no single module can block the intro or hero reveal
   function runSafeInit(initFn) {
     try {
@@ -6243,6 +6445,7 @@
     runSafeInit(initContactSection);
     runSafeInit(initFooterSection);
     runSafeInit(initDnylCommandPalette);
+    runSafeInit(initWhatsAppWidget);
   }
 
   // Initialize on DOM ready
