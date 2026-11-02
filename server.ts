@@ -24,7 +24,7 @@ async function createServer() {
       app: 'DNYL Portfolio Engine',
       recipient: process.env.CONTACT_RECIPIENT_EMAIL || 'mdaniyalhayyat@gmail.com',
       whatsapp: process.env.VITE_WHATSAPP_PHONE_NUMBER || '923331001904',
-      emailServiceActive: Boolean(process.env.RESEND_API_KEY)
+      emailServiceActive: Boolean(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim().startsWith('re_'))
     });
   });
 
@@ -53,7 +53,7 @@ async function createServer() {
       gateway: 'DNYL Direct Email & Messaging Gateway',
       recipient: process.env.CONTACT_RECIPIENT_EMAIL || 'mdaniyalhayyat@gmail.com',
       whatsapp: process.env.VITE_WHATSAPP_PHONE_NUMBER || '923331001904',
-      emailServiceConfigured: Boolean(process.env.RESEND_API_KEY)
+      emailServiceConfigured: Boolean(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim().startsWith('re_'))
     });
   });
 
@@ -65,6 +65,7 @@ async function createServer() {
         middlewareMode: true,
         port: PORT,
         host: '0.0.0.0',
+        allowedHosts: true,
         hmr: process.env.DISABLE_HMR !== 'true',
         watch: process.env.DISABLE_HMR === 'true' ? null : {}
       },

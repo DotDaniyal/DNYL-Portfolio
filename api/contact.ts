@@ -267,10 +267,12 @@ export async function processContactSubmission(
 </html>
   `;
 
-  // 7. Dispatch via Resend SDK if API key is present
-  if (resendApiKey && resendApiKey.trim().length > 0) {
+  // 7. Dispatch via Resend SDK if a valid Resend API key (re_...) is present
+  const hasValidResendKey = Boolean(resendApiKey && resendApiKey.trim().startsWith('re_'));
+
+  if (hasValidResendKey) {
     try {
-      const resend = new Resend(resendApiKey.trim());
+      const resend = new Resend(resendApiKey!.trim());
 
       // Send to Daniyal Hayat's inbox (mdaniyalhayyat@gmail.com) with Reply-To set to visitor
       const { data, error } = await resend.emails.send({
@@ -376,7 +378,7 @@ export default async function handler(req: any, res: any) {
       service: 'DNYL Direct Email Gateway (Resend SDK)',
       recipient: process.env.CONTACT_RECIPIENT_EMAIL || 'mdaniyalhayyat@gmail.com',
       sender: process.env.CONTACT_SENDER_EMAIL || 'onboarding@resend.dev',
-      emailServiceConfigured: Boolean(process.env.RESEND_API_KEY)
+      emailServiceConfigured: Boolean(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim().startsWith('re_'))
     });
     return;
   }
