@@ -6,7 +6,7 @@
 >
   <url>
     <loc>https://dnyl.vercel.app/</loc>
-    <lastmod>2026-11-02</lastmod>
+    <lastmod>2026-11-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://dnyl.vercel.app/" />
@@ -21,5 +21,17 @@
       <image:title>DNYL | Official Portfolio, Projects &amp; Digital Experience</image:title>
       <image:caption>Official brand card for DNYL (https://dnyl.vercel.app/) by Daniyal Hayat.</image:caption>
     </image:image>
+  </url>
+  <url>
+    <loc>https://dnyl.vercel.app/privacy.html</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dnyl.vercel.app/terms.html</loc>
+    <lastmod>2026-11-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

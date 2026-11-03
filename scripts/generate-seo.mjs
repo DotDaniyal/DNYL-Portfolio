@@ -2,7 +2,7 @@
 /**
  * DNYL — Automated SEO Sitemap, Robots & Static Mirror Synchronization Script
  * Ensures sitemap.xml, robots.txt, llms.txt, humans.txt, site.webmanifest, 404.html,
- * and IndexNow verification files stay synchronized across root, /public, and /portfolio.
+ * privacy.html, terms.html, and IndexNow verification files stay synchronized in /public.
  *
  * Optional IndexNow submission:
  *   node scripts/generate-seo.mjs --ping-indexnow
@@ -44,13 +44,25 @@ const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
       <image:caption>Official brand card for DNYL (${SITE_URL}/) by Daniyal Hayat.</image:caption>
     </image:image>
   </url>
+  <url>
+    <loc>${SITE_URL}/privacy.html</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${SITE_URL}/terms.html</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
 </urlset>
 `;
 
 // Write updated sitemap.xml to root
 fs.writeFileSync(path.join(rootDir, "sitemap.xml"), sitemapXml, "utf8");
 
-// Sync static SEO and asset files into /public and /portfolio if present
+// Sync static SEO and legal pages into /public
 const seoFilesToSync = [
   "sitemap.xml",
   "robots.txt",
@@ -58,33 +70,37 @@ const seoFilesToSync = [
   "humans.txt",
   "site.webmanifest",
   "dnyl-indexnow-key.txt",
-  "404.html"
+  "404.html",
+  "privacy.html",
+  "terms.html"
 ];
 
-const targetDirs = [
-  path.join(rootDir, "public"),
-  path.join(rootDir, "portfolio")
-];
+const publicDir = path.join(rootDir, "public");
 
-for (const dir of targetDirs) {
-  if (fs.existsSync(dir)) {
-    for (const file of seoFilesToSync) {
-      const src = path.join(rootDir, file);
-      const dest = path.join(dir, file);
-      if (fs.existsSync(src)) {
-        fs.copyFileSync(src, dest);
-      }
+if (fs.existsSync(publicDir)) {
+  for (const file of seoFilesToSync) {
+    const src = path.join(rootDir, file);
+    const dest = path.join(publicDir, file);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest);
     }
-    // Sync OG card SVG
-    const ogSrc = path.join(rootDir, "assets", "images", "dnyl-og-card.svg");
-    const ogDestDir = path.join(dir, "assets", "images");
-    if (fs.existsSync(ogSrc) && fs.existsSync(ogDestDir)) {
-      fs.copyFileSync(ogSrc, path.join(ogDestDir, "dnyl-og-card.svg"));
+  }
+
+  // Copy root JS, CSS, and Assets to public for static production serving
+  const staticDirs = [
+    { srcDir: path.join(rootDir, "css"), destDir: path.join(publicDir, "css") },
+    { srcDir: path.join(rootDir, "js"), destDir: path.join(publicDir, "js") },
+    { srcDir: path.join(rootDir, "assets"), destDir: path.join(publicDir, "assets") }
+  ];
+
+  for (const { srcDir, destDir } of staticDirs) {
+    if (fs.existsSync(srcDir)) {
+      fs.cpSync(srcDir, destDir, { recursive: true });
     }
   }
 }
 
-console.log(`[DNYL SEO] Generated sitemap.xml (lastmod: ${today}) and synced SEO discovery files.`);
+console.log(`[DNYL SEO] Generated sitemap.xml (lastmod: ${today}) and synced public asset tree.`);
 
 // Optional IndexNow ping when run explicitly with --ping-indexnow
 if (process.argv.includes("--ping-indexnow")) {
@@ -92,7 +108,7 @@ if (process.argv.includes("--ping-indexnow")) {
     host: "dnyl.vercel.app",
     key: INDEXNOW_KEY,
     keyLocation: `${SITE_URL}/dnyl-indexnow-key.txt`,
-    urlList: [`${SITE_URL}/`]
+    urlList: [`${SITE_URL}/`, `${SITE_URL}/privacy.html`, `${SITE_URL}/terms.html`]
   };
 
   try {
